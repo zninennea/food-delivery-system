@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Http\Controllers\Owner;
+
+use App\Http\Controllers\Controller;
+use App\Models\Restaurant;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+class ProfileController extends Controller
+{
+    public function edit()
+    {
+        $user = Auth::user();
+        $restaurant = Restaurant::where('owner_id', $user->id)->firstOrFail();
+        
+        return view('owner.profile', compact('user', 'restaurant'));
+    }
+
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+        $restaurant = Restaurant::where('owner_id', $user->id)->firstOrFail();
+
+        // Validate all data
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|max:2048',
+            'restaurant_name' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'restaurant_phone' => 'required|string|max:20',
+            'facebook_url' => 'nullable|url|max:255',
+            'background_image' => 'nullable|image|max:5120'
+        ]);
+
+        try {
+            // Prepare user update data
+            $userData = [
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'updated_at' => now(),
+            ];
+
+            // Prepare restaurant update data
+            $restaurantData = [
+                'name' => $request->restaurant_name,
+                'address' => $request->address,
+                'phone' => $request->restaurant_phone,
+                'facebook_url' => $request->facebook_url,
+                'updated_at' => now(),
+            ];
+
+            // Handle profile picture upload
+            if ($request->hasFile('profile_picture')) {
+                // Delete old profile picture if exists
+                if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                    Storage::disk('public')->delete($user->profile_picture);
+                }
+                // Store new profile picture
+                $userData['profile_picture'] = $request->file('profile_picture')->store('profile-pictures', 'public');
+            }
+
+            // Handle background image upload
+            if ($request->hasFile('background_image')) {
+                // Delete old background image if exists
+                if ($restaurant->background_image && Storage::disk('public')->exists($restaurant->background_image)) {
+                    Storage::disk('public')->delete($restaurant->background_image);
+                }
+                // Store new background image
+                $restaurantData['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
+            }
+
+            // Update user using DB query builder
+            DB::table('users')->where('id', $user->id)->update($userData);
+            
+            // Update restaurant using DB query builder
+            DB::table('restaurants')->where('id', $restaurant->id)->update($restaurantData);
+
+            return redirect()->route('owner.profile')->with('success', 'Profile updated successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error updating profile: ' . $e->getMessage());
+        }
+    }
+}
