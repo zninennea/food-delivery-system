@@ -7,7 +7,12 @@ use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Owner\ProfileController as OwnerProfileController;
 use App\Http\Controllers\Owner\MenuController as OwnerMenuController;
 use App\Http\Controllers\Owner\OrderController as OwnerOrderController;
+use App\Http\Controllers\Owner\ChatController as OwnerChatController;
+use App\Http\Controllers\Owner\RiderController as OwnerRiderController;
+use App\Http\Controllers\Owner\AnalyticsController as OwnerAnalyticsController; // Add this
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\CartController as CustomerCartController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 
 // Public routes
 Route::get('/', function () {
@@ -26,9 +31,10 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     // Dashboard
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
 
-    // Profile routes - use POST for update
-    Route::get('/profile', [OwnerProfileController::class, 'edit'])->name('profile');
-    Route::post('/profile', [OwnerProfileController::class, 'update']); // Changed to POST
+    // Profile routes
+    Route::get('/profile', [OwnerProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [OwnerProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [OwnerProfileController::class, 'update'])->name('profile.update');
 
     // Menu routes
     Route::get('/menu', [OwnerMenuController::class, 'index'])->name('menu.index');
@@ -42,11 +48,40 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/orders', [OwnerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OwnerOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('orders.update-status');
+
+    // Chat routes
+    Route::get('/orders/{order}/chat', [OwnerChatController::class, 'showChat'])->name('orders.chat');
+    Route::post('/orders/{order}/chat/send', [OwnerChatController::class, 'sendMessage'])->name('orders.chat.send');
+    Route::get('/orders/{order}/chat/messages', [OwnerChatController::class, 'getMessages'])->name('orders.chat.messages');
+    Route::post('/orders/{order}/chat/read', [OwnerChatController::class, 'markAsRead'])->name('orders.chat.read');
+
+    // Analytics routes
+    Route::get('/analytics', [OwnerAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/analytics/sales-data', [OwnerAnalyticsController::class, 'getSalesData'])->name('analytics.sales-data');
+
+    // Rider management routes
+    Route::get('/riders', [OwnerRiderController::class, 'index'])->name('riders.index');
+    Route::get('/riders/create', [OwnerRiderController::class, 'create'])->name('riders.create');
+    Route::post('/riders', [OwnerRiderController::class, 'store'])->name('riders.store');
+    Route::get('/riders/{rider}/edit', [OwnerRiderController::class, 'edit'])->name('riders.edit');
+    Route::put('/riders/{rider}', [OwnerRiderController::class, 'update'])->name('riders.update');
+    Route::delete('/riders/{rider}', [OwnerRiderController::class, 'destroy'])->name('riders.destroy');
 });
 
 // Customer Routes
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+
+    // Cart routes (AJAX-friendly)
+    Route::get('/cart', [CustomerCartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/{menuItem}', [CustomerCartController::class, 'add'])->name('cart.add');
+    Route::put('/cart/{cart}', [CustomerCartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{cart}', [CustomerCartController::class, 'destroy'])->name('cart.destroy');
+    Route::post('/cart/clear', [CustomerCartController::class, 'clear'])->name('cart.clear');
+
+    // Order routes
+    Route::post('/orders', [CustomerOrderController::class, 'store'])->name('orders.store');
+    Route::get('/track-order/{order}', [CustomerOrderController::class, 'show'])->name('track-order');
 });
 
 // Rider Routes
@@ -54,4 +89,13 @@ Route::middleware(['auth'])->prefix('rider')->name('rider.')->group(function () 
     Route::get('/dashboard', function () {
         return view('rider.dashboard');
     })->name('dashboard');
+});
+
+// Test route for chat
+Route::get('/test-chat', function () {
+    $order = \App\Models\Order::with('rider')->first();
+    if (!$order) {
+        return "No orders found. Please create an order with a rider first.";
+    }
+    return redirect()->route('owner.orders.chat', $order);
 });

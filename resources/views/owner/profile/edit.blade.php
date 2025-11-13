@@ -11,6 +11,59 @@
 
 <body class="bg-gray-100">
 
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <!-- NaNi Logo -->
+                    <div class="flex items-center">
+                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                        <div>
+                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-1"></i>Home
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-utensils mr-1"></i>Menu
+                    </a>
+                    <a href="{{ route('owner.orders.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-shopping-cart mr-1"></i>Orders
+                    </a>
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-motorcycle mr-1"></i>Riders
+                    </a>
+                    <a href="{{ route('owner.profile.show') }}"
+                        class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-user mr-1"></i>Profile
+                    </a>
+
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <body class="bg-gray-100">
         <!-- Success/Error Messages -->
         @if(session('success'))
@@ -49,56 +102,14 @@
             </div>
         @endif
 
-        <!-- Navigation -->
-        <nav class="bg-white shadow-lg">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center">
-                        <!-- NaNi Logo -->
-                        <div class="flex items-center">
-                            <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                            <div>
-                                <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                                <p class="text-xs text-gray-500 -mt-1">Profile Settings</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ route('owner.dashboard') }}"
-                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-home mr-1"></i>Dashboard
-                        </a>
-                        <a href="{{ route('owner.menu.index') }}"
-                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-utensils mr-1"></i>Menu
-                        </a>
-                        <a href="{{ route('owner.orders.index') }}"
-                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-shopping-cart mr-1"></i>Orders
-                        </a>
-                        <a href="{{ route('owner.profile') }}"
-                            class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-user mr-1"></i>Profile
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit"
-                                class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                                <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
         <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+                    <h2 class="text-2xl font-bold text-orange-600">Edit Profile</h2>
                 </div>
 
-                <form action="{{ route('owner.profile') }}" method="POST" enctype="multipart/form-data" class="p-6">
+                <form action="{{ route('owner.profile.update') }}" method="POST" enctype="multipart/form-data"
+                    class="p-6">
                     @csrf
                     <!-- Remove @method('PUT') since we're using POST now -->
 
@@ -196,11 +207,11 @@
                     </div>
 
                     <div class="mt-6 flex justify-end space-x-3">
-                        <a href="{{ route('owner.dashboard') }}"
+                        <a href="{{ route('owner.profile.show') }}"
                             class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
                             Cancel
                         </a>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
                             Save Changes
                         </button>
                     </div>

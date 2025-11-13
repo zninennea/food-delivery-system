@@ -20,27 +20,37 @@
                         <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
                         <div>
                             <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Add Menu Item</p>
+                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.dashboard') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Dashboard
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-1"></i>Home
                     </a>
                     <a href="{{ route('owner.menu.index') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-utensils mr-1"></i>Menu
                     </a>
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-shopping-cart mr-1"></i>Orders
                     </a>
-                    <a href="{{ route('owner.profile') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-motorcycle mr-1"></i>Riders
+                    </a>
+                    <a href="{{ route('owner.profile.show') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-user mr-1"></i>Profile
                     </a>
+
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"

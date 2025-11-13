@@ -15,25 +15,42 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-xl font-bold text-gray-800">NaNi - Menu Management</a>
+                    <!-- NaNi Logo -->
+                    <div class="flex items-center">
+                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                        <div>
+                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.dashboard') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Dashboard
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-1"></i>Home
                     </a>
                     <a href="{{ route('owner.menu.index') }}"
-                        class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-utensils mr-1"></i>Menu
                     </a>
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-shopping-cart mr-1"></i>Orders
                     </a>
-                    <a href="{{ route('owner.profile') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-motorcycle mr-1"></i>Riders
+                    </a>
+                    <a href="{{ route('owner.profile.show') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-user mr-1"></i>Profile
                     </a>
+
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
@@ -142,12 +159,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                        @elseif($order->status == 'ready') bg-green-100 text-green-800
-                                        @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
-                                        @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
-                                        @else bg-red-100 text-red-800 @endif">
+                                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                            @elseif($order->status == 'ready') bg-green-100 text-green-800
+                                            @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
+                                            @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
+                                            @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                     </span>
                                 </td>
