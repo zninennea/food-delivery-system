@@ -29,6 +29,7 @@ class RiderController extends Controller
             'phone' => 'required|string|max:20',
             'vehicle_type' => 'required|string|max:100',
             'vehicle_plate' => 'required|string|max:20',
+            'drivers_license' => 'required|image|max:2048', // Add this
             'profile_picture' => 'nullable|image|max:2048',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -41,6 +42,7 @@ class RiderController extends Controller
             'role' => 'rider',
             'vehicle_type' => $request->vehicle_type,
             'vehicle_plate' => $request->vehicle_plate,
+            'drivers_license' => $request->drivers_license, // Add this
             'status' => 'active',
         ];
 
@@ -49,7 +51,11 @@ class RiderController extends Controller
             $profilePicturePath = $request->file('profile_picture')->store('rider-profiles', 'public');
             $userData['profile_picture'] = $profilePicturePath;
         }
-
+        // Handle driver's license upload
+        if ($request->hasFile('drivers_license')) {
+            $licensePath = $request->file('drivers_license')->store('driver-licenses', 'public');
+            $userData['drivers_license'] = $licensePath;
+        }
         User::create($userData);
 
         return redirect()->route('owner.riders.index')
@@ -77,6 +83,7 @@ class RiderController extends Controller
             'phone' => 'required|string|max:20',
             'vehicle_type' => 'required|string|max:100',
             'vehicle_plate' => 'required|string|max:20',
+            'drivers_license' => 'nullable|image|max:2048', // Add this
             'profile_picture' => 'nullable|image|max:2048',
             'status' => 'required|in:active,inactive'
         ]);
@@ -87,6 +94,7 @@ class RiderController extends Controller
             'phone' => $request->phone,
             'vehicle_type' => $request->vehicle_type,
             'vehicle_plate' => $request->vehicle_plate,
+            'drivers_license' => $request->drivers_license, // Add this
             'status' => $request->status,
         ];
 
@@ -100,7 +108,16 @@ class RiderController extends Controller
             $profilePicturePath = $request->file('profile_picture')->store('rider-profiles', 'public');
             $updateData['profile_picture'] = $profilePicturePath;
         }
-
+        // Handle driver's license upload
+        if ($request->hasFile('drivers_license')) {
+            // Delete old driver's license if exists
+            if ($rider->drivers_license && Storage::disk('public')->exists($rider->drivers_license)) {
+                Storage::disk('public')->delete($rider->drivers_license);
+            }
+            // Store new driver's license
+            $licensePath = $request->file('drivers_license')->store('driver-licenses', 'public');
+            $updateData['drivers_license'] = $licensePath;
+        }
         $rider->update($updateData);
 
         return redirect()->route('owner.riders.index')

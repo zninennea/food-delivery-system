@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\MenuItem;
-use App\Models\OrderItem; // Add this import
+use App\Models\OrderItem;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,18 +39,28 @@ class AnalyticsController extends Controller
 
     private function getMonthlySales($restaurantId)
     {
-        return Order::where('restaurant_id', $restaurantId)
-            ->whereYear('created_at', date('Y'))
+        $currentYear = date('Y');
+        
+        $salesData = Order::where('restaurant_id', $restaurantId)
+            ->whereYear('created_at', $currentYear)
+            ->where('status', 'delivered') // Only count delivered orders
             ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
             ->groupBy('month')
             ->orderBy('month')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [
-                    $item->month => $item->total
-                ];
-            })
-            ->toArray();
+            ->get();
+
+        // Initialize array with all months set to 0
+        $monthlySales = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlySales[$month] = 0;
+        }
+
+        // Fill in actual sales data
+        foreach ($salesData as $data) {
+            $monthlySales[$data->month] = floatval($data->total);
+        }
+
+        return $monthlySales;
     }
 
     private function getTopSellingItems($restaurantId)
@@ -88,11 +98,14 @@ class AnalyticsController extends Controller
             ->where('status', 'delivered')
             ->count();
 
+        $averageOrderValue = $totalOrders > 0 ? $thisYear / $totalOrders : 0;
+
         return [
             'today' => $today,
             'this_month' => $thisMonth,
             'this_year' => $thisYear,
             'total_orders' => $totalOrders,
+            'average_order_value' => $averageOrderValue,
         ];
     }
 
@@ -124,6 +137,36 @@ class AnalyticsController extends Controller
             ->orderBy('month')
             ->get();
 
-        return response()->json($salesData);
+        // Format data for chart
+        $formattedData = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthData = $salesData->firstWhere('month', $month);
+            $formattedData[] = [
+                'month' => $month,
+                'total' => $monthData ? floatval($monthData->total) : 0
+            ];
+        }
+
+        return response()->json($formattedData);
+    }
+
+    // New method to get daily sales for the current month
+    public function getDailySales(Request $request)
+    {
+        $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
+        
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
+        
+        $dailySales = Order::where('restaurant_id', $restaurant->id)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->where('status', 'delivered')
+            ->selectRaw('DAY(created_at) as day, SUM(total_amount) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
+        return response()->json($dailySales);
     }
 }

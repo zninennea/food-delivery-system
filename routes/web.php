@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
@@ -9,10 +8,12 @@ use App\Http\Controllers\Owner\MenuController as OwnerMenuController;
 use App\Http\Controllers\Owner\OrderController as OwnerOrderController;
 use App\Http\Controllers\Owner\ChatController as OwnerChatController;
 use App\Http\Controllers\Owner\RiderController as OwnerRiderController;
-use App\Http\Controllers\Owner\AnalyticsController as OwnerAnalyticsController; // Add this
+use App\Http\Controllers\Owner\AnalyticsController as OwnerAnalyticsController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController; // Add this
 use App\Http\Controllers\Customer\CartController as CustomerCartController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+//use App\Http\Controllers\Customer\ReviewController as CustomerReviewController; // Comment out for now
 
 // Public routes
 Route::get('/', function () {
@@ -68,11 +69,23 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::delete('/riders/{rider}', [OwnerRiderController::class, 'destroy'])->name('riders.destroy');
 });
 
-// Customer Routes
+// Customer Routes - REMOVE 'customer' from middleware array
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
+    // Dashboard
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
-    // Cart routes (AJAX-friendly)
+    // Menu
+    Route::get('/menu', [CustomerDashboardController::class, 'menu'])->name('menu');
+    Route::get('/menu/{menuItem}', [CustomerDashboardController::class, 'showMenuItem'])->name('menu.item');
+
+    // Profile
+    Route::get('/profile', [CustomerProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [CustomerProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/password', [CustomerProfileController::class, 'editPassword'])->name('profile.password');
+    Route::post('/profile/password', [CustomerProfileController::class, 'updatePassword'])->name('profile.update-password');
+
+    // Cart routes
     Route::get('/cart', [CustomerCartController::class, 'index'])->name('cart.index');
     Route::post('/cart/{menuItem}', [CustomerCartController::class, 'add'])->name('cart.add');
     Route::put('/cart/{cart}', [CustomerCartController::class, 'update'])->name('cart.update');
@@ -80,8 +93,13 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/cart/clear', [CustomerCartController::class, 'clear'])->name('cart.clear');
 
     // Order routes
+    Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::post('/orders', [CustomerOrderController::class, 'store'])->name('orders.store');
     Route::get('/track-order/{order}', [CustomerOrderController::class, 'show'])->name('track-order');
+
+    // Comment out review routes for now
+    // Route::get('/orders/{order}/review', [CustomerReviewController::class, 'create'])->name('reviews.create');
+    // Route::post('/orders/{order}/review', [CustomerReviewController::class, 'store'])->name('reviews.store');
 });
 
 // Rider Routes

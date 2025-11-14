@@ -131,6 +131,9 @@
                                 Vehicle
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                License
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -165,9 +168,17 @@
                                     <div class="text-sm text-gray-500">{{ $rider->vehicle_plate }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($rider->drivers_license)
+                                        <img src="{{ asset('storage/' . $rider->drivers_license) }}" alt="Driver's License"
+                                            class="h-16 w-24 object-cover rounded border">
+                                    @else
+                                        <span class="text-sm text-gray-500">No license</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            @if($rider->status == 'active') bg-green-100 text-green-800
-                                            @else bg-red-100 text-red-800 @endif">
+                                                        @if($rider->status == 'active') bg-green-100 text-green-800
+                                                        @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst($rider->status) }}
                                     </span>
                                 </td>

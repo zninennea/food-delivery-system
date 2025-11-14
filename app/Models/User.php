@@ -16,8 +16,11 @@ class User extends Authenticatable
         'role',
         'phone',
         'profile_picture',
-        'vehicle_type',     
-        'vehicle_plate',   
+        'vehicle_type',     // For riders
+        'vehicle_plate',    // For riders  
+        'status',           // For riders
+        'delivery_address', // Add this for customers
+        'drivers_license',
         'status'
     ];
 
@@ -94,5 +97,9 @@ class User extends Authenticatable
         return $this->cartItems->sum(function ($item) {
             return $item->quantity * $item->menuItem->price;
         });
+    }
+    public function getDefaultDeliveryAddress()
+    {
+        return $this->delivery_address ?? 'No delivery address set';
     }
 }

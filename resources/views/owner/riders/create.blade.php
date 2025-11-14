@@ -152,6 +152,16 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mt-4">
+                        <label for="drivers_license" class="block text-sm font-medium text-gray-700">Driver's License
+                            Photo</label>
+                        <input type="file" name="drivers_license" id="drivers_license" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        @error('drivers_license')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Upload a clear photo of the driver's license</p>
+                    </div>
 
                     <!-- Account Information -->
                     <div>

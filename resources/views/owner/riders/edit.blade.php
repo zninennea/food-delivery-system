@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-100">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
@@ -20,18 +22,22 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('owner.dashboard') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-home mr-1"></i>Dashboard
                     </a>
-                    <a href="{{ route('owner.riders.index') }}" class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-motorcycle mr-1"></i>Riders
                     </a>
-                    <a href="{{ route('owner.profile.show') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('owner.profile.show') }}"
+                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-user mr-1"></i>Profile
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <button type="submit"
+                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
                         </button>
                     </form>
@@ -46,27 +52,30 @@
                 <h2 class="text-2xl font-bold text-gray-900">Edit Rider: {{ $rider->name }}</h2>
             </div>
 
-            <form action="{{ route('owner.riders.update', $rider) }}" method="POST" enctype="multipart/form-data" class="p-6">
+            <form action="{{ route('owner.riders.update', $rider) }}" method="POST" enctype="multipart/form-data"
+                class="p-6">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="space-y-6">
                     <!-- Current Profile Picture -->
                     @if($rider->profile_picture)
                         <div class="text-center">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Current Profile Picture</label>
-                            <img src="{{ asset('storage/' . $rider->profile_picture) }}" alt="{{ $rider->name }}" class="h-32 w-32 rounded-full object-cover mx-auto">
+                            <img src="{{ asset('storage/' . $rider->profile_picture) }}" alt="{{ $rider->name }}"
+                                class="h-32 w-32 rounded-full object-cover mx-auto">
                         </div>
                     @endif
 
                     <!-- Personal Information -->
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                <input type="text" name="name" id="name" value="{{ old('name', $rider->name) }}" required
+                                <input type="text" name="name" id="name" value="{{ old('name', $rider->name) }}"
+                                    required
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 @error('name')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -75,7 +84,8 @@
 
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" name="email" id="email" value="{{ old('email', $rider->email) }}" required
+                                <input type="email" name="email" id="email" value="{{ old('email', $rider->email) }}"
+                                    required
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 @error('email')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -85,7 +95,8 @@
 
                         <div class="mt-4">
                             <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                            <input type="text" name="phone" id="phone" value="{{ old('phone', $rider->phone) }}" required
+                            <input type="text" name="phone" id="phone" value="{{ old('phone', $rider->phone) }}"
+                                required
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             @error('phone')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -93,7 +104,8 @@
                         </div>
 
                         <div class="mt-4">
-                            <label for="profile_picture" class="block text-sm font-medium text-gray-700">New Profile Picture</label>
+                            <label for="profile_picture" class="block text-sm font-medium text-gray-700">New Profile
+                                Picture</label>
                             <input type="file" name="profile_picture" id="profile_picture"
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             @error('profile_picture')
@@ -106,10 +118,11 @@
                     <!-- Vehicle Information -->
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Vehicle Information</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="vehicle_type" class="block text-sm font-medium text-gray-700">Vehicle Type</label>
+                                <label for="vehicle_type" class="block text-sm font-medium text-gray-700">Vehicle
+                                    Type</label>
                                 <select name="vehicle_type" id="vehicle_type" required
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Select Vehicle Type</option>
@@ -124,8 +137,10 @@
                             </div>
 
                             <div>
-                                <label for="vehicle_plate" class="block text-sm font-medium text-gray-700">Vehicle Plate</label>
-                                <input type="text" name="vehicle_plate" id="vehicle_plate" value="{{ old('vehicle_plate', $rider->vehicle_plate) }}" required
+                                <label for="vehicle_plate" class="block text-sm font-medium text-gray-700">Vehicle
+                                    Plate</label>
+                                <input type="text" name="vehicle_plate" id="vehicle_plate"
+                                    value="{{ old('vehicle_plate', $rider->vehicle_plate) }}" required
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 @error('vehicle_plate')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -133,16 +148,36 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Current Driver's License -->
+                    @if($rider->drivers_license)
+                        <div class="text-center">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Driver's License</label>
+                            <img src="{{ asset('storage/' . $rider->drivers_license) }}" alt="Driver's License"
+                                class="h-48 mx-auto rounded-lg border">
+                        </div>
+                    @endif
+
+                    <div class="mt-4">
+                        <label for="drivers_license" class="block text-sm font-medium text-gray-700">New Driver's
+                            License Photo</label>
+                        <input type="file" name="drivers_license" id="drivers_license"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        @error('drivers_license')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to keep current license photo</p>
+                    </div>
 
                     <!-- Account Status -->
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Account Status</h3>
-                        
+
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                             <select name="status" id="status" required
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="active" {{ old('status', $rider->status) == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="active" {{ old('status', $rider->status) == 'active' ? 'selected' : '' }}>
+                                    Active</option>
                                 <option value="inactive" {{ old('status', $rider->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
                             </select>
                             @error('status')
@@ -153,7 +188,8 @@
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
-                    <a href="{{ route('owner.riders.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
                         Cancel
                     </a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -164,4 +200,5 @@
         </div>
     </div>
 </body>
+
 </html>

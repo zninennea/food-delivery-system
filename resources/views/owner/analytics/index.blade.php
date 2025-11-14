@@ -36,11 +36,11 @@
                         <i class="fas fa-utensils mr-1"></i>Menu
                     </a>
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-shopping-cart mr-1"></i>Orders
                     </a>
                     <a href="{{ route('owner.analytics.index') }}"
-                        class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-orange-600 hover:text-orange-700 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i>Analytics
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
@@ -63,7 +63,6 @@
             </div>
         </div>
     </nav>
-
 
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -129,10 +128,22 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Monthly Sales Chart -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Sales ({{ date('Y') }})</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Monthly Sales ({{ date('Y') }})</h3>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Only delivered orders
+                    </div>
+                </div>
                 <div class="h-64">
                     <canvas id="salesChart"></canvas>
                 </div>
+                @if(array_sum($monthlySales) == 0)
+                    <div class="text-center text-gray-500 py-4">
+                        <i class="fas fa-chart-line text-2xl mb-2"></i>
+                        <p>No sales data available for {{ date('Y') }}</p>
+                    </div>
+                @endif
             </div>
 
             <!-- Order Status Distribution -->
@@ -141,6 +152,12 @@
                 <div class="h-64">
                     <canvas id="statusChart"></canvas>
                 </div>
+                @if(array_sum($orderStatusDistribution) == 0)
+                    <div class="text-center text-gray-500 py-4">
+                        <i class="fas fa-shopping-cart text-2xl mb-2"></i>
+                        <p>No order data available</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -176,85 +193,125 @@
                 </div>
             </div>
         </div>
+
+        <!-- Debug Information (Remove in production) -->
+        @if(env('APP_DEBUG'))
+            <div class="bg-yellow-100 border border-yellow-400 rounded-lg p-4 mb-6">
+                <h4 class="font-bold text-yellow-800">Debug Information</h4>
+                <pre class="text-sm text-yellow-700 mt-2">Monthly Sales Data: @json($monthlySales)</pre>
+                <pre class="text-sm text-yellow-700">Sales Stats: @json($salesStats)</pre>
+            </div>
+        @endif
     </div>
 
     <script>
         // Monthly Sales Chart
-        const salesCtx = document.getElementById('salesChart').getContext('2d');
-        const monthlySalesData = @json($monthlySales);
+        const salesCtx = document.getElementById('salesChart');
+        if (salesCtx) {
+            const monthlySalesData = @json($monthlySales);
 
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const salesData = months.map((month, index) => monthlySalesData[index + 1] || 0);
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const salesData = months.map((month, index) => monthlySalesData[index + 1] || 0);
 
-        new Chart(salesCtx, {
-            type: 'line',
-            data: {
-                labels: months,
-                datasets: [{
-                    label: 'Sales (₱)',
-                    data: salesData,
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function (value) {
-                                return '₱' + value.toLocaleString();
+            // Only create chart if there's data
+            if (salesData.some(value => value > 0)) {
+                new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Sales (₱)',
+                            data: salesData,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return '₱' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return 'Sales: ₱' + context.parsed.y.toLocaleString();
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
             }
-        });
+        }
 
         // Order Status Distribution Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusData = @json($orderStatusDistribution);
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            const statusData = @json($orderStatusDistribution);
 
-        const statusLabels = Object.keys(statusData).map(status =>
-            status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-        );
-        const statusCounts = Object.values(statusData);
+            const statusLabels = Object.keys(statusData).map(status =>
+                status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+            );
+            const statusCounts = Object.values(statusData);
 
-        const statusColors = {
-            'pending': 'rgb(234, 179, 8)',
-            'preparing': 'rgb(59, 130, 246)',
-            'ready': 'rgb(34, 197, 94)',
-            'on_the_way': 'rgb(168, 85, 247)',
-            'delivered': 'rgb(107, 114, 128)',
-            'cancelled': 'rgb(239, 68, 68)'
-        };
+            // Only create chart if there's data
+            if (statusCounts.some(value => value > 0)) {
+                const statusColors = {
+                    'pending': 'rgb(234, 179, 8)',
+                    'preparing': 'rgb(59, 130, 246)',
+                    'ready': 'rgb(34, 197, 94)',
+                    'on_the_way': 'rgb(168, 85, 247)',
+                    'delivered': 'rgb(107, 114, 128)',
+                    'cancelled': 'rgb(239, 68, 68)'
+                };
 
-        new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    data: statusCounts,
-                    backgroundColor: statusLabels.map(label => {
-                        const key = label.toLowerCase().replace(' ', '_');
-                        return statusColors[key] || 'rgb(156, 163, 175)';
-                    })
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusCounts,
+                            backgroundColor: statusLabels.map(label => {
+                                const key = label.toLowerCase().replace(' ', '_');
+                                return statusColors[key] || 'rgb(156, 163, 175)';
+                            })
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} orders (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
+                });
             }
-        });
+        }
     </script>
 </body>
 

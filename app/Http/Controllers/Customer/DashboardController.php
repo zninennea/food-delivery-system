@@ -8,25 +8,81 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\MenuItem;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Restaurant;
+use App\Models\Review;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
+        $restaurant = Restaurant::first(); // Assuming one restaurant for now
 
         // Featured items - simple heuristic
-        $featuredItems = MenuItem::limit(9)->get();
+        $featuredItems = MenuItem::limit(6)->get();
 
-        // All menu items
-        $menuItems = MenuItem::orderBy('name')->get();
+        // All menu items grouped by category
+        $menuItemsByCategory = MenuItem::orderBy('category')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category');
 
         // Recent orders for this customer
-        $recentOrders = Order::where('customer_id', $user->id)->latest()->limit(5)->get();
+        $recentOrders = Order::where('customer_id', $user->id)
+            ->with(['items.menuItem'])
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        // Recent reviews
+        $recentReviews = Review::with(['customer', 'menuItem'])
+            ->whereHas('order', function($query) use ($user) {
+                $query->where('customer_id', '!=', $user->id); // Show other customers' reviews
+            })
+            ->latest()
+            ->limit(5)
+            ->get();
 
         // Cart count
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
 
-        return view('customer.dashboard', compact('featuredItems', 'menuItems', 'recentOrders', 'cartCount'));
+        return view('customer.dashboard', compact(
+            'featuredItems', 
+            'menuItemsByCategory', 
+            'recentOrders', 
+            'recentReviews',
+            'cartCount',
+            'restaurant'
+        ));
+    }
+
+    public function menu()
+    {
+        $user = Auth::user();
+        $restaurant = Restaurant::first();
+
+        // All menu items grouped by category
+        $menuItemsByCategory = MenuItem::orderBy('category')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category');
+
+        $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
+
+        return view('customer.menu', compact('menuItemsByCategory', 'cartCount', 'restaurant'));
+    }
+
+    public function showMenuItem(MenuItem $menuItem)
+    {
+        $user = Auth::user();
+        $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
+
+        // Get similar items
+        $similarItems = MenuItem::where('category', $menuItem->category)
+            ->where('id', '!=', $menuItem->id)
+            ->limit(4)
+            ->get();
+
+        return view('customer.menu-item', compact('menuItem', 'similarItems', 'cartCount'));
     }
 }

@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         // Custom middleware
         'role' => \App\Http\Middleware\CheckRole::class,
         'restaurant.owner' => \App\Http\Middleware\RestaurantOwner::class,
+        'customer' => \App\Http\Middleware\Customer::class, // Add this line
     ];
 }
