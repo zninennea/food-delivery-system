@@ -16,7 +16,7 @@ class CartController extends Controller
         $cartItems = Cart::with('menuItem')
             ->where('customer_id', $user->id)
             ->get();
-        
+
         $total = $cartItems->sum(function ($item) {
             return $item->quantity * $item->menuItem->price;
         });
@@ -27,10 +27,11 @@ class CartController extends Controller
     public function add(Request $request, MenuItem $menuItem)
     {
         $user = Auth::user();
-        
+
         $request->validate([
             'quantity' => 'required|integer|min:1|max:10',
-            'special_instructions' => 'nullable|string|max:500'
+            'special_instructions' => 'nullable|string|max:500',
+            'modify_order_id' => 'nullable|exists:orders,id' // Add this for modification
         ]);
 
         $cartItem = Cart::where('customer_id', $user->id)
@@ -38,7 +39,6 @@ class CartController extends Controller
             ->first();
 
         if ($cartItem) {
-            // Use update method correctly
             $cartItem->update([
                 'quantity' => $cartItem->quantity + $request->quantity,
                 'special_instructions' => $request->special_instructions ?? $cartItem->special_instructions
@@ -64,7 +64,7 @@ class CartController extends Controller
     public function update(Request $request, Cart $cart)
     {
         $user = Auth::user();
-        
+
         // Check if cart belongs to user
         if ($cart->customer_id !== $user->id) {
             abort(403, 'Unauthorized action.');
@@ -100,7 +100,7 @@ class CartController extends Controller
     public function destroy(Cart $cart)
     {
         $user = Auth::user();
-        
+
         // Check if cart belongs to user
         if ($cart->customer_id !== $user->id) {
             abort(403, 'Unauthorized action.');
@@ -133,5 +133,32 @@ class CartController extends Controller
             ->sum(function ($item) {
                 return $item->quantity * $item->menuItem->price;
             });
+    }
+    public function checkout()
+    {
+        $user = Auth::user();
+
+        // Check if user has required profile data
+        if (empty($user->delivery_address) || empty($user->phone)) {
+            return redirect()->route('customer.profile.edit')
+                ->with('error', 'Please complete your delivery information before checkout.');
+        }
+
+        $cartItems = Cart::with('menuItem')
+            ->where('customer_id', $user->id)
+            ->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('customer.cart.index')
+                ->with('error', 'Your cart is empty!');
+        }
+
+        $total = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->menuItem->price;
+        });
+
+        $deliveryFee = 50.00;
+
+        return view('customer.checkout', compact('cartItems', 'total', 'deliveryFee'));
     }
 }

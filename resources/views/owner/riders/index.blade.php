@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 
 <body class="bg-gray-100">
     <!-- Navigation -->
@@ -24,6 +26,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.dashboard') }}"
@@ -51,6 +54,7 @@
                         <i class="fas fa-user mr-1"></i>Profile
                     </a>
 
+
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
@@ -63,6 +67,7 @@
         </div>
     </nav>
 
+
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
@@ -72,6 +77,7 @@
                 <i class="fas fa-plus mr-2"></i>Add New Rider
             </a>
         </div>
+
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -111,6 +117,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Riders Table -->
         <div class="bg-white shadow rounded-lg">
@@ -169,14 +176,18 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($rider->drivers_license)
-                                        <img src="{{ asset('storage/' . $rider->drivers_license) }}" alt="Driver's License"
-                                            class="h-16 w-24 object-cover rounded border">
+                                        <button type="button"
+                                                class="view-license-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200 transition-colors"
+                                                data-license-url="{{ asset('storage/' . $rider->drivers_license) }}"
+                                                data-rider-name="{{ $rider->name }}">
+                                            <i class="fas fa-eye mr-1"></i>View License
+                                        </button>
                                     @else
                                         <span class="text-sm text-gray-500">No license</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                         @if($rider->status == 'active') bg-green-100 text-green-800
                                                         @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst($rider->status) }}
@@ -197,7 +208,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                                     No riders found. <a href="{{ route('owner.riders.create') }}"
                                         class="text-blue-600 hover:text-blue-900">Add your first rider!</a>
                                 </td>
@@ -208,6 +219,68 @@
             </div>
         </div>
     </div>
+
+
+    <!-- License Modal -->
+    <div id="licenseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center px-6 py-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Driver's License</h3>
+                <button type="button" id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <img id="licenseImage" src="" alt="Driver's License" class="w-full h-auto rounded-md">
+            </div>
+            <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
+                <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('licenseModal');
+            const licenseImage = document.getElementById('licenseImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const closeModal = document.getElementById('closeModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+           
+            // Add event listeners to all view license buttons
+            document.querySelectorAll('.view-license-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const licenseUrl = this.getAttribute('data-license-url');
+                    const riderName = this.getAttribute('data-rider-name');
+                   
+                    licenseImage.src = licenseUrl;
+                    modalTitle.textContent = `${riderName}'s Driver's License`;
+                    modal.classList.remove('hidden');
+                });
+            });
+           
+            // Close modal when X is clicked
+            closeModal.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+           
+            // Close modal when close button is clicked
+            closeModalBtn.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+           
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </body>
+
 
 </html>

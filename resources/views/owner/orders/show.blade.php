@@ -19,13 +19,54 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-arrow-left mr-1"></i>Back to Orders
                     </a>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="max-w-4xl mx-auto mt-6 px-4">
+            <div class="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative" role="alert">
+                <div class="flex items-center">
+                    <div class="py-1">
+                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong class="font-bold">Success! </strong>
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="max-w-4xl mx-auto mt-6 px-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <div class="flex items-center">
+                    <div class="py-1">
+                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong class="font-bold">Error! </strong>
+                        <span class="block sm:inline">{{ session('error') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg overflow-hidden">
@@ -104,8 +145,8 @@
             </div>
 
             <!-- Actions -->
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                <div class="flex justify-between items-center">
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
                     <form action="{{ route('owner.orders.update-status', $order) }}" method="POST"
                         class="flex items-center space-x-4">
                         @csrf
@@ -122,30 +163,36 @@
                             </option>
                             <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled
                             </option>
+
                         </select>
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                             Update Status
                         </button>
                     </form>
 
-                    @if($order->rider)
-                        <div class="text-right">
-                            <p class="text-sm text-gray-600">Assigned Rider</p>
-                            <p class="font-medium">{{ $order->rider->name }}</p>
-                            @if($order->rider)
-                                <a href="{{ route('owner.orders.chat', $order) }}"
-                                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 inline-flex items-center">
-                                    <i class="fas fa-comment mr-2"></i>Chat with Rider
-                                </a>
-                            @else
-                                <button
-                                    class="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed inline-flex items-center"
-                                    disabled>
-                                    <i class="fas fa-comment mr-2"></i>No Rider Assigned
-                                </button>
-                            @endif
-                        </div>
+                    @if(in_array($order->status, ['pending', 'cancelled']))
+                        <form action="{{ route('owner.orders.destroy', $order) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                onclick="return confirm('Delete order #{{ $order->order_number }}?')">
+                                <i class="fas fa-trash mr-2"></i>Delete Order
+                            </button>
+                        </form>
                     @endif
+                </div>
+
+                <div class="text-right">
+                    @if($order->rider)
+                        <p class="text-sm text-gray-600">Assigned Rider</p>
+                        <p class="font-medium">{{ $order->rider->name }}</p>
+                    @endif
+
+                    <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
+                        class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 inline-flex items-center mt-2">
+                        <i class="fas fa-motorcycle mr-2"></i>
+                        {{ $order->rider ? 'Change Rider' : 'Assign Rider' }}
+                    </a>
                 </div>
             </div>
         </div>

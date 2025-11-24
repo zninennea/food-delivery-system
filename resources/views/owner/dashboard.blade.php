@@ -139,16 +139,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('owner.profile.edit') }}"
-                class="bg-white rounded-lg shadow p-6 text-left hover:bg-gray-50 transition duration-200 block">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900">Change Background</h3>
-                        <p class="text-gray-600 mt-1">Update your restaurant's background image</p>
-                    </div>
-                    <i class="fas fa-image text-2xl text-green-600"></i>
-                </div>
-            </a>
+            
         </div>
 
         <!-- Active Orders Section - DYNAMIC DATA -->

@@ -36,7 +36,7 @@ class DashboardController extends Controller
 
         // Recent reviews
         $recentReviews = Review::with(['customer', 'menuItem'])
-            ->whereHas('order', function($query) use ($user) {
+            ->whereHas('order', function ($query) use ($user) {
                 $query->where('customer_id', '!=', $user->id); // Show other customers' reviews
             })
             ->latest()
@@ -47,19 +47,29 @@ class DashboardController extends Controller
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
 
         return view('customer.dashboard', compact(
-            'featuredItems', 
-            'menuItemsByCategory', 
-            'recentOrders', 
+            'featuredItems',
+            'menuItemsByCategory',
+            'recentOrders',
             'recentReviews',
             'cartCount',
             'restaurant'
         ));
     }
 
-    public function menu()
+    public function menu(Request $request)
     {
         $user = Auth::user();
         $restaurant = Restaurant::first();
+
+        // Check if we're in modification mode
+        $modifyOrderId = $request->get('modify_order');
+        $modifyOrder = null;
+
+        if ($modifyOrderId) {
+            $modifyOrder = Order::where('id', $modifyOrderId)
+                ->where('customer_id', $user->id)
+                ->first();
+        }
 
         // All menu items grouped by category
         $menuItemsByCategory = MenuItem::orderBy('category')
@@ -69,7 +79,12 @@ class DashboardController extends Controller
 
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
 
-        return view('customer.menu', compact('menuItemsByCategory', 'cartCount', 'restaurant'));
+        return view('customer.menu', compact(
+            'menuItemsByCategory',
+            'cartCount',
+            'restaurant',
+            'modifyOrder'
+        ));
     }
 
     public function showMenuItem(MenuItem $menuItem)

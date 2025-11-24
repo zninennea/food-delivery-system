@@ -24,7 +24,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            
+
             // Redirect based on user role
             return $this->redirectToDashboard($user);
         }
@@ -44,6 +44,18 @@ class LoginController extends Controller
             case 'customer':
             default:
                 return redirect()->route('customer.dashboard');
+        }
+    }
+
+    // In your LoginController
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->role === 'owner') {
+            return redirect()->route('owner.dashboard');
+        } elseif ($user->role === 'rider') {
+            return redirect()->route('rider.dashboard');
+        } else {
+            return redirect()->route('customer.dashboard');
         }
     }
 

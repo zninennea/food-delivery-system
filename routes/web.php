@@ -10,9 +10,12 @@ use App\Http\Controllers\Owner\ChatController as OwnerChatController;
 use App\Http\Controllers\Owner\RiderController as OwnerRiderController;
 use App\Http\Controllers\Owner\AnalyticsController as OwnerAnalyticsController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-use App\Http\Controllers\Customer\ProfileController as CustomerProfileController; // Add this
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 use App\Http\Controllers\Customer\CartController as CustomerCartController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Rider\DashboardController as RiderDashboardController;
+use App\Http\Controllers\Rider\ProfileController as RiderProfileController;
+use App\Http\Controllers\Rider\DashboardController as RiderDashboardApiController;
 //use App\Http\Controllers\Customer\ReviewController as CustomerReviewController; // Comment out for now
 
 // Public routes
@@ -50,6 +53,17 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/orders/{order}', [OwnerOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('orders.update-status');
 
+    // Owner GCash routes
+    Route::get('/owner/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])
+        ->name('owner.orders.gcash-receipt')
+        ->middleware(['auth', 'role:owner']);
+
+    Route::post('/owner/orders/{order}/gcash-status', [App\Http\Controllers\Owner\OrderController::class, 'updateGcashStatus'])
+        ->name('owner.orders.gcash-status')
+        ->middleware(['auth', 'role:owner']);
+
+    Route::get('/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])->name('orders.gcash-receipt');
+    Route::post('/orders/{order}/gcash-status', [App\Http\Controllers\Owner\OrderController::class, 'updateGcashStatus'])->name('orders.gcash-status');
     // Chat routes
     Route::get('/orders/{order}/chat', [OwnerChatController::class, 'showChat'])->name('orders.chat');
     Route::post('/orders/{order}/chat/send', [OwnerChatController::class, 'sendMessage'])->name('orders.chat.send');
@@ -67,9 +81,11 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/riders/{rider}/edit', [OwnerRiderController::class, 'edit'])->name('riders.edit');
     Route::put('/riders/{rider}', [OwnerRiderController::class, 'update'])->name('riders.update');
     Route::delete('/riders/{rider}', [OwnerRiderController::class, 'destroy'])->name('riders.destroy');
+
 });
 
-// Customer Routes - REMOVE 'customer' from middleware array
+
+// Customer Routes
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
@@ -97,18 +113,22 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/orders', [CustomerOrderController::class, 'store'])->name('orders.store');
     Route::get('/track-order/{order}', [CustomerOrderController::class, 'show'])->name('track-order');
 
-    // Comment out review routes for now
-    // Route::get('/orders/{order}/review', [CustomerReviewController::class, 'create'])->name('reviews.create');
-    // Route::post('/orders/{order}/review', [CustomerReviewController::class, 'store'])->name('reviews.store');
+    // Checkout
+    Route::get('/checkout', [CustomerCartController::class, 'checkout'])->name('cart.checkout');
+
+    // Order management
+    Route::put('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/modify', [CustomerOrderController::class, 'requestModification'])->name('orders.modify');
 });
 
-// Rider Routes
-Route::middleware(['auth'])->prefix('rider')->name('rider.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('rider.dashboard');
-    })->name('dashboard');
+// Rider Routes - ONLY use 'auth' middleware
+Route::prefix('rider')->name('rider.')->middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [RiderDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders/{order}', [RiderDashboardController::class, 'showOrder'])->name('orders.show');
+    Route::put('/orders/{order}/status', [RiderDashboardController::class, 'updateStatus'])->name('orders.update-status');
+    Route::get('/order-history', [RiderDashboardController::class, 'orderHistory'])->name('order-history');
+    Route::get('/profile', [RiderProfileController::class, 'show'])->name('profile.show');
 });
-
 // Test route for chat
 Route::get('/test-chat', function () {
     $order = \App\Models\Order::with('rider')->first();
@@ -116,4 +136,14 @@ Route::get('/test-chat', function () {
         return "No orders found. Please create an order with a rider first.";
     }
     return redirect()->route('owner.orders.chat', $order);
+});
+
+// Owner Order Routes
+Route::prefix('owner/orders')->name('owner.orders.')->group(function () {
+    Route::get('/', [OwnerOrderController::class, 'index'])->name('index');
+    Route::get('/{order}', [OwnerOrderController::class, 'show'])->name('show');
+    Route::put('/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('update-status');
+    Route::get('/{order}/assign-rider', [OwnerOrderController::class, 'showAssignRiderForm'])->name('assign-rider-form');
+    Route::post('/{order}/assign-rider', [OwnerOrderController::class, 'assignRider'])->name('assign-rider');
+    Route::delete('/{order}', [OwnerOrderController::class, 'destroy'])->name('destroy');
 });

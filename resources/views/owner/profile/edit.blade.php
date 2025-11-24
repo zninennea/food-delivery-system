@@ -194,15 +194,7 @@
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="background_image" class="block text-sm font-medium text-gray-700">Background
-                                    Image</label>
-                                <input type="file" name="background_image" id="background_image"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                @error('background_image')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+
                         </div>
                     </div>
 

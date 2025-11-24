@@ -153,12 +153,6 @@
                     <div class="space-y-6">
                         <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Restaurant Information</h3>
 
-                        @if($restaurant->background_image)
-                            <div class="mb-4">
-                                <img src="{{ asset('storage/' . $restaurant->background_image) }}"
-                                    alt="Restaurant Background" class="w-full h-32 object-cover rounded-lg">
-                            </div>
-                        @endif
 
                         <div class="space-y-4">
                             <div>

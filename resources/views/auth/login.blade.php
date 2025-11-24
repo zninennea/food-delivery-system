@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -40,6 +42,7 @@
         </div>
     </nav>
 
+
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
@@ -47,18 +50,39 @@
                 <div class="flex justify-center mb-4">
                     <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-25 w-25">
                 </div>
+                <h2 class="text-3xl font-bold text-gray-900">Sign in to your account</h2>
                 <p class="mt-2 text-gray-600">Welcome back! Please sign in to your account.</p>
             </div>
 
-            <form class="mt-8 space-y-6" action="/login" method="POST">
+
+            <!-- Error Message Container -->
+            @if ($errors->has('email') || session('error'))
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                {{ $errors->first('email') ?: session('error') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+
+            <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                         <input id="email" name="email" type="email" required
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="your@email.com">
+                            placeholder="your@email.com"
+                            value="{{ old('email') }}">
                     </div>
+
 
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
@@ -68,12 +92,14 @@
                     </div>
                 </div>
 
+
                 <div>
                     <button type="submit"
                         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
                         Sign In
                     </button>
                 </div>
+
 
                 <div class="text-center">
                     <p class="text-sm text-gray-600">
@@ -88,4 +114,7 @@
     </div>
 </body>
 
+
 </html>
+
+
