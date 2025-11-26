@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         'restaurant.owner' => \App\Http\Middleware\RestaurantOwner::class,
         'customer' => \App\Http\Middleware\Customer::class,
         'rider' => \App\Http\Middleware\Rider::class,
-    
+        'owner' => \App\Http\Middleware\Owner::class,
+
     ];
 }

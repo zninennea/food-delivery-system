@@ -16,6 +16,7 @@ use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Rider\DashboardController as RiderDashboardController;
 use App\Http\Controllers\Rider\ProfileController as RiderProfileController;
 use App\Http\Controllers\Rider\DashboardController as RiderDashboardApiController;
+
 //use App\Http\Controllers\Customer\ReviewController as CustomerReviewController; // Comment out for now
 
 // Public routes
@@ -52,6 +53,9 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/orders', [OwnerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OwnerOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::get('/orders/{order}/assign-rider', [OwnerOrderController::class, 'showAssignRiderForm'])->name('orders.assign-rider-form');
+    Route::post('/orders/{order}/assign-rider', [OwnerOrderController::class, 'assignRider'])->name('orders.assign-rider');
+    Route::delete('/orders/{order}', [OwnerOrderController::class, 'destroy'])->name('orders.destroy');
 
     // Owner GCash routes
     Route::get('/owner/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])
@@ -81,7 +85,6 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/riders/{rider}/edit', [OwnerRiderController::class, 'edit'])->name('riders.edit');
     Route::put('/riders/{rider}', [OwnerRiderController::class, 'update'])->name('riders.update');
     Route::delete('/riders/{rider}', [OwnerRiderController::class, 'destroy'])->name('riders.destroy');
-
 });
 
 
@@ -138,12 +141,14 @@ Route::get('/test-chat', function () {
     return redirect()->route('owner.orders.chat', $order);
 });
 
-// Owner Order Routes
-Route::prefix('owner/orders')->name('owner.orders.')->group(function () {
-    Route::get('/', [OwnerOrderController::class, 'index'])->name('index');
-    Route::get('/{order}', [OwnerOrderController::class, 'show'])->name('show');
-    Route::put('/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('update-status');
-    Route::get('/{order}/assign-rider', [OwnerOrderController::class, 'showAssignRiderForm'])->name('assign-rider-form');
-    Route::post('/{order}/assign-rider', [OwnerOrderController::class, 'assignRider'])->name('assign-rider');
-    Route::delete('/{order}', [OwnerOrderController::class, 'destroy'])->name('destroy');
+// Customer chat routes
+Route::middleware(['auth', 'customer'])->group(function () {
+    Route::get('/customer/orders/{order}/messages', [App\Http\Controllers\Customer\OrderController::class, 'getMessages']);
+    Route::post('/customer/orders/{order}/messages', [App\Http\Controllers\Customer\OrderController::class, 'sendMessage']);
+});
+
+// Rider chat routes
+Route::middleware(['auth', 'rider'])->group(function () {
+    Route::get('/rider/orders/{order}/messages', [App\Http\Controllers\Rider\OrderController::class, 'getMessages']);
+    Route::post('/rider/orders/{order}/messages', [App\Http\Controllers\Rider\OrderController::class, 'sendMessage']);
 });

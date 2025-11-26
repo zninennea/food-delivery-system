@@ -88,7 +88,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Featured Items -->
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Featured Items</h2>
@@ -158,9 +157,9 @@
                                     <p class="text-gray-600 text-sm">Total: ₱{{ number_format($order->total_amount, 2) }}</p>
                                 </div>
                                 <span class="px-3 py-1 rounded-full text-sm font-medium 
-                                            @if($order->status == 'delivered') bg-green-100 text-green-800
-                                            @elseif($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                            @else bg-blue-100 text-blue-800 @endif">
+                                                    @if($order->status == 'delivered') bg-green-100 text-green-800
+                                                    @elseif($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                    @else bg-blue-100 text-blue-800 @endif">
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </div>

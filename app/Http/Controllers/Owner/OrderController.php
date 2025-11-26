@@ -163,6 +163,7 @@ class OrderController extends Controller
     // Add method to show rider assignment form
     public function showAssignRiderForm(Order $order)
     {
+        
         $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
 
         if ($order->restaurant_id !== $restaurant->id) {

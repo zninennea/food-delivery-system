@@ -153,8 +153,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Items
                             </th>
+                            <!-- In the table header -->
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total
+                                Payment Details
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
@@ -181,6 +182,11 @@
                                     <div class="text-sm text-gray-900 capitalize">
                                         {{ str_replace('_', ' ', $order->payment_method) }}
                                     </div>
+                                    @if($order->payment_method === 'cash_on_delivery' && $order->cash_provided)
+                                        <div class="text-xs text-green-600 mt-1">
+                                            Cash: ₱{{ number_format($order->cash_provided, 2) }}
+                                        </div>
+                                    @endif
                                     @if($order->payment_method === 'gcash')
                                         <div class="text-xs mt-1">
                                             @php
@@ -210,12 +216,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                        @elseif($order->status == 'ready') bg-green-100 text-green-800
-                                                        @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
-                                                        @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
-                                                        @else bg-red-100 text-red-800 @endif">
+                                                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                        @elseif($order->status == 'ready') bg-green-100 text-green-800
+                                                                        @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
+                                                                        @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
+                                                                        @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                     </span>
                                 </td>
@@ -519,6 +525,59 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
+        }
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            console.log('Sending message:', message);
+
+            if (!message) {
+                console.log('Message is empty, not sending');
+                return;
+            }
+
+            const url = window.location.pathname.includes('customer')
+                ? `/customer/orders/${orderId}/messages`
+                : `/rider/orders/${orderId}/messages`;
+
+            console.log('Sending to URL:', url);
+
+            // Show sending state
+            sendChatBtn.disabled = true;
+            sendChatBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // Use FormData with CSRF token
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('_token', '{{ csrf_token() }}'); // Add CSRF token
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Message sent successfully:', data);
+                    chatInput.value = '';
+                    loadMessages();
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    alert('Error sending message: ' + error.message);
+                })
+                .finally(() => {
+                    sendChatBtn.disabled = false;
+                    sendChatBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                });
         }
 
         // Close modal when clicking outside

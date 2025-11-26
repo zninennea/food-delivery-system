@@ -142,6 +142,16 @@
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
                                     <h4 class="font-medium text-gray-900">Order #{{ $order->order_number }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $order->customer->name }}</p>
+                                    <p class="text-gray-600 text-sm">{{ $order->delivery_address }}</p>
+
+                                    @if($order->payment_method === 'cash_on_delivery' && $order->cash_provided)
+                                        <p class="text-green-600 text-sm font-medium">
+                                            Cash: ₱{{ number_format($order->cash_provided, 2) }}
+                                            (Change: ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }})
+                                        </p>
+                                    @endif
+
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                                         <div>
                                             <p class="text-sm text-gray-600">Customer</p>
@@ -158,9 +168,9 @@
                                     </div>
                                     <div class="mt-3">
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                            @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
-                                                            @elseif($order->status == 'ready') bg-blue-100 text-blue-800
-                                                            @else bg-green-100 text-green-800 @endif">
+                                                                                    @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
+                                                                                    @elseif($order->status == 'ready') bg-blue-100 text-blue-800
+                                                                                    @else bg-green-100 text-green-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </div>

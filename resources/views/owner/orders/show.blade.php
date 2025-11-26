@@ -116,6 +116,124 @@
                 </div>
             </div>
 
+            <!-- Payment Information -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Payment Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Payment Method</p>
+                        <p class="font-medium capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p>
+                    </div>
+
+                    @if($order->payment_method === 'cash_on_delivery')
+                        <div>
+                            <p class="text-sm text-gray-600">Payment Status</p>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full 
+                            @if($order->payment_status === 'approved') bg-green-100 text-green-800
+                            @elseif($order->payment_status === 'rejected') bg-red-100 text-red-800
+                            @else bg-yellow-100 text-yellow-800 @endif">
+                                {{ ucfirst($order->payment_status) }}
+                            </span>
+                        </div>
+
+                        @if($order->cash_provided)
+                            <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Cash Provided</p>
+                                        <p class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Order Total</p>
+                                        <p class="font-medium">₱{{ number_format($order->grand_total, 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Change Due</p>
+                                        <p class="font-medium text-blue-600">
+                                            ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                    @elseif($order->payment_method === 'gcash')
+                        <div>
+                            <p class="text-sm text-gray-600">GCash Status</p>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full 
+                            @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                            @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                            @else bg-yellow-100 text-yellow-800 @endif">
+                                {{ ucfirst($order->gcash_payment_status) }}
+                            </span>
+                        </div>
+                        @if($order->gcash_reference_number)
+                            <div>
+                                <p class="text-sm text-gray-600">Reference Number</p>
+                                <p class="font-medium">{{ $order->gcash_reference_number }}</p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+            <!-- Payment Information -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Payment Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Payment Method</p>
+                        <p class="font-medium capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p>
+                    </div>
+
+                    @if($order->payment_method === 'cash_on_delivery')
+                            <div>
+                                <p class="text-sm text-gray-600">Payment Status</p>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                        @if($order->payment_status === 'approved') bg-green-100 text-green-800
+                        @elseif($order->payment_status === 'rejected') bg-red-100 text-red-800
+                        @else bg-yellow-100 text-yellow-800 @endif">
+                                    {{ ucfirst($order->payment_status) }}
+                                </span>
+                            </div>
+
+                            @if($order->cash_provided)
+                                <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Cash Provided</p>
+                                            <p class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Order Total</p>
+                                            <p class="font-medium">₱{{ number_format($order->grand_total, 2) }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Change Due</p>
+                                            <p class="font-medium text-blue-600">
+                                                ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                    @elseif($order->payment_method === 'gcash')
+                            <div>
+                                <p class="text-sm text-gray-600">GCash Status</p>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                        @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                        @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                        @else bg-yellow-100 text-yellow-800 @endif">
+                                    {{ ucfirst($order->gcash_payment_status) }}
+                                </span>
+                            </div>
+                            @if($order->gcash_reference_number)
+                                <div>
+                                    <p class="text-sm text-gray-600">Reference Number</p>
+                                    <p class="font-medium">{{ $order->gcash_reference_number }}</p>
+                                </div>
+                            @endif
+                    @endif
+                </div>
+            </div>
             <!-- Order Items -->
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
