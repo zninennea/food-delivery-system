@@ -10,7 +10,6 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Navigation -->
     <nav class="bg-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
@@ -72,9 +71,7 @@
                 {{-- END HIDDEN FIELDS --}}
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Left Column - Delivery & Payment -->
                     <div class="space-y-6">
-                        <!-- Delivery Information -->
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Delivery Information</h3>
 
@@ -103,12 +100,10 @@
                             </div>
                         </div>
 
-                        <!-- Payment Method -->
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
 
                             <div class="space-y-4">
-                                <!-- Cash on Delivery -->
                                 <div class="flex items-center">
                                     <input type="radio" id="cash_on_delivery" name="payment_method"
                                         value="cash_on_delivery"
@@ -119,7 +114,6 @@
                                     </label>
                                 </div>
 
-                                <!-- Cash Provided Field (shown when COD is selected) -->
                                 <div id="cash_provided_field" class="ml-7 hidden">
                                     <label for="cash_provided" class="block text-sm font-medium text-gray-700">Cash
                                         Provided (Optional)</label>
@@ -129,7 +123,6 @@
                                     <p class="text-xs text-gray-500 mt-1">Enter amount if you need change</p>
                                 </div>
 
-                                <!-- GCash -->
                                 <div class="flex items-center">
                                     <input type="radio" id="gcash" name="payment_method" value="gcash"
                                         class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
@@ -139,33 +132,41 @@
                                     </label>
                                 </div>
 
-                                <!-- GCash Fields (shown when GCash is selected) -->
                                 <div id="gcash_fields" class="ml-7 hidden space-y-4">
                                     <div class="space-y-3">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Send Payment to
                                                 SA*****A NI***E B. :</label>
-                                            <p class="mt-1 text-gray-900">09123775192</p>
+                                            <div class="flex items-center justify-between mt-1">
+                                                <p class="text-gray-900 font-bold text-lg">09123775192</p>
+                                                <button type="button" 
+                                                    class="view-qr-btn text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                                                    data-qr-url="{{ asset('images/naniqr.jpg') }}" 
+                                                    data-qr-name="GCash Payment">
+                                                    <i class="fas fa-qrcode mr-1"></i> View QR  
+                                                </button>
+                                            </div>
                                         </div>
-                                        <label for="gcash_reference_number"
-                                            class="block text-sm font-medium text-gray-700">Reference Number</label>
-                                        <input type="text" name="gcash_reference_number" id="gcash_reference_number"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Enter GCash reference number">
-                                    </div>
-                                    <div>
-                                        <label for="gcash_receipt"
-                                            class="block text-sm font-medium text-gray-700">Payment Receipt</label>
-                                        <input type="file" name="gcash_receipt" id="gcash_receipt" accept="image/*"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                        <p class="text-xs text-gray-500 mt-1">Upload screenshot of your GCash payment
-                                        </p>
+                                        <div>
+                                            <label for="gcash_reference_number"
+                                                class="block text-sm font-medium text-gray-700">Reference Number</label>
+                                            <input type="text" name="gcash_reference_number" id="gcash_reference_number"
+                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Enter GCash reference number">
+                                        </div>
+                                        <div>
+                                            <label for="gcash_receipt"
+                                                class="block text-sm font-medium text-gray-700">Payment Receipt</label>
+                                            <input type="file" name="gcash_receipt" id="gcash_receipt" accept="image/*"
+                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <p class="text-xs text-gray-500 mt-1">Upload screenshot of your GCash payment
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Special Instructions -->
                         <div>
                             <label for="special_instructions" class="block text-sm font-medium text-gray-700">Special
                                 Instructions</label>
@@ -175,7 +176,6 @@
                         </div>
                     </div>
 
-                    <!-- Right Column - Order Summary -->
                     <div class="space-y-6">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
@@ -213,7 +213,6 @@
                             </div>
                         </div>
 
-                        <!-- Place Order Button -->
                         <div class="bg-blue-50 p-4 rounded-lg">
                             <button type="submit" id="place-order-btn"
                                 class="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-medium">
@@ -224,7 +223,6 @@
                             </p>
                         </div>
 
-                        <!-- Back to Cart -->
                         <div class="text-center">
                             <a href="{{ route('customer.cart.index') }}" class="text-blue-600 hover:text-blue-800">
                                 <i class="fas fa-arrow-left mr-2"></i>Back to Cart
@@ -233,6 +231,25 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <div class="flex justify-between items-center px-6 py-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Scan QR to Pay</h3>
+                <button type="button" id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 flex justify-center bg-gray-50">
+                <img id="qrImage" src="" alt="Payment QR Code" class="max-w-full h-auto rounded-md shadow-sm">
+            </div>
+            <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
+                <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                    Close
+                </button>
+            </div>
         </div>
     </div>
 
@@ -254,42 +271,47 @@
                 gcashFields.classList.remove('hidden');
             }
         }
+    </script>
 
-        // // Initialize on page load
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     togglePaymentFields();
-
-        //     // Form validation
-        //     const form = document.querySelector('form');
-        //     const placeOrderBtn = document.getElementById('place-order-btn');
-
-        //     form.addEventListener('change', validateForm);
-        //     form.addEventListener('input', validateForm);
-
-        //     function validateForm() {
-        //         const gcashRadio = document.getElementById('gcash');
-        //         let isValid = true;
-
-        //         if (gcashRadio.checked) {
-        //             const referenceNumber = document.getElementById('gcash_reference_number').value.trim();
-        //             const receipt = document.getElementById('gcash_receipt').files.length;
-
-        //             if (!referenceNumber || !receipt) {
-        //                 isValid = false;
-        //             }
-        //         }
-
-        //         placeOrderBtn.disabled = !isValid;
-        //         placeOrderBtn.classList.toggle('bg-orange-600', isValid);
-        //         placeOrderBtn.classList.toggle('bg-gray-400', !isValid);
-        //         placeOrderBtn.classList.toggle('hover:bg-orange-700', isValid);
-        //         placeOrderBtn.classList.toggle('cursor-not-allowed', !isValid);
-        //     }
-
-        //     validateForm(); // Initial validation
-        // });
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('qrModal');
+            const qrImage = document.getElementById('qrImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const closeModal = document.getElementById('closeModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            
+            // Add event listeners to all view qr buttons
+            document.querySelectorAll('.view-qr-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const qrUrl = this.getAttribute('data-qr-url');
+                    const qrName = this.getAttribute('data-qr-name');
+                    
+                    qrImage.src = qrUrl;
+                    if(qrName) {
+                        modalTitle.textContent = qrName;
+                    }
+                    modal.classList.remove('hidden');
+                });
+            });
+            
+            // Close modal when X is clicked
+            closeModal.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+            
+            // Close modal when close button is clicked
+            closeModalBtn.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
     </script>
 </body>
-
 </html>
