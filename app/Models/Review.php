@@ -13,6 +13,8 @@ class Review extends Model
         'customer_id',
         'order_id',
         'rider_id',
+        'menu_item_id',
+        'rating',
         'restaurant_rating',
         'rider_rating',
         'comment'

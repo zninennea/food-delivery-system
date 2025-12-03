@@ -25,7 +25,9 @@ class Order extends Model
         'gcash_receipt_path',
         'gcash_payment_status',
         'payment_status',
-        'delivery_fee'
+        'delivery_fee',
+        'safety_verified',
+        'safety_verified_at'
     ];
 
     protected $casts = [
@@ -177,5 +179,9 @@ class Order extends Model
     {
         return $this->payment_method === 'gcash' &&
             $this->gcash_payment_status === self::GCASH_STATUS_PENDING;
+    }
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

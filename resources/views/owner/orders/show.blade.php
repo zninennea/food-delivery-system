@@ -15,7 +15,11 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-800">NaNi - Order Details</h1>
+                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                    <div>
+                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.orders.index') }}"
@@ -74,7 +78,7 @@
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900">Order #{{ $order->order_number }}</h2>
+                        <h2 class="text-xl font-bold text-orange-600">Order #{{ $order->order_number }}</h2>
                         <p class="text-gray-600">Placed on {{ $order->created_at->format('F j, Y \a\t g:i A') }}</p>
                     </div>
                     <div class="text-right">
@@ -126,15 +130,6 @@
                     </div>
 
                     @if($order->payment_method === 'cash_on_delivery')
-                        <div>
-                            <p class="text-sm text-gray-600">Payment Status</p>
-                            <span class="px-2 py-1 text-xs font-medium rounded-full 
-                            @if($order->payment_status === 'approved') bg-green-100 text-green-800
-                            @elseif($order->payment_status === 'rejected') bg-red-100 text-red-800
-                            @else bg-yellow-100 text-yellow-800 @endif">
-                                {{ ucfirst($order->payment_status) }}
-                            </span>
-                        </div>
 
                         @if($order->cash_provided)
                             <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg">
@@ -160,9 +155,9 @@
                         <div>
                             <p class="text-sm text-gray-600">GCash Status</p>
                             <span class="px-2 py-1 text-xs font-medium rounded-full 
-                            @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
-                            @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
-                            @else bg-yellow-100 text-yellow-800 @endif">
+                                                            @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                                                            @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                                                            @else bg-yellow-100 text-yellow-800 @endif">
                                 {{ ucfirst($order->gcash_payment_status) }}
                             </span>
                         </div>
@@ -175,65 +170,7 @@
                     @endif
                 </div>
             </div>
-            <!-- Payment Information -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Payment Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-600">Payment Method</p>
-                        <p class="font-medium capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p>
-                    </div>
 
-                    @if($order->payment_method === 'cash_on_delivery')
-                            <div>
-                                <p class="text-sm text-gray-600">Payment Status</p>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
-                        @if($order->payment_status === 'approved') bg-green-100 text-green-800
-                        @elseif($order->payment_status === 'rejected') bg-red-100 text-red-800
-                        @else bg-yellow-100 text-yellow-800 @endif">
-                                    {{ ucfirst($order->payment_status) }}
-                                </span>
-                            </div>
-
-                            @if($order->cash_provided)
-                                <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg">
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <p class="text-sm text-gray-600">Cash Provided</p>
-                                            <p class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-600">Order Total</p>
-                                            <p class="font-medium">₱{{ number_format($order->grand_total, 2) }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-600">Change Due</p>
-                                            <p class="font-medium text-blue-600">
-                                                ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-
-                    @elseif($order->payment_method === 'gcash')
-                            <div>
-                                <p class="text-sm text-gray-600">GCash Status</p>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
-                        @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
-                        @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
-                        @else bg-yellow-100 text-yellow-800 @endif">
-                                    {{ ucfirst($order->gcash_payment_status) }}
-                                </span>
-                            </div>
-                            @if($order->gcash_reference_number)
-                                <div>
-                                    <p class="text-sm text-gray-600">Reference Number</p>
-                                    <p class="font-medium">{{ $order->gcash_reference_number }}</p>
-                                </div>
-                            @endif
-                    @endif
-                </div>
-            </div>
             <!-- Order Items -->
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
@@ -255,41 +192,88 @@
             </div>
 
             <!-- Order Summary -->
-            <div class="px-6 py-4">
-                <div class="flex justify-between items-center text-lg font-bold">
-                    <span>Total Amount:</span>
-                    <span>₱{{ number_format($order->total_amount, 2) }}</span>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium">₱{{ number_format($order->total_amount, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery Fee</span>
+                        <span class="font-medium">₱{{ number_format($order->delivery_fee, 2) }}</span>
+                    </div>
+
+                    @if($order->payment_method === 'cash_on_delivery' && $order->cash_provided)
+                        <div class="flex justify-between border-t border-gray-200 pt-2">
+                            <span class="text-gray-600">Cash Provided</span>
+                            <span class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Change Due</span>
+                            <span
+                                class="font-medium text-blue-600">₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</span>
+                        </div>
+                    @endif
+
+                    <div class="flex justify-between border-t border-gray-200 pt-2">
+                        <span class="font-medium text-gray-900">Total</span>
+                        <span class="font-bold text-gray-900">₱{{ number_format($order->grand_total, 2) }}</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Actions -->
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <form action="{{ route('owner.orders.update-status', $order) }}" method="POST"
-                        class="flex items-center space-x-4">
-                        @csrf
-                        @method('PUT')
-                        <select name="status"
-                            class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>Preparing
-                            </option>
-                            <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready</option>
-                            <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>On the Way
-                            </option>
-                            <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered
-                            </option>
-                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled
-                            </option>
+                <!-- Status Update Form - Only show for non-delivered, non-cancelled orders -->
+                @if(!in_array($order->status, ['delivered', 'cancelled']))
+                    <div class="flex items-center space-x-4">
+                        <form action="{{ route('owner.orders.update-status', $order) }}" method="POST"
+                            class="flex items-center space-x-4">
+                            @csrf
+                            @method('PUT')
+                            <select name="status"
+                                class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>Preparing
+                                </option>
+                                <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready</option>
+                                <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>On the Way
+                                </option>
+                                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered
+                                </option>
+                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled
+                                </option>
+                            </select>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                Update Status
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="text-sm text-gray-500 italic">
+                        Order is {{ $order->status }} - status cannot be changed
+                    </div>
+                @endif
 
-                        </select>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                            Update Status
-                        </button>
-                    </form>
+                <div class="text-right">
+                    @if($order->rider)
+                        <p class="text-sm text-gray-600">Assigned Rider</p>
+                        <p class="font-medium">{{ $order->rider->name }}</p>
+                    @endif
 
+                    <!-- Only show Assign/Change Rider button for non-delivered, non-cancelled orders -->
+                    @if(!in_array($order->status, ['delivered', 'cancelled']))
+                        <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
+                            class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 inline-flex items-center mt-2">
+                            <i class="fas fa-motorcycle mr-2"></i>
+                            {{ $order->rider ? 'Change Rider' : 'Assign Rider' }}
+                        </a>
+                    @endif
+
+                    <!-- Delete button (only for pending/cancelled orders) -->
                     @if(in_array($order->status, ['pending', 'cancelled']))
-                        <form action="{{ route('owner.orders.destroy', $order) }}" method="POST">
+                        <form action="{{ route('owner.orders.destroy', $order) }}" method="POST" class="mt-2">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
@@ -299,21 +283,11 @@
                         </form>
                     @endif
                 </div>
-
-                <div class="text-right">
-                    @if($order->rider)
-                        <p class="text-sm text-gray-600">Assigned Rider</p>
-                        <p class="font-medium">{{ $order->rider->name }}</p>
-                    @endif
-
-                    <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
-                        class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 inline-flex items-center mt-2">
-                        <i class="fas fa-motorcycle mr-2"></i>
-                        {{ $order->rider ? 'Change Rider' : 'Assign Rider' }}
-                    </a>
-                </div>
             </div>
+
+
         </div>
+    </div>
     </div>
 </body>
 

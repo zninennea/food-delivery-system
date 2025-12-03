@@ -14,12 +14,16 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-800">Assign Rider to Order #{{ $order->order_number }}</h1>
+                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                    <div>
+                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('owner.orders.show', $order) }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-arrow-left mr-1"></i>Back to Order
+                        <i class="fas fa-arrow-left mr-1"></i>Back to Order Details
                     </a>
                 </div>
             </div>
@@ -94,7 +98,7 @@
     <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg">
             <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900">Assign Rider</h2>
+                <h2 class="text-xl font-bold text-orange-600">Assign Rider</h2>
                 <p class="text-gray-600 mt-1">Order #{{ $order->order_number }} - {{ $order->customer->name }}</p>
             </div>
 

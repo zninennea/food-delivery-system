@@ -22,7 +22,7 @@
                         <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
                         <div>
                             <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
+                            <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
                         </div>
                     </div>
                 </div>
@@ -44,6 +44,10 @@
                     <a href="{{ route('owner.analytics.index') }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-star mr-1"></i>Reviews
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
                         class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
@@ -71,13 +75,15 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Rider Management</h2>
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-orange-600">Rider Management</h1>
+                <p class="text-gray-600">Manage NaNi's delivery riders and their statuses</p>
+            </div>
             <a href="{{ route('owner.riders.create') }}"
                 class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
                 <i class="fas fa-plus mr-2"></i>Add New Rider
             </a>
         </div>
-
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -177,19 +183,20 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($rider->drivers_license)
                                         <button type="button"
-                                                class="view-license-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200 transition-colors"
-                                                data-license-url="{{ asset('storage/' . $rider->drivers_license) }}"
-                                                data-rider-name="{{ $rider->name }}">
-                                            <i class="fas fa-eye mr-1"></i>View License
+                                            class="view-license-btn bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200 transition-colors"
+                                            data-license-url="{{ asset('storage/' . $rider->drivers_license) }}"
+                                            data-rider-name="{{ $rider->name }}">
+                                            <i class="fa-solid fa-id-card"></i> View License
                                         </button>
                                     @else
                                         <span class="text-sm text-gray-500">No license</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                        @if($rider->status == 'active') bg-green-100 text-green-800
-                                                        @else bg-red-100 text-red-800 @endif">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                                                        @if($rider->status == 'active') bg-green-100 text-green-800
+                                                                                        @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst($rider->status) }}
                                     </span>
                                 </td>
@@ -234,7 +241,8 @@
                 <img id="licenseImage" src="" alt="Driver's License" class="w-full h-auto rounded-md">
             </div>
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
-                <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                <button type="button" id="closeModalBtn"
+                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
                     Close
                 </button>
             </div>
@@ -243,37 +251,37 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('licenseModal');
             const licenseImage = document.getElementById('licenseImage');
             const modalTitle = document.getElementById('modalTitle');
             const closeModal = document.getElementById('closeModal');
             const closeModalBtn = document.getElementById('closeModalBtn');
-           
+
             // Add event listeners to all view license buttons
             document.querySelectorAll('.view-license-btn').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const licenseUrl = this.getAttribute('data-license-url');
                     const riderName = this.getAttribute('data-rider-name');
-                   
+
                     licenseImage.src = licenseUrl;
                     modalTitle.textContent = `${riderName}'s Driver's License`;
                     modal.classList.remove('hidden');
                 });
             });
-           
+
             // Close modal when X is clicked
-            closeModal.addEventListener('click', function() {
+            closeModal.addEventListener('click', function () {
                 modal.classList.add('hidden');
             });
-           
+
             // Close modal when close button is clicked
-            closeModalBtn.addEventListener('click', function() {
+            closeModalBtn.addEventListener('click', function () {
                 modal.classList.add('hidden');
             });
-           
+
             // Close modal when clicking outside the image
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
                 }

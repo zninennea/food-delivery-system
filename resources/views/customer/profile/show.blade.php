@@ -90,7 +90,7 @@
                         </div>
 
                         <div class="pt-4">
-                            <a href="{{ route('customer.profile.password') }}" class="text-blue-600 hover:text-blue-800">
+                            <a href="{{ route('customer.profile.password') }}" class="text-orange-600 hover:text-orange-800">
                                 <i class="fas fa-key mr-2"></i>Change Password
                             </a>
                         </div>

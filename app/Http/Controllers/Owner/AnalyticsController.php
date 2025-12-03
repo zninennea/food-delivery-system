@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\OrderItem;
 use App\Models\Restaurant;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,31 +17,29 @@ class AnalyticsController extends Controller
     public function index()
     {
         $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
-        
-        // Monthly sales data for the current year
+
+        // Existing analytics...
         $monthlySales = $this->getMonthlySales($restaurant->id);
-        
-        // Top selling menu items
         $topSellingItems = $this->getTopSellingItems($restaurant->id);
-        
-        // Sales statistics
         $salesStats = $this->getSalesStatistics($restaurant->id);
-        
-        // Order status distribution
         $orderStatusDistribution = $this->getOrderStatusDistribution($restaurant->id);
 
+        // New review analytics
+        $reviewAnalytics = $this->getReviewAnalytics($restaurant->id);
+
         return view('owner.analytics.index', compact(
-            'monthlySales', 
-            'topSellingItems', 
+            'monthlySales',
+            'topSellingItems',
             'salesStats',
-            'orderStatusDistribution'
+            'orderStatusDistribution',
+            'reviewAnalytics'
         ));
     }
 
     private function getMonthlySales($restaurantId)
     {
         $currentYear = date('Y');
-        
+
         $salesData = Order::where('restaurant_id', $restaurantId)
             ->whereYear('created_at', $currentYear)
             ->where('status', 'delivered') // Only count delivered orders
@@ -126,9 +125,9 @@ class AnalyticsController extends Controller
     public function getSalesData(Request $request)
     {
         $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
-        
+
         $year = $request->get('year', date('Y'));
-        
+
         $salesData = Order::where('restaurant_id', $restaurant->id)
             ->whereYear('created_at', $year)
             ->where('status', 'delivered')
@@ -154,10 +153,10 @@ class AnalyticsController extends Controller
     public function getDailySales(Request $request)
     {
         $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
-        
+
         $month = $request->get('month', date('m'));
         $year = $request->get('year', date('Y'));
-        
+
         $dailySales = Order::where('restaurant_id', $restaurant->id)
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
@@ -168,5 +167,77 @@ class AnalyticsController extends Controller
             ->get();
 
         return response()->json($dailySales);
+    }
+    // Add this method to your AnalyticsController.php
+    private function getReviewAnalytics($restaurantId)
+    {
+        // Monthly review count
+        $monthlyReviews = Review::whereHas('order', function ($query) use ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
+        })
+            ->whereYear('created_at', date('Y'))
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Initialize array with all months set to 0
+        $monthlyReviewCounts = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyReviewCounts[$month] = 0;
+        }
+
+        // Fill in actual review data
+        foreach ($monthlyReviews as $data) {
+            $monthlyReviewCounts[$data->month] = intval($data->count);
+        }
+
+        // Average rating over time
+        $monthlyAvgRatings = Review::whereHas('order', function ($query) use ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
+        })
+            ->whereYear('created_at', date('Y'))
+            ->selectRaw('MONTH(created_at) as month, AVG(restaurant_rating) as avg_rating')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Initialize array with all months set to 0
+        $monthlyAvgRatingData = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyAvgRatingData[$month] = 0;
+        }
+
+        // Fill in actual rating data
+        foreach ($monthlyAvgRatings as $data) {
+            $monthlyAvgRatingData[$month] = floatval($data->avg_rating);
+        }
+
+        // Get review statistics
+        $reviewStats = [
+            'total_reviews' => Review::whereHas('order', function ($query) use ($restaurantId) {
+                $query->where('restaurant_id', $restaurantId);
+            })->count(),
+
+            'avg_rating' => Review::whereHas('order', function ($query) use ($restaurantId) {
+                $query->where('restaurant_id', $restaurantId);
+            })->avg('restaurant_rating'),
+
+            'positive_reviews' => Review::whereHas('order', function ($query) use ($restaurantId) {
+                $query->where('restaurant_id', $restaurantId);
+            })->where('restaurant_rating', '>=', 4)->count(),
+
+            'reviews_this_month' => Review::whereHas('order', function ($query) use ($restaurantId) {
+                $query->where('restaurant_id', $restaurantId);
+            })->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+        ];
+
+        return [
+            'monthly_reviews' => $monthlyReviewCounts,
+            'monthly_avg_ratings' => $monthlyAvgRatingData,
+            'stats' => $reviewStats
+        ];
     }
 }

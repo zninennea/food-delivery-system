@@ -40,12 +40,12 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'profile_picture' => 'nullable|image|max:2048',
+            'profile_picture' => 'nullable|image|max:20000',
             'restaurant_name' => 'required|string|max:255',
             'address' => 'required|string|max:500',
             'restaurant_phone' => 'required|string|max:20',
             'facebook_url' => 'nullable|url|max:255',
-            'background_image' => 'nullable|image|max:5120'
+            'background_image' => 'nullable|image|max:20000'
         ]);
 
         try {

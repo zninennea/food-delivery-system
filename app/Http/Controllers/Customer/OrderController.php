@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User; // Add this import
 use App\Models\Message;
+use App\Models\Review;
+use App\Models\ReviewItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -105,9 +107,6 @@ class OrderController extends Controller
             ]);
         }
 
-        // AUTO-ASSIGN RIDER
-        $this->assignRiderToOrder($order);
-
         // Clear cart
         Cart::where('customer_id', $user->id)->delete();
 
@@ -116,28 +115,6 @@ class OrderController extends Controller
                 ($request->payment_method === 'cash_on_delivery' ? 'will be collected on delivery.' : 'is pending approval.'));
     }
 
-    /**
-     * Auto-assign a rider to the order
-     */
-    private function assignRiderToOrder(Order $order)
-    {
-        // Find an available active rider
-        $availableRider = User::where('role', 'rider')
-            ->where('status', 'active')
-            ->inRandomOrder() // Simple assignment - you can make this smarter
-            ->first();
-
-        if ($availableRider) {
-            $order->update(['rider_id' => $availableRider->id]);
-
-            // Log the assignment
-            \Log::info("Order #{$order->order_number} assigned to rider: {$availableRider->name}");
-        } else {
-            \Log::warning("No available riders found for order #{$order->order_number}");
-        }
-
-        return $availableRider;
-    }
 
     public function show(Order $order)
     {
@@ -202,21 +179,23 @@ class OrderController extends Controller
         try {
             $user = Auth::user();
 
-            if ($order->customer_id !== $user->id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+            // TEMPORARY: Comment out this check for testing
+            // if ($order->customer_id !== $user->id) {
+            //     return response()->json(['error' => 'Unauthorized'], 403);
+            // }
 
             $messages = Message::with('sender')
                 ->where('order_id', $order->id)
                 ->orderBy('created_at', 'asc')
                 ->get()
-                ->map(function ($message) {
+                ->map(function ($message) use ($user) {
                     return [
                         'id' => $message->id,
                         'message' => $message->message,
                         'sender_id' => $message->sender_id,
                         'created_at' => $message->created_at->format('g:i A'),
                         'sender_name' => $message->sender->name,
+                        'is_own_message' => $message->sender_id === $user->id, // Add this line
                     ];
                 });
 

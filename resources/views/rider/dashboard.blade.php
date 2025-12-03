@@ -10,6 +10,7 @@
 </head>
 
 <body class="bg-gray-100">
+    <div data-user-role="{{ Auth::user()->role }}" style="display: none;"></div>
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
@@ -167,10 +168,11 @@
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                                    @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
-                                                                                    @elseif($order->status == 'ready') bg-blue-100 text-blue-800
-                                                                                    @else bg-green-100 text-green-800 @endif">
+                                        <span
+                                            class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                                                                            @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
+                                                                                                            @elseif($order->status == 'ready') bg-blue-100 text-blue-800
+                                                                                                            @else bg-green-100 text-green-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </div>
@@ -178,13 +180,12 @@
                                 <div class="flex flex-col space-y-2 ml-4">
                                     <a href="{{ route('rider.orders.show', $order) }}"
                                         class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm text-center">
-                                        <i class="fas fa-eye mr-1"></i>View Details
+                                        <i class="fas fa-eye mr-1"></i>Details
                                     </a>
 
                                     @if($order->status == 'ready')
                                         <form action="{{ route('rider.orders.update-status', $order) }}" method="POST">
                                             @csrf
-                                            @method('PUT')
                                             <input type="hidden" name="status" value="on_the_way">
                                             <button type="submit"
                                                 class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm w-full">
@@ -196,7 +197,6 @@
                                     @if($order->status == 'on_the_way')
                                         <form action="{{ route('rider.orders.update-status', $order) }}" method="POST">
                                             @csrf
-                                            @method('PUT')
                                             <input type="hidden" name="status" value="delivered">
                                             <button type="submit"
                                                 class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 text-sm w-full"
@@ -205,6 +205,7 @@
                                             </button>
                                         </form>
                                     @endif
+
                                 </div>
                             </div>
                         </div>

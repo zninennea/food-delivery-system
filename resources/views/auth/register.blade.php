@@ -15,6 +15,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
+
                     <!-- NaNi Logo -->
                     <div class="flex items-center">
                         <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
@@ -28,7 +29,8 @@
                     <a href="/" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-home mr-1"></i>Home
                     </a>
-                    <a href="/login" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="/login"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </a>
                     <a href="/register" class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
@@ -66,11 +68,40 @@
                             placeholder="your@email.com">
                     </div>
 
+                    <!-- In the register form, update the password section -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                         <input id="password" name="password" type="password" required
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="••••••••">
+                            placeholder="••••••••" oninput="validatePassword(this.value)">
+                        <div class="password-requirements bg-gray-50 p-3 rounded-md mt-2">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Password must contain:</p>
+                            <div class="space-y-1">
+                                <div class="requirement invalid" id="req-length">
+                                    <i class="fas fa-circle"></i>
+                                    <span>At least 8 characters</span>
+                                </div>
+                                <div class="requirement invalid" id="req-uppercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One uppercase letter (A-Z)</span>
+                                </div>
+                                <div class="requirement invalid" id="req-lowercase">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One lowercase letter (a-z)</span>
+                                </div>
+                                <div class="requirement invalid" id="req-number">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One number (0-9)</span>
+                                </div>
+                                <div class="requirement invalid" id="req-special">
+                                    <i class="fas fa-circle"></i>
+                                    <span>One special character (@$!%*#?&)</span>
+                                </div>
+                            </div>
+                        </div>
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
@@ -101,5 +132,67 @@
         </div>
     </div>
 </body>
+<script>
+    function validatePassword(password) {
+        const requirements = {
+            length: document.getElementById('req-length'),
+            uppercase: document.getElementById('req-uppercase'),
+            lowercase: document.getElementById('req-lowercase'),
+            number: document.getElementById('req-number'),
+            special: document.getElementById('req-special')
+        };
+
+        // Update requirements
+        if (password.length >= 8) {
+            requirements.length.classList.remove('invalid');
+            requirements.length.classList.add('valid');
+            requirements.length.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            requirements.length.classList.remove('valid');
+            requirements.length.classList.add('invalid');
+            requirements.length.querySelector('i').className = 'fas fa-circle';
+        }
+
+        if (/[A-Z]/.test(password)) {
+            requirements.uppercase.classList.remove('invalid');
+            requirements.uppercase.classList.add('valid');
+            requirements.uppercase.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            requirements.uppercase.classList.remove('valid');
+            requirements.uppercase.classList.add('invalid');
+            requirements.uppercase.querySelector('i').className = 'fas fa-circle';
+        }
+
+        if (/[a-z]/.test(password)) {
+            requirements.lowercase.classList.remove('invalid');
+            requirements.lowercase.classList.add('valid');
+            requirements.lowercase.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            requirements.lowercase.classList.remove('valid');
+            requirements.lowercase.classList.add('invalid');
+            requirements.lowercase.querySelector('i').className = 'fas fa-circle';
+        }
+
+        if (/[0-9]/.test(password)) {
+            requirements.number.classList.remove('invalid');
+            requirements.number.classList.add('valid');
+            requirements.number.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            requirements.number.classList.remove('valid');
+            requirements.number.classList.add('invalid');
+            requirements.number.querySelector('i').className = 'fas fa-circle';
+        }
+
+        if (/[@$!%*#?&]/.test(password)) {
+            requirements.special.classList.remove('invalid');
+            requirements.special.classList.add('valid');
+            requirements.special.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            requirements.special.classList.remove('valid');
+            requirements.special.classList.add('invalid');
+            requirements.special.querySelector('i').className = 'fas fa-circle';
+        }
+    }
+</script>
 
 </html>

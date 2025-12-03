@@ -76,7 +76,7 @@
             <button
                 class="category-filter px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium whitespace-nowrap"
                 data-category="all">
-                        All Items
+                All Items
             </button>
             @foreach($menuItemsByCategory->keys() as $category)
                 <button
@@ -97,7 +97,7 @@
                         <div class="bg-white rounded-lg shadow hover:shadow-md transition duration-200 menu-item">
                             @if($item->image)
                                 <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="w-full h-48
-                                object-cover rounded-t-lg">
+                                                                        object-cover rounded-t-lg">
                             @else
                                 <div class="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
                                     <i class="fas fa-utensils text-gray-400 text-2xl"></i>
@@ -106,22 +106,22 @@
                             <div class="p-4">
                                 <h3 class="text-lg font-semibold text-gray-900">{{ $item->name }}</h3>
                                 <p class=" text-gray-600 text-sm mt-1">{{ $item->description }}</p>
-                                    <div class="flex justify-between items-center mt-3">
-                                        <span class="text-lg font-bold text-orange-600">₱{{ number_format($item->price, 2) }}</span>
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('customer.menu.item', $item) }}"
-                                                class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600 transition duration-200">
-                                                Details
-                                            </a>
-                                                        <button
-                                                class="add-to-cart-btn bg-orange-500 text-white px-3 py-1 rounded-md text-sm hover:bg-orange-600 transition duration-200"
-                                                data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}"            
-                                                data-item-price="{{ $item->price }}">
-                                                Add to Cart
-                                            </button>
-                                        </div>
-
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-lg font-bold text-orange-600">₱{{ number_format($item->price, 2) }}</span>
+                                    <div class="flex space-x-2">
+                                        <a href="{{ route('customer.menu-item', $item) }}"
+                                            class="bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600 transition duration-200">
+                                            Details
+                                        </a>
+                                        <button
+                                            class="add-to-cart-btn bg-orange-500 text-white px-3 py-1 rounded-md text-sm hover:bg-orange-600 transition duration-200"
+                                            data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}"
+                                            data-item-price="{{ $item->price }}">
+                                            Add to Cart
+                                        </button>
                                     </div>
+
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -251,33 +251,107 @@
             modal.classList.add('hidden');
         });
 
-        // Add to Cart form submission
+        // Add to Cart form submission - FIXED VERSION
         document.getElementById('addToCartForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
 
-            fetch(`/customer/cart/${modalItemId.value}`, {
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+            // Use the correct route with menuItem ID
+            fetch(`/customer/cart/add/${modalItemId.value}`, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         modal.classList.add('hidden');
-                        alert('Item added to cart!');
-                        // You could update the cart count here
-                        window.location.reload();
+
+                        // Show success notification
+                        const notification = document.createElement('div');
+                        notification.className = 'fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                        notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${data.message || 'Item added to cart!'}</span>
+                </div>
+            `;
+                        document.body.appendChild(notification);
+
+                        // Update cart count
+                        updateCartCount(data.cart_count);
+
+                        // Clear the form
+                        document.getElementById('special_instructions').value = '';
+                        quantityInput.value = 1;
+
+                        // Remove notification after 3 seconds
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+
+                    } else {
+                        throw new Error(data.message || 'Failed to add item to cart');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error adding item to cart. Please try again.');
+
+                    // Show error notification
+                    const errorNotification = document.createElement('div');
+                    errorNotification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                    errorNotification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>Error: ${error.message}</span>
+            </div>
+        `;
+                    document.body.appendChild(errorNotification);
+
+                    setTimeout(() => {
+                        errorNotification.remove();
+                    }, 3000);
+                })
+                .finally(() => {
+                    // Restore button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
                 });
         });
+
+        // Function to update cart count
+        function updateCartCount(count) {
+            const cartLinks = document.querySelectorAll('a[href*="cart"]');
+            cartLinks.forEach(link => {
+                const text = link.textContent;
+                const newText = text.replace(/\(\d+\)/, `(${count})`);
+                link.textContent = newText;
+            });
+
+            // Update the quick cart summary
+            const quickCart = document.querySelector('.fixed.bottom-4');
+            if (quickCart) {
+                const countSpan = quickCart.querySelector('span');
+                if (countSpan) {
+                    countSpan.textContent = `${count} items`;
+                }
+            }
+        }
 
         // Close modal when clicking outside
         modal.addEventListener('click', function (e) {

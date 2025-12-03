@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-100">
-    <!-- Navigation -->
     <nav class="bg-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
@@ -20,18 +21,18 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('customer.dashboard') }}" 
-                       class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('customer.dashboard') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-home mr-1"></i>Home
                     </a>
-                    <a href="{{ route('customer.orders.index') }}" 
-                       class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="{{ route('customer.orders.index') }}"
+                        class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-list mr-1"></i>My Orders
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" 
-                                class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <button type="submit"
+                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
                         </button>
                     </form>
@@ -68,6 +69,9 @@
                                     Status
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Review
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -90,22 +94,56 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">₱{{ number_format($order->total_amount, 2) }}</div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            ₱{{ number_format($order->total_amount, 2) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                            @elseif($order->status == 'ready') bg-green-100 text-green-800
-                                            @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
-                                            @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
-                                            @else bg-red-100 text-red-800 @endif">
+                                                                                @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                                @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                                @elseif($order->status == 'ready') bg-green-100 text-green-800
+                                                                                @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
+                                                                                @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
+                                                                                @else bg-red-100 text-red-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="{{ route('customer.track-order', $order) }}" 
-                                           class="text-blue-600 hover:text-blue-900">Track Order</a>
+                                        @if($order->status == 'delivered')
+                                            @php
+                                                $hasReviewed = \App\Models\Review::where('order_id', $order->id)->exists();
+                                            @endphp
+
+                                            @if(!$hasReviewed)
+                                                <a href="{{ route('customer.reviews.create', $order) }}"
+                                                    class="text-green-600 hover:text-green-900 font-medium">
+                                                    <i class="fas fa-star mr-1"></i>Leave Review
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">
+                                                    <i class="fas fa-check-circle mr-1"></i>Reviewed
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        @if(in_array($order->status, ['pending', 'preparing', 'ready', 'on_the_way']))
+                                            <a href="{{ route('customer.track-order', $order) }}"
+                                                class="text-blue-600 hover:text-blue-900">Track Order</a>
+                                        @else
+                                            <span class="text-gray-400 cursor-not-allowed">
+                                                @if($order->status == 'delivered')
+                                                    Order Delivered
+                                                @elseif($order->status == 'cancelled')
+                                                    Order Cancelled
+                                                @else
+                                                    Order Completed
+                                                @endif
+                                            </span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -113,7 +151,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 @if($orders->hasPages())
                     <div class="px-6 py-4 border-t border-gray-200">
                         {{ $orders->links() }}
@@ -124,8 +161,8 @@
                 <div class="p-6 text-center">
                     <i class="fas fa-shopping-bag text-gray-400 text-4xl mb-3"></i>
                     <p class="text-gray-500">You haven't placed any orders yet.</p>
-                    <a href="{{ route('customer.menu') }}" 
-                       class="mt-4 inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
+                    <a href="{{ route('customer.menu') }}"
+                        class="mt-4 inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
                         <i class="fas fa-utensils mr-2"></i>Browse Menu
                     </a>
                 </div>
@@ -133,4 +170,5 @@
         </div>
     </div>
 </body>
+
 </html>

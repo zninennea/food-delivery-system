@@ -16,9 +16,9 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $restaurant = Restaurant::first(); // Assuming one restaurant for now
+        $restaurant = Restaurant::first();
 
-        // Featured items - simple heuristic
+        // Featured items
         $featuredItems = MenuItem::limit(6)->get();
 
         // All menu items grouped by category
@@ -34,14 +34,18 @@ class DashboardController extends Controller
             ->limit(3)
             ->get();
 
-        // Recent reviews
-        $recentReviews = Review::with(['customer', 'menuItem'])
+        // Get recent reviews from the database
+        $recentReviews = Review::with(['customer', 'order.items.menuItem'])
             ->whereHas('order', function ($query) use ($user) {
-                $query->where('customer_id', '!=', $user->id); // Show other customers' reviews
+                $query->where('customer_id', $user->id);
             })
             ->latest()
             ->limit(5)
             ->get();
+
+        // Calculate average restaurant rating for display
+        $averageRating = Review::avg('restaurant_rating');
+        $totalReviews = Review::count();
 
         // Cart count
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
@@ -52,7 +56,10 @@ class DashboardController extends Controller
             'recentOrders',
             'recentReviews',
             'cartCount',
-            'restaurant'
+            'restaurant',
+            'averageRating',
+            'totalReviews'
+
         ));
     }
 

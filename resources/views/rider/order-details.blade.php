@@ -27,6 +27,7 @@
             </div>
         </div>
     </nav>
+    @include('components.chat-popup')
 
     <!-- Success/Error Messages -->
     @if(session('success'))
@@ -170,7 +171,6 @@
                     @if($order->status == 'ready')
                         <form action="{{ route('rider.orders.update-status', $order) }}" method="POST">
                             @csrf
-                            @method('PUT')
                             <input type="hidden" name="status" value="on_the_way">
                             <button type="submit"
                                 class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-medium">
@@ -182,7 +182,6 @@
                     @if($order->status == 'on_the_way')
                         <form action="{{ route('rider.orders.update-status', $order) }}" method="POST">
                             @csrf
-                            @method('PUT')
                             <input type="hidden" name="status" value="delivered">
                             <button type="submit"
                                 class="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 font-medium"
@@ -206,9 +205,9 @@
     </div>
     <!-- Chat with Customer Button -->
     <div class="bg-gray-50 rounded-lg p-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Chat with Customer</h3>
-        <button id="open-chat-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-            <i class="fas fa-comments mr-2"></i>Chat with Customer
+        <button onclick="openChat({{ $order->id }}, '{{ $order->order_number }}', '{{ $order->customer->name }}')"
+            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+            <i class="fas fa-comments mr-2"></i>Chat with {{ $order->customer->name }}
         </button>
     </div>
 
@@ -223,7 +222,7 @@
                 <button id="close-chat-modal" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
-            </div>
+            </div>  
 
             <!-- Chat Messages -->
             <div class="p-4">

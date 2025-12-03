@@ -17,7 +17,7 @@ class DashboardController extends Controller
         }
 
         $rider = Auth::user();
-        
+
         // Get orders assigned to this rider
         $assignedOrders = Order::with(['customer', 'restaurant', 'items.menuItem'])
             ->where('rider_id', $rider->id)
@@ -41,7 +41,7 @@ class DashboardController extends Controller
 
         $totalEarnings = Order::where('rider_id', $rider->id)
             ->where('status', 'delivered')
-            ->count() * 50;
+            ->count() * 50; // Assuming ₱50 per delivery
 
         $activeDeliveries = $assignedOrders->count();
 
@@ -61,7 +61,6 @@ class DashboardController extends Controller
         }
 
         $rider = Auth::user();
-
         // Verify the order is assigned to this rider
         if ($order->rider_id !== $rider->id) {
             abort(403, 'Unauthorized access to this order.');
@@ -79,7 +78,6 @@ class DashboardController extends Controller
         }
 
         $rider = Auth::user();
-
         // Verify the order is assigned to this rider
         if ($order->rider_id !== $rider->id) {
             return redirect()->back()->with('error', 'Unauthorized access to this order.');
@@ -109,7 +107,6 @@ class DashboardController extends Controller
         }
 
         $rider = Auth::user();
-
         $orders = Order::with(['customer', 'restaurant'])
             ->where('rider_id', $rider->id)
             ->where('status', 'delivered')

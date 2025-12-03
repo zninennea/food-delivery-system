@@ -8,31 +8,19 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('reviews', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->constrained('users');
-            $table->foreignId('order_id')->constrained();
-            $table->foreignId('rider_id')->nullable()->constrained('users');
-            $table->integer('restaurant_rating'); // Overall restaurant rating
-            $table->integer('rider_rating')->nullable(); // Rider rating
-            $table->text('comment')->nullable();
-            $table->timestamps();
-        });
-
-        // Review items for individual menu items
-        Schema::create('review_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('review_id')->constrained();
-            $table->foreignId('menu_item_id')->constrained();
-            $table->integer('rating'); // 1-5 stars
-            $table->text('comment')->nullable();
-            $table->timestamps();
+        Schema::table('reviews', function (Blueprint $table) {
+            // Make restaurant_rating nullable and add default value
+            $table->integer('restaurant_rating')->default(5)->nullable()->change();
+            // Also make rider_rating nullable
+            $table->integer('rider_rating')->nullable()->change();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('review_items');
-        Schema::dropIfExists('reviews');
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->integer('restaurant_rating')->nullable(false)->change();
+            $table->integer('rider_rating')->nullable(false)->change();
+        });
     }
 };

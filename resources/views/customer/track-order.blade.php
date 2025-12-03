@@ -8,6 +8,62 @@
     <title>Track Order #{{ $order->order_number }} - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* License modal animations */
+        #license-modal {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #license-image {
+            transition: transform 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        #fullscreen-modal {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Custom scrollbar for modal */
+        #license-modal .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        #license-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #license-modal .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f7fafc;
+            border-radius: 4px;
+        }
+
+        #license-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        /* Safety checklist styling */
+        #license-content input[type="checkbox"]:checked+label {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        #license-content input[type="checkbox"]:checked {
+            background-color: #059669;
+            border-color: #059669;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -42,6 +98,17 @@
             </div>
         </div>
     </nav>
+
+    @if($order->rider_id)
+        @include('components.chat-popup', ['order' => $order])
+    @else
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+            <p class="text-yellow-700">
+                <i class="fas fa-info-circle mr-2"></i>
+                Chat will be available once a rider is assigned to your order.
+            </p>
+        </div>
+    @endif
 
     <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg">
@@ -110,66 +177,128 @@
                     <!-- Order Actions -->
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Order Actions</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Modify Order Button -->
-                            <button id="modify-order-btn"
-                                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                {{ !$order->canBeModified() ? 'disabled' : '' }}>
-                                <i class="fas fa-edit mr-2"></i>Modify Order
-                            </button>
+                        <div class="grid grid-cols-1 gap-4">
+                            <!-- Cancel Order Button (only if order can be cancelled) -->
+                            @if($order->canBeCancelled())
+                                <button id="cancel-order-btn"
+                                    class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                                    <i class="fas fa-times mr-2"></i>Cancel Order
+                                </button>
+                            @endif
 
-                            <!-- Cancel Order Button -->
-                            <button id="cancel-order-btn"
-                                class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                {{ !$order->canBeCancelled() ? 'disabled' : '' }}>
-                                <i class="fas fa-times mr-2"></i>Cancel Order
-                            </button>
-
-                            <!-- Confirm Delivery / Write Review Button -->
+                            <!-- Review Button (only if order is delivered and not reviewed) -->
                             @if($order->status == 'delivered')
-                                @if($order->review)
-                                    <button class="bg-green-600 text-white px-4 py-2 rounded-md" disabled>
-                                        <i class="fas fa-check mr-2"></i>Review Submitted
-                                    </button>
+                                @php
+                                    $hasReviewed = \App\Models\Review::where('order_id', $order->id)->exists();
+                                @endphp
+
+                                @if(!$hasReviewed)
+                                    <a href="{{ route('customer.reviews.create', $order) }}"
+                                        class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-center">
+                                        <i class="fas fa-star mr-2"></i>Review This Order
+                                    </a>
                                 @else
-                                    <button id="write-review-btn"
-                                        class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                        <i class="fas fa-star mr-2"></i>Write Review
+                                    <button class="bg-gray-400 text-white px-4 py-2 rounded-md cursor-not-allowed" disabled>
+                                        <i class="fas fa-check mr-2"></i>Already Reviewed
                                     </button>
                                 @endif
-                            @elseif($order->status == 'on_the_way')
-                                <button id="confirm-delivery-btn"
-                                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                    <i class="fas fa-check mr-2"></i>Confirm Delivery
-                                </button>
+                            @endif
+
+                            <!-- Modification Button (only if order can be modified) -->
+                            @if($order->canBeModified())
+                                <form action="{{ route('customer.orders.request-modification', $order) }}" method="POST"
+                                    class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700">
+                                        <i class="fas fa-edit mr-2"></i>Request Modification
+                                    </button>
+                                </form>
                             @endif
                         </div>
                     </div>
 
-                    <!-- Rider Information -->
+                    <!-- Rider Information - ONLY SHOW WHEN RIDER IS ASSIGNED -->
                     @if($order->rider)
                         <div class="bg-gray-50 rounded-lg p-4">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Rider Information</h3>
                             <div class="flex items-center space-x-4">
                                 @if($order->rider->profile_picture)
                                     <img src="{{ asset('storage/' . $order->rider->profile_picture) }}"
-                                        alt="{{ $order->rider->name }}" class="h-12 w-12 rounded-full object-cover">
+                                        alt="{{ $order->rider->name }}" class="h-16 w-16 rounded-full object-cover">
                                 @else
-                                    <div class="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-user text-gray-400"></i>
+                                    <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-400 text-2xl"></i>
                                     </div>
                                 @endif
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $order->rider->name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $order->rider->vehicle_type }} •
-                                        {{ $order->rider->vehicle_plate }}
-                                    </p>
-                                    <p class="text-sm text-gray-500">License: {{ $order->rider->drivers_license }}</p>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-lg">{{ $order->rider->name }}</p>
+                                            <p class="text-sm text-gray-500">
+                                                <i class="fas fa-motorcycle mr-1"></i>
+                                                {{ $order->rider->vehicle_type }} • {{ $order->rider->vehicle_plate }}
+                                            </p>
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                <i class="fas fa-phone mr-1"></i>
+                                                {{ $order->rider->phone ?? 'No phone provided' }}
+                                            </p>
+                                            <div class="mt-2">
+                                                @if($order->rider->drivers_license)
+                                                    <button type="button"
+                                                        onclick="viewRiderLicense('{{ asset('storage/' . $order->rider->drivers_license) }}', '{{ $order->rider->name }}')"
+                                                        class="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm transition-colors">
+                                                        <i class="fas fa-id-card mr-2"></i> View Rider ID
+                                                    </button>
+                                                @else
+                                                    <span class="text-sm text-gray-500 italic">
+                                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                                        Driver's license not available
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                                                                                                            @if($order->rider->status == 'active') bg-green-100 text-green-800
+                                                                                                                            @else bg-red-100 text-red-800 @endif">
+                                                <i class="fas fa-circle text-xs mr-1"></i>
+                                                {{ ucfirst($order->rider->status) }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Safety Information -->
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-shield-alt text-blue-500 mt-1 mr-2"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-blue-800">Safety Information</p>
+                                                <p class="text-xs text-blue-600 mt-1">
+                                                    For your safety, verify the rider's identity matches the ID shown above.
+                                                    Always check the license plate matches
+                                                    {{ $order->rider->vehicle_plate }}.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    @else
+                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">Rider Assignment</h3>
+                            <p class="text-yellow-700">
+                                <i class="fas fa-clock mr-2"></i>
+                                Waiting for restaurant to assign a rider to your order.
+                            </p>
+                            <p class="text-sm text-yellow-600 mt-1">
+                                A rider will be assigned shortly and you'll be able to track your delivery.
+                            </p>
+                        </div>
                     @endif
-                </div>
+                </div> <!-- Close left column (lg:col-span-2) -->
 
                 <!-- Right Column - Order Summary & Chat -->
                 <div class="space-y-6">
@@ -205,76 +334,64 @@
                         </div>
                     </div>
 
-                    <!-- Chat with Rider -->
+                    <!-- Chat with Rider - ONLY SHOW WHEN RIDER IS ASSIGNED -->
                     @if($order->rider)
                         <div class="bg-gray-50 rounded-lg p-4">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Chat with Rider</h3>
-                            <button id="open-chat-btn"
-                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                                <i class="fas fa-comments mr-2"></i>Chat with Rider
+                            <button onclick="openChat({{ $order->id }}, '{{ $order->order_number }}')"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full">
+                                <i class="fas fa-comments mr-2"></i>Chat with Rider {{ $order->rider->name }}
+                            </button>
+                        </div>
+                    @else
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Chat</h3>
+                            <button class="bg-gray-400 text-white px-4 py-2 rounded-md cursor-not-allowed w-full" disabled>
+                                <i class="fas fa-comments mr-2"></i>Chat will be available when rider is assigned
                             </button>
                         </div>
                     @endif
-                    <!-- Chat Popup Modal -->
-                    <div id="chat-modal"
-                        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
-                        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-                            <!-- Modal Header -->
-                            <div class="flex justify-between items-center px-6 py-4 border-b">
-                                <h3 class="text-lg font-medium text-gray-900">
-                                    <i class="fas fa-comments mr-2"></i>Chat with Rider
-                                </h3>
-                                <button id="close-chat-modal" class="text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-times text-xl"></i>
-                                </button>
-                            </div>
+                </div> <!-- Close right column -->
+            </div> <!-- Close grid -->
+        </div> <!-- Close main content -->
+    </div> <!-- Close container -->
 
-                            <!-- Chat Messages -->
-                            <div class="p-4">
-                                <div id="chat-messages" class="h-64 overflow-y-auto mb-4 space-y-3">
-                                    <!-- Messages will be loaded here -->
-                                </div>
+    <!-- Chat Popup Modal -->
+    <div id="chat-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900">
+                    <i class="fas fa-comments mr-2"></i>Chat with Rider
+                </h3>
+                <button id="close-chat-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
 
-                                <!-- Message Input -->
-                                <div class="flex space-x-2">
-                                    <input type="text" id="chat-input" placeholder="Type your message..."
-                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    <button id="send-chat-btn"
-                                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Chat Messages -->
+            <div class="p-4">
+                <div id="chat-messages" class="h-64 overflow-y-auto mb-4 space-y-3">
+                    <!-- Messages will be loaded here -->
+                </div>
 
+                <!-- Message Input -->
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Type your message..."
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <button id="send-chat-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modify Order Modal -->
-    <div id="modify-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Modify Your Order</h3>
-            <p class="text-gray-600 mb-4">You can add more items to your order. The restaurant will review your changes.
-            </p>
-
-            <div class="mb-4">
-                <a href="{{ route('customer.menu') }}?modify_order={{ $order->id }}"
-                    class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 inline-block">
-                    <i class="fas fa-plus mr-2"></i>Browse Menu to Add Items
-                </a>
-            </div>
-
-            <div class="flex justify-end space-x-3">
-                <button type="button" id="close-modify-modal"
-                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                    Cancel
-                </button>
-            </div>
-        </div>
     </div>
+    </div>
+    </div>
+    </div>
+
 
     <!-- Cancel Order Modal -->
     <div id="cancel-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
@@ -329,6 +446,7 @@
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const status = '{{ $order->status }}';
+            const hasRider = {{ $order->rider ? 'true' : 'false' }};
 
             let progress = 0;
             let text = '';
@@ -344,7 +462,11 @@
                     break;
                 case 'ready':
                     progress = 70;
-                    text = 'Order is ready - Rider is on the way';
+                    if (hasRider) {
+                        text = 'Order is ready - Rider is on the way';
+                    } else {
+                        text = 'Order is ready - Waiting for rider assignment';
+                    }
                     break;
                 case 'on_the_way':
                     progress = 90;
@@ -364,16 +486,8 @@
         }
 
         // Modal handlers
-        document.getElementById('modify-order-btn').addEventListener('click', function () {
-            document.getElementById('modify-modal').classList.remove('hidden');
-        });
-
         document.getElementById('cancel-order-btn').addEventListener('click', function () {
             document.getElementById('cancel-modal').classList.remove('hidden');
-        });
-
-        document.getElementById('close-modify-modal').addEventListener('click', function () {
-            document.getElementById('modify-modal').classList.add('hidden');
         });
 
         document.getElementById('close-cancel-modal').addEventListener('click', function () {
@@ -469,64 +583,52 @@
                 }
             }
 
+            // Replace your current loadMessages function with this:
             function loadMessages() {
                 const url = window.location.pathname.includes('customer')
                     ? `/customer/orders/${orderId}/messages`
                     : `/rider/orders/${orderId}/messages`;
 
-                console.log('Loading messages from:', url);
+                console.log('Attempting to load messages from:', url);
 
                 fetch(url, {
                     headers: {
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 })
                     .then(response => {
-                        console.log('Load messages response status:', response.status);
+                        console.log('Response status:', response.status);
+                        if (response.status === 500) {
+                            throw new Error('Server error - check Laravel logs');
+                        }
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         return response.json();
                     })
-                    .then(messages => {
-                        console.log('Messages loaded:', messages);
-                        chatMessages.innerHTML = '';
+                    .then(data => {
+                        console.log('Response data:', data);
 
-                        if (messages.length === 0) {
-                            const noMessages = document.createElement('div');
-                            noMessages.className = 'text-center text-gray-500 py-4';
-                            noMessages.textContent = 'No messages yet. Start the conversation!';
-                            chatMessages.appendChild(noMessages);
-                        } else {
-                            messages.forEach(message => {
-                                const messageDiv = document.createElement('div');
-                                messageDiv.className = `flex ${message.sender_id === userId ? 'justify-end' : 'justify-start'} mb-2`;
-
-                                const messageBubble = document.createElement('div');
-                                messageBubble.className = `max-w-xs px-4 py-2 rounded-lg ${message.sender_id === userId
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 text-gray-800'
-                                    }`;
-
-                                const messageText = document.createElement('div');
-                                messageText.textContent = message.message;
-
-                                const messageTime = document.createElement('div');
-                                messageTime.className = 'text-xs mt-1 opacity-75';
-                                messageTime.textContent = message.created_at;
-
-                                messageBubble.appendChild(messageText);
-                                messageBubble.appendChild(messageTime);
-                                messageDiv.appendChild(messageBubble);
-                                chatMessages.appendChild(messageDiv);
-                            });
+                        if (data.error) {
+                            throw new Error(data.error);
                         }
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                        // Check if data is an array (messages) or has messages property
+                        const messages = Array.isArray(data) ? data : (data.messages || []);
+                        renderMessages(messages);
                     })
                     .catch(error => {
                         console.error('Error loading messages:', error);
-                        chatMessages.innerHTML = '<div class="text-center text-red-500 py-4">Error loading messages: ' + error.message + '</div>';
+                        const chatMessages = document.getElementById('chat-messages');
+                        chatMessages.innerHTML = `
+            <div class="text-center text-red-500 py-4">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Chat temporarily unavailable: ${error.message}
+                <br><small>Check browser console for details</small>
+            </div>
+        `;
                     });
             }
 
@@ -600,5 +702,526 @@
             });
         });
     </script>
+    <script>
+        // License Modal Functions
+        let currentLicenseUrl = '';
+        let zoomLevel = 1;
+
+        function viewRiderLicense(licenseUrl, riderName) {
+            console.log('Opening license modal for:', licenseUrl, riderName);
+
+            currentLicenseUrl = licenseUrl;
+            const modal = document.getElementById('license-modal');
+            const title = document.getElementById('license-rider-name');
+            const checkName = document.getElementById('check-rider-name');
+
+            // Set rider name
+            title.textContent = riderName;
+            checkName.textContent = riderName;
+
+            // Show modal
+            modal.classList.remove('hidden');
+
+            // Load license image
+            loadLicenseImage(licenseUrl);
+
+            // Reset zoom
+            zoomLevel = 1;
+            updateImageZoom();
+
+            // Reset checkboxes
+            document.querySelectorAll('#license-content input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.disabled = false;
+            });
+
+            // Show/hide verify button based on checkboxes
+            updateVerifyButton();
+        }
+
+        function loadLicenseImage(url) {
+            const loading = document.getElementById('license-loading');
+            const error = document.getElementById('license-error');
+            const content = document.getElementById('license-content');
+            const image = document.getElementById('license-image');
+            const fullscreenImage = document.getElementById('fullscreen-image');
+
+            // Show loading, hide others
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            content.classList.add('hidden');
+
+            // Preload image
+            const img = new Image();
+            img.onload = function () {
+                console.log('License image loaded successfully');
+                image.src = url;
+                fullscreenImage.src = url;
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+
+                // Enable zoom controls
+                document.getElementById('zoom-in-btn').disabled = false;
+                document.getElementById('zoom-out-btn').disabled = false;
+                document.getElementById('fullscreen-btn').disabled = false;
+            };
+
+            img.onerror = function () {
+                console.error('Failed to load license image:', url);
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                document.getElementById('license-error-message').textContent =
+                    'Unable to load the driver\'s license. Please try again or contact support.';
+            };
+
+            img.src = url;
+        }
+
+        function retryLoadLicense() {
+            if (currentLicenseUrl) {
+                loadLicenseImage(currentLicenseUrl);
+            }
+        }
+
+        function updateImageZoom() {
+            const image = document.getElementById('license-image');
+            image.style.transform = `scale(${zoomLevel})`;
+            image.style.transformOrigin = 'center center';
+
+            // Update button states
+            document.getElementById('zoom-out-btn').disabled = zoomLevel <= 0.5;
+            document.getElementById('zoom-in-btn').disabled = zoomLevel >= 3;
+        }
+
+        function updateVerifyButton() {
+            // Check if already verified
+            if (window.orderSafetyVerified) {
+                console.log('Safety already verified, hiding checkboxes');
+                document.querySelectorAll('#license-content input[type="checkbox"]').forEach(cb => {
+                    cb.disabled = true;
+                    cb.checked = true;
+                });
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('#license-content input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            const verifyBtn = document.getElementById('verify-btn');
+
+            if (allChecked) {
+                verifyBtn.classList.remove('hidden');
+                verifyBtn.disabled = false;
+            } else {
+                verifyBtn.classList.add('hidden');
+            }
+        }
+
+        function verifySafety() {
+            if (!confirm('Are you sure you have verified all safety checks and the rider is legitimate?')) {
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verify-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verifying...';
+
+            // Send verification to server
+            fetch(`/customer/orders/${window.currentOrderId}/verify-safety`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    verified: true
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Safety verification completed! Thank you for helping keep our community safe.');
+                        window.orderSafetyVerified = true;
+
+                        // Disable all checkboxes
+                        document.querySelectorAll('#license-content input[type="checkbox"]').forEach(cb => {
+                            cb.disabled = true;
+                            cb.checked = true;
+                        });
+
+                        // Hide verify button
+                        verifyBtn.classList.add('hidden');
+
+                        // Show success message
+                        const safetyDiv = document.getElementById('safety-checklist');
+                        safetyDiv.innerHTML += `
+                <div class="mt-4 p-3 bg-green-100 rounded border border-green-200">
+                    <p class="text-sm text-green-800 flex items-start">
+                        <i class="fas fa-check-circle mr-2 mt-0.5"></i>
+                        <span>Safety verification completed successfully!</span>
+                    </p>
+                </div>
+            `;
+
+                        // Close modal after 2 seconds
+                        setTimeout(() => {
+                            document.getElementById('license-modal').classList.add('hidden');
+                        }, 2000);
+                    } else {
+                        alert('Verification failed: ' + (data.message || 'Please try again'));
+                        verifyBtn.disabled = false;
+                        verifyBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verified & Safe';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Network error. Please check your connection and try again.');
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verified & Safe';
+                });
+        }
+
+        // Update the viewRiderLicense function to set currentOrderId
+        function viewRiderLicense(licenseUrl, riderName) {
+            console.log('Opening license modal for:', licenseUrl, riderName);
+
+            window.currentOrderId = {{ $order->id }};
+            window.orderSafetyVerified = {{ $order->safety_verified ? 'true' : 'false' }};
+
+            currentLicenseUrl = licenseUrl;
+            const modal = document.getElementById('license-modal');
+            const title = document.getElementById('license-rider-name');
+            const checkName = document.getElementById('check-rider-name');
+
+            // Set rider name
+            title.textContent = riderName;
+            checkName.textContent = riderName;
+
+            // Show modal
+            modal.classList.remove('hidden');
+
+            // Load license image
+            loadLicenseImage(licenseUrl);
+
+            // Reset zoom
+            zoomLevel = 1;
+            updateImageZoom();
+
+            // If already verified, disable checkboxes
+            if (window.orderSafetyVerified) {
+                document.querySelectorAll('#license-content input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                    cb.disabled = true;
+                });
+                document.getElementById('verify-btn').classList.add('hidden');
+            } else {
+                // Reset checkboxes
+                document.querySelectorAll('#license-content input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                });
+                updateVerifyButton();
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // License modal close buttons
+            document.getElementById('close-license-modal').addEventListener('click', function () {
+                document.getElementById('license-modal').classList.add('hidden');
+            });
+
+            document.getElementById('close-license-btn').addEventListener('click', function () {
+                document.getElementById('license-modal').classList.add('hidden');
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('license-modal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+
+            // Download license button
+            document.getElementById('download-license-btn').addEventListener('click', function () {
+                if (currentLicenseUrl) {
+                    const link = document.createElement('a');
+                    link.href = currentLicenseUrl;
+                    link.download = 'rider-license.jpg';
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            });
+
+            // Zoom controls
+            document.getElementById('zoom-in-btn').addEventListener('click', function () {
+                if (zoomLevel < 3) {
+                    zoomLevel += 0.25;
+                    updateImageZoom();
+                }
+            });
+
+            document.getElementById('zoom-out-btn').addEventListener('click', function () {
+                if (zoomLevel > 0.5) {
+                    zoomLevel -= 0.25;
+                    updateImageZoom();
+                }
+            });
+
+            // Fullscreen
+            document.getElementById('fullscreen-btn').addEventListener('click', function () {
+                const fullscreenModal = document.getElementById('fullscreen-modal');
+                fullscreenModal.classList.remove('hidden');
+            });
+
+            // Close fullscreen
+            document.getElementById('close-fullscreen').addEventListener('click', function () {
+                document.getElementById('fullscreen-modal').classList.add('hidden');
+            });
+
+            // Close fullscreen on ESC
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    document.getElementById('fullscreen-modal').classList.add('hidden');
+                }
+            });
+
+            // Checkbox change listeners
+            document.querySelectorAll('#license-content input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateVerifyButton);
+            });
+
+            // Verify button
+            document.getElementById('verify-btn').addEventListener('click', verifySafety);
+        });
+
+        // Also add this to handle Escape key for license modal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const licenseModal = document.getElementById('license-modal');
+                if (!licenseModal.classList.contains('hidden')) {
+                    licenseModal.classList.add('hidden');
+                }
+            }
+        });
+        // Add this to your existing JavaScript section
+        document.addEventListener('DOMContentLoaded', function () {
+            // Review button handler
+            const reviewBtn = document.getElementById('review-order-btn');
+            if (reviewBtn) {
+                reviewBtn.addEventListener('click', function () {
+                    window.location.href = '/customer/reviews/{{ $order->id }}/create';
+                });
+            }
+
+            // Only show cancel modal if order can be cancelled
+            const cancelBtn = document.getElementById('cancel-order-btn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function () {
+                    if (this.disabled) return;
+
+                    // Check if order is still cancellable
+                    fetch('/api/orders/{{ $order->id }}/can-cancel')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.can_cancel) {
+                                document.getElementById('cancel-modal').classList.remove('hidden');
+                            } else {
+                                alert('This order can no longer be cancelled as preparation has started.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking cancellation:', error);
+                            document.getElementById('cancel-modal').classList.remove('hidden');
+                        });
+                });
+            }
+        });
+        // Make sure this function exists globally
+        window.openChat = function (orderId, orderNumber) {
+            console.log('Opening chat for order:', orderId, orderNumber);
+            // This function should be defined in your chat-popup.blade.php
+            if (window.chatPopup && window.chatPopup.open) {
+                window.chatPopup.open(orderId, orderNumber);
+            } else {
+                console.error('Chat system not initialized');
+                alert('Chat system is not available. Please refresh the page.');
+            }
+        };
+    </script>
+
+    <!-- Rider License Modal -->
+    <div id="license-modal"
+        class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b bg-blue-600 text-white">
+                <div>
+                    <h3 class="text-lg font-medium" id="license-modal-title">
+                        <i class="fas fa-id-card mr-2"></i>Rider Identification
+                    </h3>
+                    <p class="text-sm opacity-75" id="license-rider-name"></p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="download-license-btn" class="text-white hover:text-blue-200">
+                        <i class="fas fa-download text-xl"></i>
+                    </button>
+                    <button id="close-license-modal" class="text-white hover:text-gray-200">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- License Content -->
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <!-- Loading State -->
+                <div id="license-loading" class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+                    <p class="text-gray-600">Loading rider identification...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="license-error" class="text-center py-8 hidden">
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
+                    <p class="text-gray-900 font-medium">Unable to load identification</p>
+                    <p class="text-gray-600 mt-2" id="license-error-message"></p>
+                    <button onclick="retryLoadLicense()"
+                        class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-redo mr-2"></i>Retry
+                    </button>
+                </div>
+
+                <!-- Success State -->
+                <div id="license-content" class="hidden">
+                    <!-- License Image -->
+                    <div class="mb-6">
+                        <div class="flex justify-center mb-4">
+                            <div class="relative">
+                                <img id="license-image" src="" alt="Rider's Driver License"
+                                    class="max-w-full h-auto rounded-lg shadow-md border border-gray-300 max-h-[500px]">
+                                <div
+                                    class="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-camera mr-1"></i>Official ID
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Controls -->
+                        <div class="flex justify-center space-x-4 mt-4">
+                            <button id="zoom-in-btn"
+                                class="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300">
+                                <i class="fas fa-search-plus"></i> Zoom In
+                            </button>
+                            <button id="zoom-out-btn"
+                                class="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300">
+                                <i class="fas fa-search-minus"></i> Zoom Out
+                            </button>
+                            <button id="fullscreen-btn"
+                                class="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Safety Verification Checklist -->
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200" id="safety-checklist">
+                        <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                            Safety Verification Checklist
+                        </h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="check-face" class="mr-3 h-4 w-4 text-blue-600" {{ $order->safety_verified ? 'checked disabled' : '' }}>
+                                <label for="check-face" class="text-sm text-gray-700">
+                                    Rider's face matches ID photo
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="check-name" class="mr-3 h-4 w-4 text-blue-600" {{ $order->safety_verified ? 'checked disabled' : '' }}>
+                                <label for="check-name" class="text-sm text-gray-700">
+                                    Rider's name matches ID: <span id="check-rider-name" class="font-medium"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="check-vehicle" class="mr-3 h-4 w-4 text-blue-600" {{ $order->safety_verified ? 'checked disabled' : '' }}>
+                                <label for="check-vehicle" class="text-sm text-gray-700">
+                                    Vehicle matches: <span
+                                        class="font-medium">{{ $order->rider->vehicle_license ?? 'N/A' }}</span>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="check-expiry" class="mr-3 h-4 w-4 text-blue-600" {{ $order->safety_verified ? 'checked disabled' : '' }}>
+                                <label for="check-expiry" class="text-sm text-gray-700">
+                                    ID is not expired (check expiry date)
+                                </label>
+                            </div>
+                        </div>
+
+                        @if(!$order->safety_verified)
+                            <div class="mt-4 p-3 bg-blue-100 rounded border border-blue-200">
+                                <p class="text-sm text-blue-800 flex items-start">
+                                    <i class="fas fa-info-circle mr-2 mt-0.5"></i>
+                                    <span>For your safety, verify all items before accepting delivery.
+                                        <strong class="block mt-1">If anything seems suspicious, contact restaurant support
+                                            immediately:</strong>
+                                        <div class="mt-2">
+                                            <i class="fas fa-phone mr-1"></i>
+                                            {{ $order->restaurant->phone ?? '09194445566' }}
+                                            <br>
+                                            <i class="fas fa-store mr-1 mt-1"></i>
+                                            {{ $order->restaurant->name ?? 'NaNi Japanese Restaurant' }}
+                                        </div>
+                                    </span>
+                                </p>
+                            </div>
+                        @else
+                            <div class="mt-4 p-3 bg-green-100 rounded border border-green-200">
+                                <p class="text-sm text-green-800 flex items-start">
+                                    <i class="fas fa-check-circle mr-2 mt-0.5"></i>
+                                    <span>Safety verification completed on
+                                        {{ $order->safety_verified_at->format('M j, Y g:i A') }}</span>
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t bg-gray-50">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            For verification purposes only. Do not share this ID.
+                        </p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="verify-btn"
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 hidden">
+                            <i class="fas fa-check-circle mr-2"></i>Verified & Safe
+                        </button>
+                        <button id="close-license-btn"
+                            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreen-modal" class="fixed inset-0 bg-black hidden flex items-center justify-center z-[60]">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <button id="close-fullscreen" class="absolute top-4 right-4 text-white text-3xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="fullscreen-image" src="" class="max-w-full max-h-full object-contain">
+        </div>
+    </div>
+</body>
 
 </html>

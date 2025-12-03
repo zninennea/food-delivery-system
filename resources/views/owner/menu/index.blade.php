@@ -20,7 +20,7 @@
                         <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
                         <div>
                             <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
+                            <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
                         </div>
                     </div>
                 </div>
@@ -41,6 +41,10 @@
                     <a href="{{ route('owner.analytics.index') }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-star mr-1"></i>Reviews
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">

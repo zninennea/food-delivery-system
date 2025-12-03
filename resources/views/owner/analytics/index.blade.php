@@ -21,7 +21,7 @@
                         <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
                         <div>
                             <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
+                            <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
                         </div>
                     </div>
                 </div>
@@ -42,6 +42,10 @@
                     <a href="{{ route('owner.analytics.index') }}"
                         class="text-orange-600 hover:text-orange-700 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i>Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-star mr-1"></i>Reviews
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
@@ -67,8 +71,8 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p class="text-gray-600">Track your restaurant's performance and sales statistics</p>
+            <h1 class="text-3xl font-bold text-orange-600">Analytics Dashboard</h1>
+            <p class="text-gray-600">Track NaNi's performance and sales statistics</p>
         </div>
 
         <!-- Sales Statistics -->
@@ -190,6 +194,54 @@
                             <p>No sales data available yet.</p>
                         </div>
                     @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Analytics Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Review Trends Chart -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Monthly Review Trends ({{ date('Y') }})</h3>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Reviews & Average Rating
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="reviewTrendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Review Statistics -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Review Statistics</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-orange-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-orange-600 mb-1">
+                            {{ number_format($reviewAnalytics['stats']['avg_rating'] ?? 0, 1) }}
+                        </div>
+                        <p class="text-sm text-gray-600">Average Rating</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600 mb-1">
+                            {{ $reviewAnalytics['stats']['total_reviews'] ?? 0 }}
+                        </div>
+                        <p class="text-sm text-gray-600">Total Reviews</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600 mb-1">
+                            {{ $reviewAnalytics['stats']['positive_reviews'] ?? 0 }}
+                        </div>
+                        <p class="text-sm text-gray-600">Positive Reviews (4+ stars)</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-purple-600 mb-1">
+                            {{ $reviewAnalytics['stats']['reviews_this_month'] ?? 0 }}
+                        </div>
+                        <p class="text-sm text-gray-600">Reviews This Month</p>
+                    </div>
                 </div>
             </div>
         </div>

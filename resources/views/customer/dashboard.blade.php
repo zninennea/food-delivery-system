@@ -10,6 +10,7 @@
 </head>
 
 <body class="bg-gray-50">
+    <div data-user-role="{{ Auth::user()->role }}" style="display: none;"></div>
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
@@ -77,38 +78,51 @@
                 </div>
                 <div class="text-right">
                     <div class="flex items-center text-yellow-400 mb-2">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                        <span class="text-gray-600 ml-2">4.5 (128 reviews)</span>
+                        @php
+                            $averageRating = $averageRating ?? 4.5; // Fallback to 4.5 if not set
+                            $totalReviews = $totalReviews ?? 128; // Fallback to 128 if not set
+                            $fullStars = floor($averageRating);
+                            $hasHalfStar = $averageRating - $fullStars >= 0.5;
+                        @endphp
+
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= $fullStars)
+                                <i class="fas fa-star"></i>
+                            @elseif($i == $fullStars + 1 && $hasHalfStar)
+                                <i class="fas fa-star-half-alt"></i>
+                            @else
+                                <i class="far fa-star"></i>
+                            @endif
+                        @endfor
+                        <span class="text-gray-600 ml-2">{{ number_format($averageRating, 1) }} ({{ $totalReviews }}
+                            reviews)</span>
                     </div>
                     <p class="text-gray-600">Open until 10:00 PM</p>
                 </div>
             </div>
         </div>
+
         <!-- Featured Items -->
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Featured Items</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($featuredItems as $item)
-                    <div class="bg-white rounded-lg shadow hover:shadow-md transition duration-200">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                         @if($item->image)
                             <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
-                                class="w-full h-48 object-cover rounded-t-lg">
+                                class="w-full h-48 object-cover">
                         @else
-                            <div class="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                                <i class="fas fa-utensils text-gray-400 text-2xl"></i>
+                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-utensils text-gray-400 text-4xl"></i>
                             </div>
                         @endif
                         <div class="p-4">
                             <h3 class="text-lg font-semibold text-gray-900">{{ $item->name }}</h3>
-                            <p class="text-gray-600 text-sm mt-1">{{ Str::limit($item->description, 60) }}</p>
+                            <p class="text-gray-600 text-sm mt-1">{{ Str::limit($item->description, 80) }}</p>
                             <div class="flex justify-between items-center mt-3">
                                 <span class="text-lg font-bold text-orange-600">₱{{ number_format($item->price, 2) }}</span>
-                                <a href="{{ route('customer.menu.item', $item) }}"
-                                    class="bg-orange-500 text-white px-3 py-1 rounded-md text-sm hover:bg-orange-600 transition duration-200">
+                                <a href="{{ route('customer.menu-item', $item) }}"
+                                    class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 text-sm">
                                     View Details
                                 </a>
                             </div>
@@ -156,10 +170,11 @@
                                     </p>
                                     <p class="text-gray-600 text-sm">Total: ₱{{ number_format($order->total_amount, 2) }}</p>
                                 </div>
-                                <span class="px-3 py-1 rounded-full text-sm font-medium 
-                                                    @if($order->status == 'delivered') bg-green-100 text-green-800
-                                                    @elseif($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                    @else bg-blue-100 text-blue-800 @endif">
+                                <span
+                                    class="px-3 py-1 rounded-full text-sm font-medium 
+                                                                                                                                            @if($order->status == 'delivered') bg-green-100 text-green-800
+                                                                                                                                            @elseif($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                                                                                            @else bg-blue-100 text-blue-800 @endif">
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </div>
@@ -169,10 +184,10 @@
                                     Track Order
                                 </a>
                                 @if($order->status == 'delivered')
-                                    {{-- <a href="{{ route('customer.reviews.create', $order) }}"
+                                    <a href="{{ route('customer.reviews.create', $order) }}"
                                         class="text-blue-600 hover:text-blue-800 text-sm">
                                         Write Review
-                                    </a> --}}
+                                    </a>
                                 @endif
                             </div>
                         </div>
@@ -181,32 +196,112 @@
             </div>
         @endif
 
-        <!-- Customer Reviews Section -->
+        <!-- Customer Reviews Section - Show ALL customer reviews -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">What Our Customers Are Saying</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+                <a href="{{ route('customer.reviews.index') }}"
+                    class="text-sm text-orange-600 hover:text-orange-800 font-medium">
+                    <i class="fas fa-comments mr-1"></i>View All Reviews
+                </a>
+            </div>
+
             @if($recentReviews->count() > 0)
-                <div class="space-y-4">
+                <div class="space-y-6">
                     @foreach($recentReviews as $review)
-                        <div class="border-l-4 border-orange-500 pl-4 py-2">
-                            <div class="flex items-center mb-2">
-                                <div class="flex items-center text-yellow-400 mr-2">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="fas fa-star{{ $i <= $review->rating ? '' : '-o' }} text-sm"></i>
-                                    @endfor
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition duration-150">
+                            <!-- Review Header with customer info -->
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center">
+                                    <!-- Customer Avatar -->
+                                    @if($review->customer->profile_picture)
+                                        <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
+                                            alt="{{ $review->customer->name }}" class="h-10 w-10 rounded-full object-cover mr-3">
+                                    @else
+                                        <div class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-gray-400"></i>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ $review->customer->name }}</p>
+                                        <div class="flex items-center">
+                                            <div class="flex items-center text-yellow-400 mr-2">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i
+                                                        class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o' }} text-sm"></i>
+                                                @endfor
+                                            </div>
+                                            <span
+                                                class="text-xs text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="text-sm text-gray-600">by {{ $review->customer->name }}</span>
+                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                    Order #{{ $review->order->order_number }}
+                                </span>
                             </div>
-                            <p class="text-gray-800 mb-2">"{{ $review->comment }}"</p>
-                            @if($review->menuItem)
-                                <p class="text-sm text-gray-600">Reviewed: {{ $review->menuItem->name }}</p>
+
+                            <!-- Review Comment -->
+                            @if($review->comment)
+                                <p class="text-gray-700 mb-3">"{{ $review->comment }}"</p>
+                            @else
+                                <p class="text-gray-500 italic mb-3">No comment provided</p>
+                            @endif
+
+                            <!-- Ordered Items -->
+                            @if($review->order && $review->order->items->count() > 0)
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Ordered:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($review->order->items as $item)
+                                            <div class="flex items-center text-sm bg-gray-100 rounded-full px-3 py-1">
+                                                <span class="text-gray-700">{{ $item->quantity }}x {{ $item->menuItem->name }}</span>
+                                                <span class="text-gray-500 ml-1">• ₱{{ number_format($item->unit_price, 2) }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="flex justify-between items-center mt-3 text-sm">
+                                        <span class="text-gray-600">
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            {{ $review->order->created_at->format('M d, Y') }}
+                                        </span>
+                                        <span class="font-medium text-gray-900">
+                                            Total: ₱{{ number_format($review->order->total_amount, 2) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Rider Rating (if exists) -->
+                            @if($review->rider_rating)
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-motorcycle text-gray-400 mr-2"></i>
+                                        <span class="text-sm text-gray-600 mr-2">Rider:</span>
+                                        <div class="flex items-center text-yellow-400">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="fas fa-star{{ $i <= $review->rider_rating ? '' : '-o' }} text-xs"></i>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
                         </div>
                     @endforeach
                 </div>
+
+                <!-- View All Reviews Link -->
+                <div class="mt-6 text-center">
+                    <a href="{{ route('customer.reviews.index') }}"
+                        class="inline-flex items-center text-orange-600 hover:text-orange-800 font-medium">
+                        <i class="fas fa-arrow-right mr-2"></i>See More Reviews
+                    </a>
+                </div>
             @else
                 <div class="text-center text-gray-500 py-8">
                     <i class="fas fa-comments text-4xl mb-2"></i>
-                    <p>No reviews yet. Be the first to review!</p>
+                    <p>You have no reviews yet.</p>
+                    <p class="text-sm mt-2">Share your experience after your next order!</p>
                 </div>
             @endif
         </div>
@@ -234,3 +329,17 @@
 </body>
 
 </html>
+<!-- Add this debug section to dashboard.blade.php -->
+@php
+    $allRoutes = Route::getRoutes()->getRoutesByName();
+    $reviewRoutes = [];
+    foreach ($allRoutes as $name => $route) {
+        if (str_contains($name, 'review')) {
+            $reviewRoutes[$name] = $route->uri();
+        }
+    }
+@endphp
+
+<div style="display: none;">
+    <pre>{{ print_r($reviewRoutes, true) }}</pre>
+</div>

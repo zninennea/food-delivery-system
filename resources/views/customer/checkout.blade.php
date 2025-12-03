@@ -112,15 +112,14 @@
                                     <label for="cash_on_delivery" class="ml-3 block text-sm font-medium text-gray-700">
                                         Cash on Delivery
                                     </label>
-                                </div>
-
-                                <div id="cash_provided_field" class="ml-7 hidden">
-                                    <label for="cash_provided" class="block text-sm font-medium text-gray-700">Cash
-                                        Provided (Optional)</label>
-                                    <input type="number" name="cash_provided" id="cash_provided" step="0.01" min="0"
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="0.00">
-                                    <p class="text-xs text-gray-500 mt-1">Enter amount if you need change</p>
+                                    <div id="cash_provided_field" class="ml-7 space-y-2">
+                                        <label for="cash_provided" class="block text-sm font-medium text-gray-700">Cash
+                                            Provided (Optional)</label>
+                                        <input type="number" name="cash_provided" id="cash_provided" step="0.01" min="0"
+                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="0.00">
+                                        <p class="text-xs text-gray-500 mt-1">Enter amount if you need change</p>
+                                    </div>
                                 </div>
 
                                 <div class="flex items-center">
@@ -139,11 +138,11 @@
                                                 SA*****A NI***E B. :</label>
                                             <div class="flex items-center justify-between mt-1">
                                                 <p class="text-gray-900 font-bold text-lg">09123775192</p>
-                                                <button type="button" 
+                                                <button type="button"
                                                     class="view-qr-btn text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                                                    data-qr-url="{{ asset('images/naniqr.jpg') }}" 
+                                                    data-qr-url="{{ asset('images/naniqr.jpg') }}"
                                                     data-qr-name="GCash Payment">
-                                                    <i class="fas fa-qrcode mr-1"></i> View QR  
+                                                    <i class="fas fa-qrcode mr-1"></i> View QR
                                                 </button>
                                             </div>
                                         </div>
@@ -159,7 +158,8 @@
                                                 class="block text-sm font-medium text-gray-700">Payment Receipt</label>
                                             <input type="file" name="gcash_receipt" id="gcash_receipt" accept="image/*"
                                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <p class="text-xs text-gray-500 mt-1">Upload screenshot of your GCash payment
+                                            <p class="text-xs text-gray-500 mt-1">Upload screenshot of your GCash
+                                                payment
                                             </p>
                                         </div>
                                     </div>
@@ -246,7 +246,8 @@
                 <img id="qrImage" src="" alt="Payment QR Code" class="max-w-full h-auto rounded-md shadow-sm">
             </div>
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
-                <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                <button type="button" id="closeModalBtn"
+                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
                     Close
                 </button>
             </div>
@@ -274,39 +275,39 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('qrModal');
             const qrImage = document.getElementById('qrImage');
             const modalTitle = document.getElementById('modalTitle');
             const closeModal = document.getElementById('closeModal');
             const closeModalBtn = document.getElementById('closeModalBtn');
-            
+
             // Add event listeners to all view qr buttons
             document.querySelectorAll('.view-qr-btn').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const qrUrl = this.getAttribute('data-qr-url');
                     const qrName = this.getAttribute('data-qr-name');
-                    
+
                     qrImage.src = qrUrl;
-                    if(qrName) {
+                    if (qrName) {
                         modalTitle.textContent = qrName;
                     }
                     modal.classList.remove('hidden');
                 });
             });
-            
+
             // Close modal when X is clicked
-            closeModal.addEventListener('click', function() {
+            closeModal.addEventListener('click', function () {
                 modal.classList.add('hidden');
             });
-            
+
             // Close modal when close button is clicked
-            closeModalBtn.addEventListener('click', function() {
+            closeModalBtn.addEventListener('click', function () {
                 modal.classList.add('hidden');
             });
-            
+
             // Close modal when clicking outside the image
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
                 }
@@ -314,4 +315,5 @@
         });
     </script>
 </body>
+
 </html>

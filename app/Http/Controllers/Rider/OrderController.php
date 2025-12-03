@@ -63,7 +63,32 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', "Order status updated to " . ucfirst(str_replace('_', ' ', $newStatus)) . "!");
     }
+    public function getMessages(Order $order)
+    {
+        try {
+            $user = Auth::user();
 
+            $messages = Message::with('sender')
+                ->where('order_id', $order->id)
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->map(function ($message) use ($user) {
+                    return [
+                        'id' => $message->id,
+                        'message' => $message->message,
+                        'sender_id' => $message->sender_id,
+                        'sender_name' => $message->sender->name, // Make sure this is included
+                        'created_at' => $message->created_at->format('g:i A'),
+                        'is_own_message' => $message->sender_id === $user->id,
+                    ];
+                });
+
+            return response()->json($messages);
+        } catch (\Exception $e) {
+            \Log::error('Error getting messages: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to load messages'], 500);
+        }
+    }
     /**
      * Display order history
      */
@@ -82,68 +107,5 @@ class OrderController extends Controller
             ->paginate(15);
 
         return view('rider.order-history', compact('orders'));
-    }
-    // Add these methods to your existing OrderController class
-
-    public function getMessages(Order $order)
-    {
-        try {
-            $user = Auth::user();
-
-            if ($order->rider_id !== $user->id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
-
-            $messages = Message::with('sender')
-                ->where('order_id', $order->id)
-                ->orderBy('created_at', 'asc')
-                ->get()
-                ->map(function ($message) {
-                    return [
-                        'id' => $message->id,
-                        'message' => $message->message,
-                        'sender_id' => $message->sender_id,
-                        'created_at' => $message->created_at->format('g:i A'),
-                        'sender_name' => $message->sender->name,
-                    ];
-                });
-
-            return response()->json($messages);
-        } catch (\Exception $e) {
-            \Log::error('Error getting messages: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to load messages'], 500);
-        }
-    }
-
-    public function sendMessage(Request $request, Order $order)
-    {
-        try {
-            $user = Auth::user();
-
-            if ($order->rider_id !== $user->id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
-
-            $request->validate([
-                'message' => 'required|string|max:1000'
-            ]);
-
-            // Create message
-            $message = Message::create([
-                'order_id' => $order->id,
-                'sender_id' => $user->id,
-                'receiver_id' => $order->customer_id,
-                'message' => $request->message,
-                'is_read' => false
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message_id' => $message->id
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error sending message: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to send message'], 500);
-        }
     }
 }

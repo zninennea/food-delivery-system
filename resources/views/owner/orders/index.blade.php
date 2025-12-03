@@ -70,6 +70,10 @@
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i>Analytics
                     </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-star mr-1"></i>Reviews
+                    </a>
                     <a href="{{ route('owner.riders.index') }}"
                         class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-motorcycle mr-1"></i>Riders
@@ -215,14 +219,18 @@
                                         ₱{{ number_format($order->total_amount, 2) }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                                        @elseif($order->status == 'ready') bg-green-100 text-green-800
-                                                                        @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
-                                                                        @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
-                                                                        @else bg-red-100 text-red-800 @endif">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                                                                    @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                                                    @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                                                    @elseif($order->status == 'ready') bg-green-100 text-green-800
+                                                                                                    @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
+                                                                                                    @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
+                                                                                                    @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                                        @if(in_array($order->status, ['delivered', 'cancelled']))
+                                            <i class="fas fa-lock ml-1" title="Finalized - No further changes allowed"></i>
+                                        @endif
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -232,15 +240,21 @@
                                     <a href="{{ route('owner.orders.show', $order) }}"
                                         class="text-blue-600 hover:text-blue-900 mr-3">View</a>
 
-                                    <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
-                                        class="text-orange-600 hover:text-orange-900 mr-3">
-                                        <i class="fas fa-motorcycle mr-1"></i>Assign Rider
-                                    </a>
+                                    <!-- Only show Assign Rider button for non-delivered, non-cancelled orders -->
+                                    @if(!in_array($order->status, ['delivered', 'cancelled']))
+                                        <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
+                                            class="text-orange-600 hover:text-orange-900 mr-3">
+                                            <i class="fas fa-motorcycle mr-1"></i>Assign Rider
+                                        </a>
+                                    @endif
 
-                                    <button class="text-indigo-600 hover:text-indigo-900 update-status mr-3"
-                                        data-order-id="{{ $order->id }}">
-                                        <i class="fas fa-sync"></i> Order Status
-                                    </button>
+                                    <!-- Only show Order Status button for non-delivered, non-cancelled orders -->
+                                    @if(!in_array($order->status, ['delivered', 'cancelled']))
+                                        <button class="text-indigo-600 hover:text-indigo-900 update-status mr-3"
+                                            data-order-id="{{ $order->id }}">
+                                            <i class="fas fa-sync"></i> Order Status
+                                        </button>
+                                    @endif
 
                                     <!-- GCash Receipt Button -->
                                     @if($order->payment_method === 'gcash' && $order->gcash_receipt_path)
@@ -252,8 +266,8 @@
                                         </button>
                                     @endif
 
-                                    <!-- GCash Status Update Button -->
-                                    @if($order->payment_method === 'gcash')
+                                    <!-- Only show GCash Status Update for non-delivered, non-cancelled GCash orders -->
+                                    @if($order->payment_method === 'gcash' && !in_array($order->status, ['delivered', 'cancelled']))
                                         <button class="text-purple-600 hover:text-purple-900 update-gcash-status mr-3"
                                             data-order-id="{{ $order->id }}">
                                             <i class="fas fa-sync"></i>
@@ -589,6 +603,34 @@
                 closeModal('gcashStatusModal');
             }
         }
+        // Prevent status updates for delivered/cancelled orders
+        document.addEventListener('DOMContentLoaded', function () {
+            // Order Status Update - only add event listeners to visible buttons
+            const updateButtons = document.querySelectorAll('.update-status');
+            const statusModal = document.getElementById('statusModal');
+            const statusForm = document.getElementById('statusForm');
+
+            updateButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const orderId = this.getAttribute('data-order-id');
+                    statusForm.action = `/owner/orders/${orderId}/status`;
+                    statusModal.classList.remove('hidden');
+                });
+            });
+
+            // GCash Status Update - only add event listeners to visible buttons
+            const gcashUpdateButtons = document.querySelectorAll('.update-gcash-status');
+            const gcashStatusModal = document.getElementById('gcashStatusModal');
+            const gcashStatusForm = document.getElementById('gcashStatusForm');
+
+            gcashUpdateButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const orderId = this.getAttribute('data-order-id');
+                    gcashStatusForm.action = `/owner/orders/${orderId}/gcash-status`;
+                    gcashStatusModal.classList.remove('hidden');
+                });
+            });
+        });
     </script>
 </body>
 

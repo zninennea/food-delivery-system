@@ -54,11 +54,17 @@ class CartController extends Controller
 
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
 
-        return response()->json([
-            'success' => true,
-            'cart_count' => $cartCount,
-            'message' => 'Item added to cart!'
-        ]);
+        // Return JSON response for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'cart_count' => $cartCount,
+                'message' => 'Item added to cart!'
+            ]);
+        }
+
+        // For regular form submissions, redirect back
+        return redirect()->back()->with('success', 'Item added to cart!');
     }
 
     public function update(Request $request, Cart $cart)

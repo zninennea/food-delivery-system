@@ -16,49 +16,17 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <!-- NaNi Logo -->
-                    <div class="flex items-center">
-                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                        <div>
-                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Owner Dashboard</p>
-                        </div>
+                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                    <div>
+                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
                     </div>
                 </div>
-
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('owner.dashboard') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
-                    </a>
-                    <a href="{{ route('owner.menu.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-utensils mr-1"></i>Menu
-                    </a>
-                    <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-shopping-cart mr-1"></i>Orders
-                    </a>
-                    <a href="{{ route('owner.analytics.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-bar mr-1"></i>Analytics
-                    </a>
-                    <a href="{{ route('owner.riders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-motorcycle mr-1"></i>Riders
-                    </a>
                     <a href="{{ route('owner.profile.show') }}"
-                        class="text-orange-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-user mr-1"></i>Profile
+                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to Profile
                     </a>
-
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
@@ -194,7 +162,38 @@
                                 @enderror
                             </div>
 
+                            <!-- ADD THIS SECTION: Background Image Upload -->
+                            <div>
+                                <label for="background_image" class="block text-sm font-medium text-gray-700">Welcome
+                                    Page Background Image</label>
 
+                                <!-- Current background image preview -->
+                                @if($restaurant->background_image)
+                                    <div class="mb-2">
+                                        <p class="text-sm text-gray-600 mb-1">Current Background Image:</p>
+                                        <div class="relative">
+                                            <img src="{{ asset('storage/' . $restaurant->background_image) }}"
+                                                alt="Current Background" class="h-32 w-full object-cover rounded-md border">
+                                            <div
+                                                class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                                Current
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <input type="file" name="background_image" id="background_image" accept="image/*"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Recommended size: 1920x1080px. This image will appear on the welcome page hero
+                                    section.
+                                </p>
+
+                                @error('background_image')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 
