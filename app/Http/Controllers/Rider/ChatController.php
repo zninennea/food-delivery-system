@@ -14,7 +14,7 @@ class ChatController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Verify the rider is assigned to this order
             if ($order->rider_id !== $user->id) {
                 return response()->json(['error' => 'Unauthorized access to this order chat.'], 403);
@@ -36,7 +36,6 @@ class ChatController extends Controller
                 });
 
             return response()->json($messages);
-            
         } catch (\Exception $e) {
             \Log::error('Error getting rider messages: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to load messages'], 500);
@@ -47,7 +46,7 @@ class ChatController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Verify the rider is assigned to this order
             if ($order->rider_id !== $user->id) {
                 return response()->json(['error' => 'Unauthorized access to this order chat.'], 403);
@@ -70,7 +69,6 @@ class ChatController extends Controller
                 'success' => true,
                 'message_id' => $message->id
             ]);
-            
         } catch (\Exception $e) {
             \Log::error('Error sending rider message: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to send message'], 500);

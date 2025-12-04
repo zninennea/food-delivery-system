@@ -8,6 +8,18 @@
     <title>Order #{{ $order->order_number }} - NaNi Rider</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Chat modal styling */
+        .chat-message-left {
+            background-color: #e3f2fd;
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .chat-message-right {
+            background-color: #dcf8c6;
+            border-radius: 18px 18px 4px 18px;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -16,7 +28,11 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-800">Order #{{ $order->order_number }}</h1>
+                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
+                    <div>
+                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
+                        <p class="text-xs text-gray-500 -mt-1">Order Details</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('rider.dashboard') }}"
@@ -27,7 +43,10 @@
             </div>
         </div>
     </nav>
-    @include('components.chat-popup')
+
+    @if($order->customer_id)
+        @include('components.chat-popup', ['order' => $order])
+    @endif
 
     <!-- Success/Error Messages -->
     @if(session('success'))
@@ -56,7 +75,7 @@
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900">Order #{{ $order->order_number }}</h2>
+                        <h2 class="text-xl font-bold text-orange-600">Order #{{ $order->order_number }}</h2>
                         <p class="text-gray-600">Placed on {{ $order->created_at->format('F j, Y \a\t g:i A') }}</p>
                     </div>
                     <div class="text-right">
@@ -64,6 +83,7 @@
                             @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
                             @elseif($order->status == 'ready') bg-blue-100 text-blue-800
                             @elseif($order->status == 'on_the_way') bg-green-100 text-green-800
+                            @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
                             @else bg-gray-100 text-gray-800 @endif">
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                         </span>
@@ -137,6 +157,24 @@
             </div>
 
             <!-- Order Summary -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium">₱{{ number_format($order->total_amount, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery Fee</span>
+                        <span class="font-medium">₱{{ number_format($order->delivery_fee, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-200 pt-2">
+                        <span class="font-medium text-gray-900">Total</span>
+                        <span class="font-bold text-gray-900">₱{{ number_format($order->grand_total, 2) }}</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Payment Information -->
             <div class="bg-gray-50 rounded-lg p-4 mt-4">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
@@ -184,7 +222,7 @@
                             @csrf
                             <input type="hidden" name="status" value="delivered">
                             <button type="submit"
-                                class="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 font-medium"
+                                class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 font-medium"
                                 onclick="return confirm('Mark order #{{ $order->order_number }} as delivered?')">
                                 <i class="fas fa-check mr-2"></i>Mark as Delivered
                             </button>
@@ -202,16 +240,27 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Chat with Customer Button -->
-    <div class="bg-gray-50 rounded-lg p-4">
-        <button onclick="openChat({{ $order->id }}, '{{ $order->order_number }}', '{{ $order->customer->name }}')"
-            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-            <i class="fas fa-comments mr-2"></i>Chat with {{ $order->customer->name }}
-        </button>
+
+        <!-- Chat with Customer Button -->
+        @if($order->customer)
+            <div class="bg-gray-50 rounded-lg p-4 mt-6">
+                <button onclick="openChat({{ $order->id }}, '{{ $order->order_number }}')"
+                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 font-medium">
+                    <i class="fas fa-comments mr-2"></i>Chat with {{ $order->customer->name }}
+                </button>
+            </div>
+        @else
+            <div class="bg-yellow-50 rounded-lg p-4 mt-6 border border-yellow-200">
+                <h3 class="text-lg font-medium text-yellow-800 mb-2">Chat Not Available</h3>
+                <p class="text-yellow-700">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Customer information is not available for this order.
+                </p>
+            </div>
+        @endif
     </div>
 
-    <!-- Chat Popup Modal -->
+    <!-- Chat Modal -->
     <div id="chat-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
             <!-- Modal Header -->
@@ -222,7 +271,7 @@
                 <button id="close-chat-modal" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
-            </div>  
+            </div>
 
             <!-- Chat Messages -->
             <div class="p-4">
@@ -243,9 +292,9 @@
     </div>
 
     <script>
+        // Chat functionality
         document.addEventListener('DOMContentLoaded', function () {
             const chatModal = document.getElementById('chat-modal');
-            const openChatBtn = document.getElementById('open-chat-btn');
             const closeChatBtn = document.getElementById('close-chat-modal');
             const chatMessages = document.getElementById('chat-messages');
             const chatInput = document.getElementById('chat-input');
@@ -253,17 +302,15 @@
             const orderId = {{ $order->id }};
             const userId = {{ auth()->id() }};
 
-            console.log('Chat system initialized - Order ID:', orderId, 'User ID:', userId);
-
             let pollingInterval;
 
             // Open chat modal
-            openChatBtn.addEventListener('click', function () {
-                console.log('Opening chat modal');
+            window.openChat = function (orderId, orderNumber) {
+                console.log('Opening chat modal for order:', orderId);
                 chatModal.classList.remove('hidden');
                 loadMessages();
                 startPolling();
-            });
+            };
 
             // Close chat modal
             closeChatBtn.addEventListener('click', function () {
@@ -302,119 +349,116 @@
             }
 
             function loadMessages() {
-                const url = window.location.pathname.includes('customer')
-                    ? `/customer/orders/${orderId}/messages`
-                    : `/rider/orders/${orderId}/messages`;
-
-                console.log('Loading messages from:', url);
+                const url = `/rider/orders/${orderId}/messages`;
 
                 fetch(url, {
                     headers: {
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 })
-                    .then(response => {
-                        console.log('Load messages response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(messages => {
-                        console.log('Messages loaded:', messages);
-                        chatMessages.innerHTML = '';
-
-                        if (messages.length === 0) {
-                            const noMessages = document.createElement('div');
-                            noMessages.className = 'text-center text-gray-500 py-4';
-                            noMessages.textContent = 'No messages yet. Start the conversation!';
-                            chatMessages.appendChild(noMessages);
-                        } else {
-                            messages.forEach(message => {
-                                const messageDiv = document.createElement('div');
-                                messageDiv.className = `flex ${message.sender_id === userId ? 'justify-end' : 'justify-start'} mb-2`;
-
-                                const messageBubble = document.createElement('div');
-                                messageBubble.className = `max-w-xs px-4 py-2 rounded-lg ${message.sender_id === userId
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 text-gray-800'
-                                    }`;
-
-                                const messageText = document.createElement('div');
-                                messageText.textContent = message.message;
-
-                                const messageTime = document.createElement('div');
-                                messageTime.className = 'text-xs mt-1 opacity-75';
-                                messageTime.textContent = message.created_at;
-
-                                messageBubble.appendChild(messageText);
-                                messageBubble.appendChild(messageTime);
-                                messageDiv.appendChild(messageBubble);
-                                chatMessages.appendChild(messageDiv);
-                            });
-                        }
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    .then(response => response.json())
+                    .then(data => {
+                        const messages = Array.isArray(data) ? data : (data.messages || []);
+                        renderMessages(messages);
                     })
                     .catch(error => {
                         console.error('Error loading messages:', error);
-                        chatMessages.innerHTML = '<div class="text-center text-red-500 py-4">Error loading messages: ' + error.message + '</div>';
+                        chatMessages.innerHTML = `
+                            <div class="text-center text-red-500 py-4">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Chat temporarily unavailable
+                            </div>
+                        `;
                     });
+            }
+
+            function renderMessages(messages) {
+                chatMessages.innerHTML = '';
+
+                if (messages.length === 0) {
+                    const noMessages = document.createElement('div');
+                    noMessages.className = 'text-center text-gray-500 py-4';
+                    noMessages.textContent = 'No messages yet. Start the conversation!';
+                    chatMessages.appendChild(noMessages);
+                } else {
+                    messages.forEach(msg => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = msg.is_own_message ? 'chat-message-right p-3 ml-12' : 'chat-message-left p-3 mr-12';
+                        messageDiv.innerHTML = `
+                            <p class="text-sm font-medium">${msg.sender_name}</p>
+                            <p class="mt-1">${msg.message}</p>
+                            <p class="text-xs text-gray-500 mt-1 text-right">${msg.created_at}</p>
+                        `;
+                        chatMessages.appendChild(messageDiv);
+                    });
+                }
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
             function sendMessage() {
                 const message = chatInput.value.trim();
-                console.log('Sending message:', message);
 
                 if (!message) {
-                    console.log('Message is empty, not sending');
                     return;
                 }
 
-                const url = window.location.pathname.includes('customer')
-                    ? `/customer/orders/${orderId}/messages`
-                    : `/rider/orders/${orderId}/messages`;
+                const url = `/rider/orders/${orderId}/messages`;
 
-                console.log('Sending to URL:', url);
-
-                // Show sending state
                 sendChatBtn.disabled = true;
                 sendChatBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                // Use FormData with CSRF token
                 const formData = new FormData();
                 formData.append('message', message);
-                formData.append('_token', '{{ csrf_token() }}'); // Add CSRF token
+                formData.append('_token', '{{ csrf_token() }}');
 
                 fetch(url, {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 })
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        console.log('Message sent successfully:', data);
                         chatInput.value = '';
                         loadMessages();
                     })
                     .catch(error => {
                         console.error('Error sending message:', error);
-                        alert('Error sending message: ' + error.message);
+                        showNotification('Error sending message. Please try again.', 'error');
                     })
                     .finally(() => {
                         sendChatBtn.disabled = false;
                         sendChatBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
                     });
             }
+
+            // Notification function
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md ${type === 'success' ? 'bg-green-100 border border-green-300 text-green-800' : 'bg-red-100 border border-red-300 text-red-800'}`;
+
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-3"></i>
+                        <div class="flex-1">
+                            <p class="text-sm">${message}</p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 5000);
+            }
+
             // Close with Escape key
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && !chatModal.classList.contains('hidden')) {
@@ -424,7 +468,6 @@
             });
         });
     </script>
-
 </body>
 
 </html>

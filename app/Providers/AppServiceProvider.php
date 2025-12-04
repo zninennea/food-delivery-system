@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +12,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($this->app->isLocal()) {
+            $this->app->register(IdeHelperServiceProvider::class);
+        }
+        
+        // Bind ConnectionInterface to Connection for better IDE support
+        $this->app->bind(
+            \Illuminate\Database\ConnectionInterface::class,
+            \Illuminate\Database\MySqlConnection::class
+        );
     }
 
     /**

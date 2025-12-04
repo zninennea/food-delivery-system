@@ -5,6 +5,71 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $restaurant_id
+ * @property int $customer_id
+ * @property int|null $rider_id
+ * @property string $order_number
+ * @property string $status
+ * @property int $is_reviewed
+ * @property numeric $total_amount
+ * @property string $delivery_address
+ * @property string $customer_phone
+ * @property string|null $special_instructions
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $delivered_at
+ * @property string $payment_method
+ * @property string|null $cash_provided
+ * @property string|null $gcash_reference_number
+ * @property string|null $gcash_receipt_path
+ * @property string $gcash_payment_status
+ * @property string $payment_status
+ * @property string $delivery_fee
+ * @property int $safety_verified
+ * @property \Illuminate\Support\Carbon|null $safety_verified_at
+ * @property-read \App\Models\User $customer
+ * @property-read mixed $grand_total
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderItem> $items
+ * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
+ * @property-read int|null $messages_count
+ * @property-read \App\Models\Restaurant $restaurant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read int|null $reviews_count
+ * @property-read \App\Models\User|null $rider
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order pending()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order today()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereCashProvided($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereCustomerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereCustomerPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereDeliveredAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereDeliveryAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereDeliveryFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereGcashPaymentStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereGcashReceiptPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereGcashReferenceNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereIsReviewed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereOrderNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order wherePaymentStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereRestaurantId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereRiderId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereSafetyVerified($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereSafetyVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereSpecialInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereTotalAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Order whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Order extends Model
 {
     use HasFactory;
@@ -31,7 +96,8 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2'
+        'total_amount' => 'decimal:2',
+        'safety_verified_at' => 'datetime',
     ];
 
     // Status constants

@@ -177,7 +177,7 @@
 
     <script>
         // Add to cart with AJAX
-        d// Add to cart with AJAX
+        // Add to cart with AJAX
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('form');
             if (form) {

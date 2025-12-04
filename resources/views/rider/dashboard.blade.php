@@ -199,7 +199,7 @@
                                             @csrf
                                             <input type="hidden" name="status" value="delivered">
                                             <button type="submit"
-                                                class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 text-sm w-full"
+                                                class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm w-full"
                                                 onclick="return confirm('Mark order #{{ $order->order_number }} as delivered?')">
                                                 <i class="fas fa-check mr-1"></i>Mark Delivered
                                             </button>

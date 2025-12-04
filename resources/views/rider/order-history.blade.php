@@ -16,7 +16,7 @@
                     <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
                     <div>
                         <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Order History</p>
+                        <p class="text-xs text-gray-500 -mt-1">Order History - {{ Auth::user()->name }}</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">

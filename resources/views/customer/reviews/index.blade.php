@@ -46,10 +46,6 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">Customer Reviews</h1>
-                <a href="{{ route('customer.dashboard') }}"
-                    class="text-sm text-orange-600 hover:text-orange-800 font-medium">
-                    <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
-                </a>
             </div>
 
             <!-- Reviews Statistics -->
