@@ -20,8 +20,11 @@ class CartController extends Controller
         $total = $cartItems->sum(function ($item) {
             return $item->quantity * $item->menuItem->price;
         });
+        // 1. Define the delivery fee (same as you did in the checkout method)
+        $deliveryFee = 50.00;
 
-        return view('customer.cart', compact('cartItems', 'total'));
+        // 2. Pass 'deliveryFee' to the view using compact()
+        return view('customer.cart', compact('cartItems', 'total', 'deliveryFee'));
     }
 
     public function add(Request $request, MenuItem $menuItem)

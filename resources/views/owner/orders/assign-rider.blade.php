@@ -4,167 +4,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assign Rider - Order #{{ $order->order_number }}</title>
+    <title>Assign Rider - NaNi Owner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                    <div>
-                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('owner.orders.show', $order) }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-arrow-left mr-1"></i>Back to Order Details
+<body class="bg-stone-50 text-gray-800 antialiased">
+
+    <nav class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
                     </a>
+                    <a href="{{ route('owner.orders.index') }}"
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-shopping-cart mr-1"></i> Orders
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
+                    </a>
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-star mr-1"></i> Reviews
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-motorcycle mr-1"></i> Riders
+                    </a>
+
+                    <div class="ml-4 pl-4 border-l border-gray-200 flex items-center gap-3">
+                        <!-- Profile Button (Active) -->
+                        <a href="{{ route('owner.profile.show') }}"
+                            class="text-grey-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+
+                        <span class="text-sm font-bold text-gray-700">Admin</span>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="max-w-2xl mx-auto mt-6 px-4">
-            <div class="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+    <div class="pt-32 pb-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-6 fade-in">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-100 rounded-xl">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block">{{ session('success') }}</span>
+                        </div>
                     </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 fade-in">
+                <div class="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-red-100 rounded-xl">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div>
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block">{{ session('error') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Back Button -->
+        <div class="mb-6 fade-in">
+            <a href="{{ route('owner.orders.show', $order) }}"
+                class="inline-flex items-center gap-2 text-stone-600 hover:text-orange-600 font-medium transition-colors group">
+                <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                Back to Order Details
+            </a>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in" style="animation-delay: 0.1s;">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-stone-900 to-stone-800 text-white p-8">
+                <div class="flex justify-between items-start">
                     <div>
-                        <strong class="font-bold">Success! </strong>
-                        <span class="block sm:inline">{{ session('success') }}</span>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Assign Rider</h1>
+                        <p class="text-stone-300">Order #{{ $order->order_number }} • {{ $order->customer->name }}</p>
+                    </div>
+                    <div class="p-3 bg-white/10 rounded-xl">
+                        <i class="fas fa-motorcycle text-2xl"></i>
                     </div>
                 </div>
             </div>
-        </div>
-    @endif
 
-    @if(session('error'))
-        <div class="max-w-2xl mx-auto mt-6 px-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+            <!-- Content -->
+            <div class="p-8">
+                <form action="{{ route('owner.orders.assign-rider', $order) }}" method="POST" class="space-y-8">
+                    @csrf
+
+                    <!-- Rider Selection -->
+                    <div class="space-y-4">
+                        <label class="block">
+                            <span class="text-sm font-bold text-stone-700 mb-2 block">Select Rider</span>
+                            <select name="rider_id" id="rider_id" required
+                                class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none bg-white">
+                                <option value="" class="text-stone-400">-- Choose a rider --</option>
+                                @foreach($availableRiders as $rider)
+                                    <option value="{{ $rider->id }}" 
+                                            class="py-2"
+                                            {{ $order->rider_id == $rider->id ? 'selected' : '' }}>
+                                        {{ $rider->name }}
+                                        <span class="text-stone-500">
+                                            • {{ $rider->vehicle_type }} ({{ $rider->vehicle_plate }})
+                                            • <span class="font-bold {{ $rider->status == 'active' ? 'text-green-600' : 'text-yellow-600' }}">
+                                                {{ ucfirst($rider->status) }}
+                                            </span>
+                                        </span>
+                                    </option>
+                                @endforeach
+                            </select>
+                        </label>
+                        @error('rider_id')
+                            <p class="text-red-500 text-sm mt-1 flex items-center gap-2">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
-                    <div>
-                        <strong class="font-bold">Error! </strong>
-                        <span class="block sm:inline">{{ session('error') }}</span>
+
+                    <!-- Order Summary -->
+                    <div class="bg-stone-50 rounded-2xl p-6 space-y-4 border border-stone-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-receipt text-orange-500"></i>
+                            Order Summary
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div>
+                                    <span class="text-sm text-stone-500">Customer</span>
+                                    <p class="font-medium">{{ $order->customer->name }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-stone-500">Phone</span>
+                                    <p class="font-medium">{{ $order->customer_phone }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div>
+                                    <span class="text-sm text-stone-500">Address</span>
+                                    <p class="font-medium">{{ $order->delivery_address }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-stone-500">Total Amount</span>
+                                    <p class="font-bold text-lg text-gray-900">₱{{ number_format($order->grand_total ?? $order->total_amount, 2) }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-stone-200">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-stone-500">Current Status:</span>
+                                <span class="px-3 py-1 text-sm font-bold rounded-full 
+                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                        @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                        @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                        @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                        @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                        @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                                </span>
+                            </div>
+                            
+                            @if($order->special_instructions)
+                                <div class="text-sm text-stone-600 italic">
+                                    <i class="fas fa-info-circle text-orange-500 mr-1"></i>
+                                    Has special instructions
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-3 pt-6 border-t border-stone-200">
+                        <a href="{{ route('owner.orders.show', $order) }}"
+                            class="px-6 py-3 bg-stone-200 text-stone-700 font-bold rounded-xl hover:bg-stone-300 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold rounded-xl hover:from-orange-700 hover:to-red-700 transition-all shadow-lg shadow-orange-500/30">
+                            <i class="fas fa-motorcycle mr-2"></i>
+                            Assign Rider
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-    @endif
 
-    @if($errors->any())
-        <div class="max-w-2xl mx-auto mt-6 px-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <strong class="font-bold">Please fix the following errors: </strong>
-                        <ul class="mt-1 list-disc list-inside">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+        <!-- Available Riders Grid -->
+        @if($availableRiders->count() > 0)
+            <div class="mt-8 fade-in" style="animation-delay: 0.2s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Available Riders</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($availableRiders as $rider)
+                        <div class="bg-white p-4 rounded-2xl border border-stone-200 hover-card">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
+                                        <i class="fas fa-motorcycle"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-900">{{ $rider->name }}</h4>
+                                        <p class="text-sm text-stone-500">{{ $rider->vehicle_type }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold px-2 py-1 rounded-full 
+                                              {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                    {{ ucfirst($rider->status) }}
+                                </span>
+                            </div>
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span class="text-stone-500">Plate:</span>
+                                    <span class="font-medium ml-1">{{ $rider->vehicle_plate }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-stone-500">Phone:</span>
+                                    <span class="font-medium ml-1">{{ $rider->phone }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-        </div>
-    @endif
-
-    <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-orange-600">Assign Rider</h2>
-                <p class="text-gray-600 mt-1">Order #{{ $order->order_number }} - {{ $order->customer->name }}</p>
-            </div>
-
-            <form action="{{ route('owner.orders.assign-rider', $order) }}" method="POST" class="p-6">
-                @csrf
-
-                <div class="mb-6">
-                    <label for="rider_id" class="block text-sm font-medium text-gray-700 mb-2">
-                        Select Rider
-                    </label>
-                    <select name="rider_id" id="rider_id" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">-- Select a Rider --</option>
-                        @foreach($availableRiders as $rider)
-                            <option value="{{ $rider->id }}" {{ $order->rider_id == $rider->id ? 'selected' : '' }}>
-                                {{ $rider->name }}
-                                ({{ $rider->vehicle_type }} - {{ $rider->vehicle_plate }})
-                                - {{ $rider->status }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('rider_id')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Order Summary -->
-                <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-3">Order Summary</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Customer:</span>
-                            <span class="font-medium">{{ $order->customer->name }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Delivery Address:</span>
-                            <span class="font-medium text-right">{{ $order->delivery_address }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Total Amount:</span>
-                            <span class="font-medium">₱{{ number_format($order->grand_total, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Current Status:</span>
-                            <span class="px-2 py-1 text-xs rounded-full 
-                                @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                @else bg-gray-100 text-gray-800 @endif">
-                                {{ ucfirst($order->status) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3">
-                    <a href="{{ route('owner.orders.show', $order) }}"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                        Cancel
-                    </a>
-                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
-                        <i class="fas fa-motorcycle mr-2"></i>Assign Rider
-                    </button>
-                </div>
-            </form>
-        </div>
+        @endif
     </div>
-</body>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Logout?',
+                        text: "You will be returned to the login screen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1c1917',
+                        cancelButtonColor: '#78716c',
+                        confirmButtonText: 'Yes, logout',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
 </html>

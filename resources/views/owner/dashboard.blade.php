@@ -7,281 +7,351 @@
     <title>Admin Dashboard - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-stone-50 text-gray-800 antialiased">
     <div data-user-role="{{ Auth::user()->role }}" style="display: none;"></div>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <!-- NaNi Logo -->
-                    <div class="flex items-center">
-                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                        <div>
-                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="flex items-center space-x-4">
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('owner.dashboard') }}"
-                        class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
-                    </a>
-                    <a href="{{ route('owner.menu.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-utensils mr-1"></i>Menu
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
                     </a>
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-shopping-cart mr-1"></i>Orders
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-shopping-cart mr-1"></i> Orders
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
                     </a>
                     <a href="{{ route('owner.analytics.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Analytics
                     </a>
                     <a href="{{ route('owner.reviews.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-star mr-1"></i>Reviews
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-star mr-1"></i> Reviews
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-motorcycle mr-1"></i>Riders
-                    </a>
-                    <a href="{{ route('owner.profile.show') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-user mr-1"></i>Profile
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-motorcycle mr-1"></i> Riders
                     </a>
 
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
+                    <div class="ml-4 pl-4 border-l border-gray-200 flex items-center gap-3">
+                        <!-- Profile Button (Active) -->
+                        <a href="{{ route('owner.profile.show') }}"
+                            class="text-grey-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+
+                        <span class="text-sm font-bold text-gray-700">Admin</span>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Restaurant Header - DYNAMIC DATA -->
-        <div class="bg-white rounded-lg shadow mb-6 p-6">
-            <h2 class="text-2xl font-bold text-gray-800">Welcome to {{ $restaurant->name }}</h2>
-            <p class="text-gray-600">{{ $restaurant->address }} • {{ $restaurant->phone }}</p>
-        </div>
+    <div class="pt-32 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Stats Cards - DYNAMIC DATA -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <!-- Today's Orders -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 bg-orange-100 rounded-lg">
-                        <i class="fas fa-shopping-cart text-orange-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Today's Orders</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['today_orders'] }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Orders -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 bg-green-100 rounded-lg">
-                        <i class="fas fa-clock text-green-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Active Orders</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['active_orders'] }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pending -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 bg-yellow-100 rounded-lg">
-                        <i class="fas fa-hourglass-half text-yellow-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Pending</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['pending_orders'] }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Average Rating -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 bg-purple-100 rounded-lg">
-                        <i class="fas fa-star text-purple-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Avg. Rating</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['average_rating'], 1) }}/5
-                        </p>
-                        <p class="text-xs text-gray-500">{{ $stats['total_reviews'] }} reviews</p>
-                    </div>
-                </div>
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 mb-8 fade-in relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-bl-full -mr-16 -mt-16 opacity-50"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome Back, Admin</h1>
+                <p class="text-stone-500">{{ $restaurant->name }} • {{ $restaurant->address }}</p>
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 fade-in" style="animation-delay: 0.1s;">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                        <i class="fas fa-receipt text-xl"></i>
+                    </div>
+                    <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">Today</span>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ $stats['today_orders'] }}</h3>
+                <p class="text-sm text-stone-500">Orders Received</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                        <i class="fas fa-fire text-xl"></i>
+                    </div>
+                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Live</span>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ $stats['active_orders'] }}</h3>
+                <p class="text-sm text-stone-500">Active Orders</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-yellow-50 text-yellow-600 rounded-xl">
+                        <i class="fas fa-bell text-xl"></i>
+                    </div>
+                    @if($stats['pending_orders'] > 0)
+                        <span class="flex h-3 w-3 relative">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                    @endif
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ $stats['pending_orders'] }}</h3>
+                <p class="text-sm text-stone-500">Pending Actions</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                        <i class="fas fa-star text-xl"></i>
+                    </div>
+                    <span class="text-xs font-bold text-stone-400">{{ $stats['total_reviews'] }} Reviews</span>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['average_rating'], 1) }}</h3>
+                <p class="text-sm text-stone-500">Average Rating</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-in" style="animation-delay: 0.2s;">
             <a href="{{ route('owner.menu.create') }}"
-                class="bg-white rounded-lg shadow p-6 text-left hover:bg-gray-50 transition duration-200 block">
-                <div class="flex items-center justify-between">
+                class="group bg-gradient-to-br from-stone-900 to-stone-800 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="text-lg font-medium text-gray-900">Add New Item</h3>
-                        <p class="text-gray-600 mt-1">Add new menu items to your restaurant</p>
+                        <h3 class="font-bold text-lg mb-1">Add Menu Item</h3>
+                        <p class="text-stone-400 text-sm">Create new dishes</p>
                     </div>
-                    <i class="fas fa-plus-circle text-2xl text-orange-600"></i>
+                    <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
+                        <i class="fas fa-plus"></i>
+                    </div>
                 </div>
             </a>
 
+            <a href="{{ route('owner.analytics.index') }}"
+                class="group bg-white border border-stone-200 p-6 rounded-2xl shadow-sm hover:border-orange-200 hover:shadow-md transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">View Analytics</h3>
+                        <p class="text-stone-500 text-sm">Sales & performance</p>
+                    </div>
+                    <div class="text-stone-300 group-hover:text-orange-500 transition-colors">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+            </a>
 
+            <a href="{{ route('owner.riders.index') }}"
+                class="group bg-white border border-stone-200 p-6 rounded-2xl shadow-sm hover:border-blue-200 hover:shadow-md transition-all">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">Manage Riders</h3>
+                        <p class="text-stone-500 text-sm">View fleet status</p>
+                    </div>
+                    <div class="text-stone-300 group-hover:text-blue-500 transition-colors">
+                        <i class="fas fa-motorcycle text-xl"></i>
+                    </div>
+                </div>
+            </a>
         </div>
 
-        <!-- Active Orders Section - DYNAMIC DATA -->
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">Active Orders</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-in" style="animation-delay: 0.3s;">
+
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
+                    <div class="p-6 border-b border-stone-100 flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-900 font-serif">Active Orders</h3>
+                        <a href="{{ route('owner.orders.index') }}"
+                            class="text-sm font-bold text-orange-600 hover:text-orange-700">View All</a>
+                    </div>
+
+                    @if($activeOrders->count() > 0)
+                        <div class="divide-y divide-stone-100">
+                            @foreach($activeOrders as $order)
+                                <div class="p-6 hover:bg-stone-50 transition-colors">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div>
+                                            <div class="flex items-center gap-3 mb-1">
+                                                <span class="font-bold text-gray-900">#{{ $order->order_number }}</span>
+                                                <span
+                                                    class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide
+                                                                                                    @if($order->status == 'preparing') bg-blue-100 text-blue-700
+                                                                                                    @elseif($order->status == 'ready') bg-green-100 text-green-700
+                                                                                                    @else bg-gray-100 text-gray-700 @endif">
+                                                    {{ $order->status }}
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-stone-500">{{ $order->created_at->diffForHumans() }} •
+                                                {{ $order->items->count() }} items
+                                            </p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-bold text-gray-900">₱{{ number_format($order->total_amount, 2) }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-stone-100">
+                                        <div class="flex items-center gap-2 text-sm text-stone-600">
+                                            <i class="fas fa-user-circle text-stone-400"></i>
+                                            {{ $order->customer->name }}
+                                        </div>
+                                        <div class="flex gap-2">
+                                            @if(!$order->rider)
+                                                <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
+                                                    class="px-4 py-2 bg-orange-50 text-orange-700 rounded-lg text-sm font-bold hover:bg-orange-100 transition-colors">
+                                                    Assign Rider
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('owner.orders.show', $order) }}"
+                                                class="px-4 py-2 bg-stone-900 text-white rounded-lg text-sm font-bold hover:bg-stone-800 transition-colors">
+                                                View
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-12 text-center text-stone-400">
+                            <i class="fas fa-clipboard-check text-4xl mb-3"></i>
+                            <p>No active orders right now.</p>
+                        </div>
+                    @endif
+                </div>
             </div>
 
-            @if($activeOrders->count() > 0)
-                <div class="p-6 space-y-4">
-                    @foreach($activeOrders as $order)
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Order #{{ $order->order_number }}</h3>
-                                    <p class="text-gray-600">Customer: {{ $order->customer->name }}</p>
-                                    <p class="text-gray-600">Address: {{ $order->delivery_address }}</p>
-                                    <p class="text-gray-600">Phone: {{ $order->customer_phone }}</p>
-                                    @if($order->rider)
-                                        <p class="text-gray-600">Rider: {{ $order->rider->name }}</p>
-                                    @else
-                                        <p class="text-gray-600 text-yellow-600">No rider assigned</p>
-                                    @endif
-                                </div>
-                                <div class="text-right">
-                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                                                        @if($order->status == 'preparing') bg-yellow-100 text-yellow-800
-                                                                        @elseif($order->status == 'ready') bg-green-100 text-green-800
-                                                                        @elseif($order->status == 'on_the_way') bg-blue-100 text-blue-800
-                                                                        @endif">
-                                        {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                                    </span>
-                                    <p class="text-sm text-gray-500 mt-1">{{ $order->created_at->format('M j, Y g:i A') }}</p>
-                                </div>
-                            </div>
-                            <div class="mt-4 flex space-x-3">
-                                <a href="{{ route('owner.orders.show', $order) }}"
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
-                                    View Details
-                                </a>
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
+                    <div class="p-6 border-b border-stone-100">
+                        <h3 class="text-xl font-bold text-gray-900 font-serif">Recent Feedback</h3>
+                    </div>
 
-                                @if(!$order->rider)
-                                    <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
-                                        class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 text-sm">
-                                        Assign Rider
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="p-6 text-center">
-                    <i class="fas fa-shopping-cart text-gray-400 text-4xl mb-3"></i>
-                    <p class="text-gray-500">No active orders at the moment.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-    <!-- Recent Reviews Section -->
-    <div class="bg-white rounded-lg shadow mb-6">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="text-lg font-medium text-gray-900">Recent Customer Reviews</h3>
-            <a href="{{ route('owner.reviews.index') }}"
-                class="text-sm text-orange-600 hover:text-orange-800 font-medium">
-                View All Reviews <i class="fas fa-arrow-right ml-1"></i>
-            </a>
-        </div>
-
-        @if($recentReviews->count() > 0)
-            <div class="p-6 space-y-4">
-                @foreach($recentReviews as $review)
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center">
-                                @if($review->customer->profile_picture)
-                                    <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
-                                        alt="{{ $review->customer->name }}" class="h-10 w-10 rounded-full object-cover mr-3">
-                                @else
-                                    <div class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                @endif
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $review->customer->name }}</p>
-                                    <div class="flex items-center">
-                                        <div class="flex items-center text-yellow-400 mr-2">
+                    @if($recentReviews->count() > 0)
+                        <div class="divide-y divide-stone-100">
+                            @foreach($recentReviews as $review)
+                                <div class="p-6 hover:bg-stone-50 transition-colors">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="font-bold text-sm text-gray-900">{{ $review->customer->name }}</div>
+                                        </div>
+                                        <div class="flex text-yellow-400 text-xs">
                                             @for($i = 1; $i <= 5; $i++)
                                                 <i
-                                                    class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o' }} text-sm"></i>
+                                                    class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o text-stone-200' }}"></i>
                                             @endfor
                                         </div>
-                                        <span class="text-xs text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
                                     </div>
+                                    <p class="text-sm text-stone-600 italic mb-2">"{{ Str::limit($review->comment, 60) }}"</p>
+                                    <span class="text-xs text-stone-400">{{ $review->created_at->diffForHumans() }}</span>
                                 </div>
-                            </div>
-                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                Order #{{ $review->order->order_number }}
-                            </span>
+                            @endforeach
                         </div>
-
-                        @if($review->comment)
-                            <p class="text-gray-700 text-sm mb-2">"{{ Str::limit($review->comment, 100) }}"</p>
-                        @else
-                            <p class="text-gray-400 italic text-sm mb-2">No comment provided</p>
-                        @endif
-
-                        @if($review->rider_rating)
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-motorcycle mr-2"></i>
-                                <span class="mr-2">Rider Rating:</span>
-                                <div class="flex items-center text-yellow-400">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="fas fa-star{{ $i <= $review->rider_rating ? '' : '-o' }} text-xs"></i>
-                                    @endfor
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
+                        <div class="p-4 border-t border-stone-100">
+                            <a href="{{ route('owner.reviews.index') }}"
+                                class="block w-full text-center py-2 text-sm font-bold text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded-lg transition-colors">
+                                View All Reviews
+                            </a>
+                        </div>
+                    @else
+                        <div class="p-12 text-center text-stone-400">
+                            <i class="far fa-comment-alt text-4xl mb-3"></i>
+                            <p>No reviews yet.</p>
+                        </div>
+                    @endif
+                </div>
             </div>
-        @else
-            <div class="p-6 text-center">
-                <i class="fas fa-comments text-gray-400 text-4xl mb-3"></i>
-                <p class="text-gray-500">No reviews yet.</p>
-            </div>
-        @endif
+
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Add any JavaScript functionality here
-        // Auto-refresh dashboard every 30 seconds to show real-time updates
+        // Auto-refresh logic
         setTimeout(function () {
             window.location.reload();
-        }, 30000); // 30 seconds
+        }, 60000); // Refresh every minute
+
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
     </script>
 </body>
 

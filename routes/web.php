@@ -16,6 +16,8 @@ use App\Http\Controllers\Owner\RiderController as OwnerRiderController;
 use App\Http\Controllers\Owner\AnalyticsController as OwnerAnalyticsController;
 use App\Models\Order;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -174,17 +176,12 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::delete('/orders/{order}', [OwnerOrderController::class, 'destroy'])->name('orders.destroy');
 
     // Owner GCash routes
-    Route::get('/owner/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])
-        ->name('owner.orders.gcash-receipt')
-        ->middleware(['auth', 'role:owner']);
+    Route::get('/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])
+        ->name('orders.gcash-receipt');
 
-    Route::post('/owner/orders/{order}/gcash-status', [App\Http\Controllers\Owner\OrderController::class, 'updateGcashStatus'])
-        ->name('owner.orders.gcash-status')
-        ->middleware(['auth', 'role:owner']);
+    Route::post('/orders/{order}/gcash-status', [App\Http\Controllers\Owner\OrderController::class, 'updateGcashStatus'])
+        ->name('orders.gcash-status');
 
-    Route::get('/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])->name('orders.gcash-receipt');
-    Route::post('/orders/{order}/gcash-status', [App\Http\Controllers\Owner\OrderController::class, 'updateGcashStatus'])->name('orders.gcash-status');
-   
     // Chat routes
     Route::get('/orders/{order}/chat', [OwnerChatController::class, 'showChat'])->name('orders.chat');
     Route::post('/orders/{order}/chat/send', [OwnerChatController::class, 'sendMessage'])->name('orders.chat.send');
@@ -194,6 +191,7 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     // Analytics routes
     Route::get('/analytics', [OwnerAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/sales-data', [OwnerAnalyticsController::class, 'getSalesData'])->name('analytics.sales-data');
+    Route::get('/analytics/export', [App\Http\Controllers\Owner\AnalyticsController::class, 'export'])->name('analytics.export');
 
     // Owner Review routes
     Route::get('/reviews', [\App\Http\Controllers\Owner\ReviewController::class, 'index'])->name('reviews.index');

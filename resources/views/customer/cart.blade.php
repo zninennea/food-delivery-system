@@ -7,241 +7,433 @@
     <title>Shopping Cart - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SweetAlert2 Custom Theme */
+        .swal2-popup {
+            border-radius: 1.5rem !important;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .swal2-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                    <div>
-                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Shopping Cart</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
+<body class="bg-stone-50 text-gray-800 antialiased">
+
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('customer.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('customer.dashboard') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="{{ route('customer.menu') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
                     </a>
                     <a href="{{ route('customer.cart.index') }}"
-                        class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-shopping-cart mr-1"></i>Cart ({{ $cartItems->sum('quantity') }})
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative">
+                        <i class="fas fa-shopping-cart mr-1"></i> Cart
+                        @if($cartItems->sum('quantity') > 0)
+                            <span
+                                class="absolute top-0 right-0 -mt-1 -mr-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $cartItems->sum('quantity') }}</span>
+                        @endif
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
+                    <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
+                        <a href="{{ route('customer.profile.show') }}"
+                            class="text-gray-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-900">Shopping Cart</h2>
-            </div>
+    <div class="pt-32 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            @if($cartItems->count() > 0)
-                <div class="p-6">
-                    <div class="space-y-4">
-                        @foreach($cartItems as $item)
-                            <div class="flex items-center justify-between border-b border-gray-200 pb-4">
-                                <div class="flex items-center">
-                                    @if($item->menuItem->image)
-                                        <img src="{{ asset('storage/' . $item->menuItem->image) }}"
-                                            alt="{{ $item->menuItem->name }}" class="h-16 w-16 object-cover rounded-md">
-                                    @else
-                                        <div class="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
-                                            <i class="fas fa-utensils text-gray-400"></i>
-                                        </div>
-                                    @endif
-                                    <div class="ml-4">
-                                        <h3 class="text-lg font-medium text-gray-900">{{ $item->menuItem->name }}</h3>
-                                        <p class="text-gray-600">₱{{ number_format($item->menuItem->price, 2) }}</p>
-                                        @if($item->special_instructions)
-                                            <p class="text-sm text-gray-500">Note: {{ $item->special_instructions }}</p>
-                                        @endif
+        <div class="flex items-center justify-between mb-8 fade-in">
+            <h1 class="text-4xl font-bold text-gray-900">Your Cart</h1>
+            <span class="text-stone-500 text-sm">{{ $cartItems->sum('quantity') }} items</span>
+        </div>
+
+        @if($cartItems->count() > 0)
+            <div class="flex flex-col lg:flex-row gap-8 fade-in">
+
+                <div class="lg:w-2/3 space-y-4">
+                    @foreach($cartItems as $item)
+                        <div
+                            class="bg-white rounded-2xl shadow-sm border border-stone-100 p-4 sm:p-6 flex flex-col sm:flex-row items-start gap-6 transition-all hover:shadow-md">
+
+                            <div class="w-full sm:w-24 h-24 flex-shrink-0 bg-stone-100 rounded-xl overflow-hidden">
+                                @if($item->menuItem->image)
+                                    <img src="{{ asset('storage/' . $item->menuItem->image) }}" alt="{{ $item->menuItem->name }}"
+                                        class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-stone-300">
+                                        <i class="fas fa-utensils text-2xl"></i>
                                     </div>
+                                @endif
+                            </div>
+
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-gray-900 font-serif mb-1">{{ $item->menuItem->name }}</h3>
+                                    <p class="text-lg font-bold text-orange-600">
+                                        ₱{{ number_format($item->quantity * $item->menuItem->price, 2) }}</p>
                                 </div>
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex items-center space-x-2">
-                                        <button class="decrease-quantity px-2 py-1 border border-gray-300 rounded"
+                                <p class="text-stone-500 text-sm mb-2">₱{{ number_format($item->menuItem->price, 2) }} each</p>
+
+                                @if($item->special_instructions)
+                                    <div
+                                        class="bg-orange-50 text-orange-800 text-xs px-3 py-2 rounded-lg inline-block mb-3 border border-orange-100">
+                                        <i class="fas fa-comment-alt mr-1"></i> "{{ $item->special_instructions }}"
+                                    </div>
+                                @endif
+
+                                <div class="flex justify-between items-center mt-2">
+                                    <div class="flex items-center bg-stone-100 rounded-lg p-1">
+                                        <button
+                                            class="decrease-quantity w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-stone-600 hover:text-orange-600 transition-colors"
                                             data-cart-id="{{ $item->id }}">-</button>
-                                        <span class="quantity-display w-8 text-center">{{ $item->quantity }}</span>
-                                        <button class="increase-quantity px-2 py-1 border border-gray-300 rounded"
+                                        <span
+                                            class="quantity-display w-10 text-center font-bold text-gray-900 text-sm">{{ $item->quantity }}</span>
+                                        <button
+                                            class="increase-quantity w-8 h-8 flex items-center justify-center bg-white rounded-md shadow-sm text-stone-600 hover:text-orange-600 transition-colors"
                                             data-cart-id="{{ $item->id }}">+</button>
                                     </div>
-                                    <div class="text-lg font-semibold text-gray-900">
-                                        ₱{{ number_format($item->quantity * $item->menuItem->price, 2) }}
-                                    </div>
-                                    <button class="remove-item text-red-600 hover:text-red-800" data-cart-id="{{ $item->id }}">
-                                        <i class="fas fa-trash"></i>
+
+                                    <button
+                                        class="remove-item text-red-500 hover:text-red-700 text-sm font-medium transition-colors flex items-center gap-1"
+                                        data-cart-id="{{ $item->id }}">
+                                        <i class="fas fa-trash-alt"></i> Remove
                                     </button>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
+                </div>
 
-                    <div class="mt-6 border-t border-gray-200 pt-6">
-                        <div class="flex justify-between items-center text-xl font-bold">
-                            <span>Total:</span>
-                            <span>₱{{ number_format($total, 2) }}</span>
+                <div class="lg:w-1/3">
+                    <div class="bg-white rounded-2xl shadow-xl border border-stone-100 p-6 sm:p-8 sticky top-28">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 font-serif">Order Summary</h2>
+
+                        <div class="space-y-4 mb-6 pb-6 border-b border-gray-100">
+                            <div class="flex justify-between text-stone-600">
+                                <span>Subtotal</span>
+                                <span>₱{{ number_format($total, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-stone-600">
+                                <span>Delivery Fee</span>
+                                <span>₱{{ number_format($deliveryFee, 2) }}</span>
+                            </div>
                         </div>
 
-                        <div class="mt-6 flex justify-between">
-                            <form action="{{ route('customer.cart.clear') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
-                                    Clear Cart
-                                </button>
-                            </form>
-                            {{-- Replace the existing checkout button --}}
-                            <a href="{{ route('customer.cart.checkout') }}"
-                                class="bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600">
-                                Proceed to Checkout
-                            </a>
+                        <div class="flex justify-between items-end mb-8">
+                            <span class="text-lg font-bold text-gray-900">Total</span>
+                            <span
+                                class="text-3xl font-bold text-orange-600">₱{{ number_format($total + $deliveryFee, 2) }}</span>
+                        </div>
+
+                        <a href="{{ route('customer.cart.checkout') }}"
+                            class="block w-full bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-4 rounded-xl font-bold shadow-lg hover:shadow-orange-500/30 transform hover:-translate-y-1 transition-all duration-200">
+                            Proceed to Checkout
+                        </a>
+
+                        <div class="mt-4 flex justify-center">
+                            <button type="button" id="clear-cart-btn"
+                                class="text-stone-400 hover:text-red-500 text-sm transition-colors">
+                                Clear Shopping Cart
+                            </button>
                         </div>
                     </div>
                 </div>
-            @else
-                <div class="p-6 text-center">
-                    <i class="fas fa-shopping-cart text-gray-400 text-5xl mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-                    <p class="text-gray-600 mb-4">Add some delicious items to get started!</p>
-                    <a href="{{ route('customer.menu') }}"
-                        class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
-                        Browse Menu
-                    </a>
+            </div>
+        @else
+            <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-12 text-center fade-in max-w-2xl mx-auto">
+                <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-shopping-basket text-4xl text-orange-300"></i>
                 </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Checkout Modal -->
-    <div id="checkout-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Checkout</h3>
-            <form id="checkout-form" action="{{ route('customer.orders.store') }}" method="POST">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="delivery_address" class="block text-sm font-medium text-gray-700">Delivery
-                            Address</label>
-                        <input type="text" name="delivery_address" id="delivery_address" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-                    </div>
-                    <div>
-                        <label for="customer_phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="text" name="customer_phone" id="customer_phone" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-                    </div>
-                    <div>
-                        <label for="special_instructions" class="block text-sm font-medium text-gray-700">Special
-                            Instructions</label>
-                        <textarea name="special_instructions" id="special_instructions" rows="3"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"></textarea>
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" id="cancel-checkout"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
-                        Place Order
-                    </button>
-                </div>
-            </form>
-        </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2 font-serif">Your cart is empty</h3>
+                <p class="text-stone-500 mb-8">Looks like you haven't added any delicious items yet.</p>
+                <a href="{{ route('customer.menu') }}"
+                    class="inline-flex items-center gap-2 bg-stone-900 text-white px-8 py-3 rounded-full font-bold hover:bg-orange-600 transition-all duration-300">
+                    <i class="fas fa-utensils"></i> Browse Menu
+                </a>
+            </div>
+        @endif
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Checkout modal
-            const checkoutBtn = document.getElementById('checkout-btn');
-            const checkoutModal = document.getElementById('checkout-modal');
-            const cancelCheckout = document.getElementById('cancel-checkout');
-
-            if (checkoutBtn) {
-                checkoutBtn.addEventListener('click', () => {
-                    checkoutModal.classList.remove('hidden');
-                });
-            }
-
-            cancelCheckout.addEventListener('click', () => {
-                checkoutModal.classList.add('hidden');
-            });
-
-            // Cart quantity updates
-            document.querySelectorAll('.increase-quantity').forEach(button => {
-                button.addEventListener('click', function () {
-                    const cartId = this.getAttribute('data-cart-id');
-                    updateQuantity(cartId, 'increase');
-                });
-            });
-
-            document.querySelectorAll('.decrease-quantity').forEach(button => {
-                button.addEventListener('click', function () {
-                    const cartId = this.getAttribute('data-cart-id');
-                    updateQuantity(cartId, 'decrease');
-                });
-            });
-
-            document.querySelectorAll('.remove-item').forEach(button => {
-                button.addEventListener('click', function () {
-                    const cartId = this.getAttribute('data-cart-id');
-                    removeItem(cartId);
-                });
-            });
-
-            function updateQuantity(cartId, action) {
-                const quantityDisplay = document.querySelector(`[data-cart-id="${cartId}"]`).closest('.flex').querySelector('.quantity-display');
-                let quantity = parseInt(quantityDisplay.textContent);
-
-                if (action === 'increase' && quantity < 10) {
-                    quantity++;
-                } else if (action === 'decrease' && quantity > 1) {
-                    quantity--;
+            // Initialize SweetAlert2 Toast
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#1f2937',
+                color: '#f9fafb',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
                 }
+            });
 
-                fetch(`/customer/cart/${cartId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        quantity: quantity
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            quantityDisplay.textContent = quantity;
-                            location.reload(); // Simple reload for demo
-                        }
+            // Helper to handle API calls
+            const handleCartAction = async (url, method, body = null) => {
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: body ? JSON.stringify(body) : null
                     });
-            }
 
-            function removeItem(cartId) {
-                fetch(`/customer/cart/${cartId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: data.message || 'Cart updated successfully'
+                        });
+
+                        // Wait for toast to show before reload
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Failed to update cart');
                     }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.message || 'Something went wrong. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            };
+
+            // Quantity Increase
+            document.querySelectorAll('.increase-quantity').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.dataset.cartId;
+                    const display = this.parentNode.querySelector('.quantity-display');
+                    let qty = parseInt(display.textContent);
+
+                    if (qty < 10) {
+                        handleCartAction(`/customer/cart/${id}`, 'PUT', { quantity: qty + 1 });
+                    } else {
+                        Toast.fire({
+                            icon: 'warning',
+                            title: 'Maximum quantity is 10'
+                        });
+                    }
+                });
+            });
+
+            // Quantity Decrease
+            document.querySelectorAll('.decrease-quantity').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.dataset.cartId;
+                    const display = this.parentNode.querySelector('.quantity-display');
+                    let qty = parseInt(display.textContent);
+
+                    if (qty > 1) {
+                        handleCartAction(`/customer/cart/${id}`, 'PUT', { quantity: qty - 1 });
+                    } else {
+                        // If quantity is 1, show remove confirmation instead
+                        const removeBtn = this.closest('.flex').querySelector('.remove-item');
+                        removeBtn.click();
+                    }
+                });
+            });
+
+            // Remove Item with SweetAlert2
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const itemName = this.closest('.bg-white').querySelector('h3').textContent;
+                    const cartId = this.dataset.cartId;
+
+                    Swal.fire({
+                        title: 'Remove Item?',
+                        html: `<div class="text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-trash-alt text-red-600 text-xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to remove <strong>"${itemName}"</strong> from your cart?</p>
+                        </div>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Remove Item',
+                        cancelButtonText: '<i class="fas fa-times mr-2"></i>Keep Item',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                            cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            handleCartAction(`/customer/cart/${cartId}`, 'DELETE');
                         }
                     });
+                });
+            });
+
+            // Clear Cart with SweetAlert2
+            document.getElementById('clear-cart-btn')?.addEventListener('click', function () {
+                Swal.fire({
+                    title: 'Clear Cart?',
+                    html: `<div class="text-center">
+                        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shopping-basket text-red-600 text-2xl"></i>
+                        </div>
+                        <p class="text-lg font-medium text-gray-900">Clear All Items</p>
+                        <p class="text-gray-600 mt-2">This will remove all items from your shopping cart.</p>
+                        <div class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash mr-2"></i>Clear All Items',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('{{ route('customer.cart.clear') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: 'Cart cleared successfully'
+                                    });
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Failed to clear cart. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#ef4444',
+                                    confirmButtonText: 'OK'
+                                });
+                            });
+                    }
+                });
+            });
+
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Logout Confirmation',
+                        html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                        cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                            cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
             }
         });
     </script>

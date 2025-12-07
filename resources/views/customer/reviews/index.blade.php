@@ -7,176 +7,203 @@
     <title>Customer Reviews - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Navigation (same as other pages) -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                    <div>
-                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Customer Reviews</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
+<body class="bg-stone-50 text-gray-800 antialiased">
+
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('customer.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('customer.dashboard') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
                     </a>
                     <a href="{{ route('customer.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-list mr-1"></i>My Orders
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-list mr-1"></i> My Orders
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
+                    <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
+                        <a href="{{ route('customer.profile.show') }}"
+                            class="text-gray-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto py-8 px-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-900">Customer Reviews</h1>
+    <div class="pt-32 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center mb-12 fade-in">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Community Reviews</h1>
+            <p class="text-stone-500">See what others are saying about our dishes</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 fade-in">
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 flex flex-col items-center justify-center">
+                <div class="text-5xl font-bold text-gray-900 mb-2 font-serif">{{ number_format($averageRating, 1) }}
+                </div>
+                <div class="flex items-center gap-1 text-yellow-400 mb-2 text-lg">
+                    @for($i = 1; $i <= 5; $i++)
+                        @if($i <= floor($averageRating))
+                            <i class="fas fa-star"></i>
+                        @elseif($i == floor($averageRating) + 1 && $averageRating - floor($averageRating) >= 0.5)
+                            <i class="fas fa-star-half-alt"></i>
+                        @else
+                            <i class="far fa-star text-gray-300"></i>
+                        @endif
+                    @endfor
+                </div>
+                <p class="text-sm text-stone-500 font-medium uppercase tracking-wide">Average Rating</p>
             </div>
 
-            <!-- Reviews Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-orange-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-orange-600 mb-2">{{ number_format($averageRating, 1) }}</div>
-                    <div class="flex items-center justify-center text-yellow-400 mb-2">
-                        @for($i = 1; $i <= 5; $i++)
-                            @if($i <= floor($averageRating))
-                                <i class="fas fa-star"></i>
-                            @elseif($i == floor($averageRating) + 1 && $averageRating - floor($averageRating) >= 0.5)
-                                <i class="fas fa-star-half-alt"></i>
-                            @else
-                                <i class="far fa-star"></i>
-                            @endif
-                        @endfor
-                    </div>
-                    <p class="text-gray-600">Average Rating</p>
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 flex flex-col items-center justify-center">
+                <div
+                    class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center text-orange-600 text-2xl mb-4">
+                    <i class="fas fa-comment-alt"></i>
                 </div>
+                <div class="text-3xl font-bold text-gray-900 mb-1">{{ $totalReviews }}</div>
+                <p class="text-sm text-stone-500 font-medium uppercase tracking-wide">Total Reviews</p>
+            </div>
 
-                <div class="bg-blue-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-blue-600 mb-2">{{ $totalReviews }}</div>
-                    <p class="text-gray-600">Total Reviews</p>
-                </div>
-
-                <div class="bg-green-50 rounded-lg p-4">
-                    <p class="font-medium text-gray-900 mb-2">Rating Distribution</p>
-                    @foreach($ratingDistribution as $distribution)
-                        <div class="flex items-center mb-1">
-                            <span class="text-sm text-gray-600 w-8">{{ $distribution->restaurant_rating }}★</span>
-                            <div class="flex-1 bg-gray-200 rounded-full h-2 ml-2">
-                                <div class="bg-yellow-400 h-2 rounded-full"
-                                    style="width: {{ ($distribution->count / $totalReviews) * 100 }}%"></div>
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+                <p class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Rating Breakdown</p>
+                <div class="space-y-3">
+                    @foreach($ratingDistribution as $dist)
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="font-medium text-gray-600 w-6">{{ $dist->restaurant_rating }} <i
+                                    class="fas fa-star text-xs text-yellow-400"></i></span>
+                            <div class="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-yellow-400 rounded-full"
+                                    style="width: {{ ($dist->count / $totalReviews) * 100 }}%"></div>
                             </div>
-                            <span class="text-sm text-gray-600 ml-2 w-8">{{ $distribution->count }}</span>
+                            <span class="text-stone-400 w-8 text-right">{{ $dist->count }}</span>
                         </div>
                     @endforeach
                 </div>
             </div>
+        </div>
 
-            <!-- Reviews List -->
-            <div class="space-y-6">
-                @foreach($reviews as $review)
-                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition duration-150">
-                        <!-- Review Header with customer info -->
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center">
-                                <!-- Customer Avatar -->
-                                @if($review->customer->profile_picture)
-                                    <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
-                                        alt="{{ $review->customer->name }}" class="h-10 w-10 rounded-full object-cover mr-3">
-                                @else
-                                    <div class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                @endif
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $review->customer->name }}</p>
-                                    <div class="flex items-center">
-                                        <div class="flex items-center text-yellow-400 mr-2">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <i
-                                                    class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o' }} text-sm"></i>
-                                            @endfor
-                                        </div>
-                                        <span
-                                            class="text-xs text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
-                                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in" style="animation-delay: 0.1s;">
+            @foreach($reviews as $review)
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 hover:shadow-md transition-shadow">
+
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            @if($review->customer->profile_picture)
+                                <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
+                                    alt="{{ $review->customer->name }}"
+                                    class="w-10 h-10 rounded-full object-cover border border-stone-100">
+                            @else
+                                <div
+                                    class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">
+                                    {{ substr($review->customer->name, 0, 1) }}
                                 </div>
+                            @endif
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">{{ $review->customer->name }}</p>
+                                <p class="text-xs text-stone-400">{{ $review->created_at->diffForHumans() }}</p>
                             </div>
-                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                Order #{{ $review->order->order_number }}
+                        </div>
+                        <div class="flex text-yellow-400 text-sm">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o text-gray-200' }}"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    @if($review->comment)
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">"{{ $review->comment }}"</p>
+                    @else
+                        <p class="text-stone-400 text-sm italic mb-4">No written review.</p>
+                    @endif
+
+                    @if($review->order && $review->order->items->count() > 0)
+                        <div class="bg-stone-50 rounded-xl p-3 border border-stone-100">
+                            <p class="text-xs font-bold text-stone-400 uppercase tracking-wide mb-2">Ordered</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($review->order->items->take(3) as $item)
+                                    <span
+                                        class="px-2 py-1 bg-white border border-stone-200 rounded-md text-xs text-stone-600 font-medium">
+                                        {{ $item->quantity }}x {{ $item->menuItem->name }}
+                                    </span>
+                                @endforeach
+                                @if($review->order->items->count() > 3)
+                                    <span class="px-2 py-1 text-xs text-stone-400">+{{ $review->order->items->count() - 3 }}
+                                        more</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($review->rider_rating && $review->rider)
+                        <div class="mt-4 pt-4 border-t border-stone-100 flex items-center gap-2 text-xs text-stone-500">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Rider rated:</span>
+                            <span class="font-bold text-gray-900 flex items-center gap-1">
+                                {{ $review->rider_rating }} <i class="fas fa-star text-yellow-400 text-[10px]"></i>
                             </span>
                         </div>
+                    @endif
 
-                        <!-- Review Comment -->
-                        @if($review->comment)
-                            <p class="text-gray-700 mb-3">"{{ $review->comment }}"</p>
-                        @else
-                            <p class="text-gray-500 italic mb-3">No comment provided</p>
-                        @endif
-
-                        <!-- Ordered Items -->
-                        @if($review->order && $review->order->items->count() > 0)
-                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                <p class="text-sm font-medium text-gray-700 mb-2">Ordered:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($review->order->items as $item)
-                                        <div class="flex items-center text-sm bg-gray-100 rounded-full px-3 py-1">
-                                            <span class="text-gray-700">{{ $item->quantity }}x {{ $item->menuItem->name }}</span>
-                                            <span class="text-gray-500 ml-1">• ₱{{ number_format($item->unit_price, 2) }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <div class="flex justify-between items-center mt-3 text-sm">
-                                    <span class="text-gray-600">
-                                        <i class="fas fa-calendar-alt mr-1"></i>
-                                        {{ $review->order->created_at->format('M d, Y') }}
-                                    </span>
-                                    <span class="font-medium text-gray-900">
-                                        Total: ₱{{ number_format($review->order->total_amount, 2) }}
-                                    </span>
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Rider Rating (if exists) -->
-                        @if($review->rider_rating)
-                            <div class="mt-3 pt-3 border-t border-gray-200">
-                                <div class="flex items-center">
-                                    <i class="fas fa-motorcycle text-gray-400 mr-2"></i>
-                                    <span class="text-sm text-gray-600 mr-2">Rider:</span>
-                                    <div class="flex items-center text-yellow-400">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            <i class="fas fa-star{{ $i <= $review->rider_rating ? '' : '-o' }} text-xs"></i>
-                                        @endfor
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-
-            <!-- Pagination -->
-            @if($reviews->hasPages())
-                <div class="mt-8">
-                    {{ $reviews->links() }}
                 </div>
-            @endif
+            @endforeach
         </div>
+
+        @if($reviews->hasPages())
+            <div class="mt-12 flex justify-center">
+                {{ $reviews->links() }}
+            </div>
+        @endif
+
     </div>
 </body>
 

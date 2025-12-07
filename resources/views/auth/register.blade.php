@@ -7,192 +7,234 @@
     <title>Register - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Password Validation Styles */
+        .requirement.valid i {
+            color: #16a34a;
+        }
+
+        /* Green-600 */
+        .requirement.valid span {
+            color: #16a34a;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .requirement.invalid i {
+            color: #d1d5db;
+        }
+
+        /* Gray-300 */
+        .requirement.invalid span {
+            color: #6b7280;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
+<body class="bg-stone-900 antialiased text-gray-800">
 
-                    <!-- NaNi Logo -->
-                    <div class="flex items-center">
-                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                        <div>
-                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Japanese Restaurant</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="flex items-center space-x-2 sm:space-x-6">
+                    <a href="/"
+                        class="text-gray-600 hover:text-orange-600 font-medium text-sm transition-colors duration-200">
+                        <i class="fas fa-home mr-2"></i>Home
                     </a>
                     <a href="/login"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
-                    <a href="/register" class="text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-user-plus mr-1"></i>Register
+                        class="text-orange-600 font-medium text-sm hover:text-orange-700 transition-colors">
+                        Log In
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div class="text-center">
-                <!-- Logo -->
-                <div class="flex justify-center mb-4">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-25 w-25">
-                </div>
-                <p class="mt-2 text-gray-600">Create your User Account and Fill your plate!</p>
+    <div class="relative min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+
+        <div class="absolute inset-0 z-0">
+            <div
+                class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=1925&auto=format&fit=crop')] bg-cover bg-center">
             </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-stone-900/90"></div>
+        </div>
 
-            <form class="mt-8 space-y-6" action="/register" method="POST">
-                @csrf
-                <div class="space-y-4">
+        <div class="max-w-md w-full relative z-10 fade-in mt-10">
+            <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/20">
+
+                <div class="text-center mb-8">
+                    <div class="flex justify-center mb-4">
+                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Logo" class="h-20 w-auto drop-shadow-md">
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">Join NaNi</h2>
+                    <p class="mt-2 text-sm text-gray-600">Create your account to order</p>
+                </div>
+
+                <form class="space-y-5" action="/register" method="POST">
+                    @csrf
+
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input id="name" name="name" type="text" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="Your full name">
+                        <label for="name" class="block text-sm font-medium text-gray-700 ml-1 mb-1">Full Name</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input id="name" name="name" type="text" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
+                                placeholder="Your full name">
+                        </div>
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input id="email" name="email" type="email" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="your@email.com">
+                        <label for="email" class="block text-sm font-medium text-gray-700 ml-1 mb-1">Email
+                            Address</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+                            <input id="email" name="email" type="email" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
+                                placeholder="your@email.com">
+                        </div>
                     </div>
 
-                    <!-- In the register form, update the password section -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input id="password" name="password" type="password" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="••••••••" oninput="validatePassword(this.value)">
-                        <div class="password-requirements bg-gray-50 p-3 rounded-md mt-2">
-                            <p class="text-sm font-medium text-gray-700 mb-2">Password must contain:</p>
-                            <div class="space-y-1">
-                                <div class="requirement invalid" id="req-length">
-                                    <i class="fas fa-circle"></i>
-                                    <span>At least 8 characters</span>
+                        <label for="password" class="block text-sm font-medium text-gray-700 ml-1 mb-1">Password</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input id="password" name="password" type="password" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
+                                placeholder="••••••••" oninput="validatePassword(this.value)">
+                        </div>
+
+                        <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 mt-3 transition-all duration-300">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Password
+                                Strength</p>
+                            <div class="space-y-2 text-xs">
+                                <div class="requirement invalid flex items-center gap-2" id="req-length">
+                                    <i class="fas fa-circle text-[8px]"></i> <span>At least 8 characters</span>
                                 </div>
-                                <div class="requirement invalid" id="req-uppercase">
-                                    <i class="fas fa-circle"></i>
-                                    <span>One uppercase letter (A-Z)</span>
+                                <div class="requirement invalid flex items-center gap-2" id="req-uppercase">
+                                    <i class="fas fa-circle text-[8px]"></i> <span>One uppercase letter</span>
                                 </div>
-                                <div class="requirement invalid" id="req-lowercase">
-                                    <i class="fas fa-circle"></i>
-                                    <span>One lowercase letter (a-z)</span>
+                                <div class="requirement invalid flex items-center gap-2" id="req-lowercase">
+                                    <i class="fas fa-circle text-[8px]"></i> <span>One lowercase letter</span>
                                 </div>
-                                <div class="requirement invalid" id="req-number">
-                                    <i class="fas fa-circle"></i>
-                                    <span>One number (0-9)</span>
+                                <div class="requirement invalid flex items-center gap-2" id="req-number">
+                                    <i class="fas fa-circle text-[8px]"></i> <span>One number</span>
                                 </div>
-                                <div class="requirement invalid" id="req-special">
-                                    <i class="fas fa-circle"></i>
-                                    <span>One special character (@$!%*#?&)</span>
+                                <div class="requirement invalid flex items-center gap-2" id="req-special">
+                                    <i class="fas fa-circle text-[8px]"></i> <span>One special char (@$!%*#?&)</span>
                                 </div>
                             </div>
                         </div>
+
                         @error('password')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm
-                            Password</label>
-                        <input id="password_confirmation" name="password_confirmation" type="password" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="••••••••">
+                        <label for="password_confirmation"
+                            class="block text-sm font-medium text-gray-700 ml-1 mb-1">Confirm Password</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-check-circle text-gray-400"></i>
+                            </div>
+                            <input id="password_confirmation" name="password_confirmation" type="password" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-all"
+                                placeholder="••••••••">
+                        </div>
                     </div>
-                </div>
 
-                <div>
                     <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 shadow-lg hover:shadow-orange-500/30 transition-all duration-200 hover:-translate-y-0.5 mt-4">
                         Create Account
                     </button>
-                </div>
 
-                <div class="text-center">
-                    <p class="text-sm text-gray-600">
-                        Already have an account?
-                        <a href="/login" class="font-medium text-orange-600 hover:text-orange-500">
-                            Sign in here
-                        </a>
-                    </p>
-                </div>
-            </form>
+                    <div class="text-center mt-4">
+                        <p class="text-sm text-gray-600">
+                            Already have an account?
+                            <a href="/login" class="font-bold text-orange-600 hover:text-orange-500 transition-colors">
+                                Sign in here
+                            </a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <p class="text-center text-white/40 text-xs mt-8">
+                &copy; {{ date('Y') }} NaNi Restaurant. All rights reserved.
+            </p>
         </div>
     </div>
+
+    <script>
+        function validatePassword(password) {
+            const requirements = {
+                length: document.getElementById('req-length'),
+                uppercase: document.getElementById('req-uppercase'),
+                lowercase: document.getElementById('req-lowercase'),
+                number: document.getElementById('req-number'),
+                special: document.getElementById('req-special')
+            };
+
+            const updateStatus = (element, isValid) => {
+                if (isValid) {
+                    element.classList.remove('invalid');
+                    element.classList.add('valid');
+                    element.querySelector('i').className = 'fas fa-check-circle text-[10px]';
+                } else {
+                    element.classList.remove('valid');
+                    element.classList.add('invalid');
+                    element.querySelector('i').className = 'fas fa-circle text-[8px]';
+                }
+            };
+
+            updateStatus(requirements.length, password.length >= 8);
+            updateStatus(requirements.uppercase, /[A-Z]/.test(password));
+            updateStatus(requirements.lowercase, /[a-z]/.test(password));
+            updateStatus(requirements.number, /[0-9]/.test(password));
+            updateStatus(requirements.special, /[@$!%*#?&]/.test(password));
+        }
+    </script>
 </body>
-<script>
-    function validatePassword(password) {
-        const requirements = {
-            length: document.getElementById('req-length'),
-            uppercase: document.getElementById('req-uppercase'),
-            lowercase: document.getElementById('req-lowercase'),
-            number: document.getElementById('req-number'),
-            special: document.getElementById('req-special')
-        };
-
-        // Update requirements
-        if (password.length >= 8) {
-            requirements.length.classList.remove('invalid');
-            requirements.length.classList.add('valid');
-            requirements.length.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-            requirements.length.classList.remove('valid');
-            requirements.length.classList.add('invalid');
-            requirements.length.querySelector('i').className = 'fas fa-circle';
-        }
-
-        if (/[A-Z]/.test(password)) {
-            requirements.uppercase.classList.remove('invalid');
-            requirements.uppercase.classList.add('valid');
-            requirements.uppercase.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-            requirements.uppercase.classList.remove('valid');
-            requirements.uppercase.classList.add('invalid');
-            requirements.uppercase.querySelector('i').className = 'fas fa-circle';
-        }
-
-        if (/[a-z]/.test(password)) {
-            requirements.lowercase.classList.remove('invalid');
-            requirements.lowercase.classList.add('valid');
-            requirements.lowercase.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-            requirements.lowercase.classList.remove('valid');
-            requirements.lowercase.classList.add('invalid');
-            requirements.lowercase.querySelector('i').className = 'fas fa-circle';
-        }
-
-        if (/[0-9]/.test(password)) {
-            requirements.number.classList.remove('invalid');
-            requirements.number.classList.add('valid');
-            requirements.number.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-            requirements.number.classList.remove('valid');
-            requirements.number.classList.add('invalid');
-            requirements.number.querySelector('i').className = 'fas fa-circle';
-        }
-
-        if (/[@$!%*#?&]/.test(password)) {
-            requirements.special.classList.remove('invalid');
-            requirements.special.classList.add('valid');
-            requirements.special.querySelector('i').className = 'fas fa-check-circle';
-        } else {
-            requirements.special.classList.remove('valid');
-            requirements.special.classList.add('invalid');
-            requirements.special.querySelector('i').className = 'fas fa-circle';
-        }
-    }
-</script>
 
 </html>

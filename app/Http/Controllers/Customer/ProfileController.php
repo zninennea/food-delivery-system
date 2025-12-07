@@ -53,6 +53,20 @@ class ProfileController extends Controller
 
         $user->update($updateData);
 
+        // Check if request is AJAX
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully!',
+                'user' => [
+                    'name' => $user->name,
+                    'phone' => $user->phone,
+                    'delivery_address' => $user->delivery_address,
+                    'profile_picture' => $user->profile_picture ? asset('storage/' . $user->profile_picture) : null,
+                ]
+            ]);
+        }
+
         return redirect()->route('customer.profile.show')
             ->with('success', 'Profile updated successfully!');
     }

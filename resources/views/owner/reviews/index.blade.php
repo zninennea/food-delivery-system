@@ -6,80 +6,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Reviews - NaNi Owner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .rating-bar {
+            transition: width 0.8s ease-out;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <!-- NaNi Logo -->
-                    <div class="flex items-center">
-                        <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                        <div>
-                            <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                            <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
-                        </div>
-                    </div>
-                </div>
+<body class="bg-stone-50 text-gray-800 antialiased">
 
-                <div class="flex items-center space-x-4">
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('owner.dashboard') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
-                    </a>
-                    <a href="{{ route('owner.menu.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-utensils mr-1"></i>Menu
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
                     </a>
                     <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-shopping-cart mr-1"></i>Orders
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-shopping-cart mr-1"></i> Orders
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
                     </a>
                     <a href="{{ route('owner.analytics.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-bar mr-1"></i>Analytics
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Analytics
                     </a>
                     <a href="{{ route('owner.reviews.index') }}"
-                        class="text-orange-600 hover:text-orange-700 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-star mr-1"></i>Reviews
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-star mr-1"></i> Reviews
                     </a>
                     <a href="{{ route('owner.riders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-motorcycle mr-1"></i>Riders
-                    </a>
-                    <a href="{{ route('owner.profile.show') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-user mr-1"></i>Profile
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-motorcycle mr-1"></i> Riders
                     </a>
 
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                    </form>
+                    <div class="ml-4 pl-4 border-l border-gray-200 flex items-center gap-3">
+                        <!-- Profile Button (Active) -->
+                        <a href="{{ route('owner.profile.show') }}"
+                            class="text-grey-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+
+                        <span class="text-sm font-bold text-gray-700">Admin</span>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto py-8 px-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <!-- Header -->
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold text-orange-600">Customer Reviews</h1>
-                <p class="text-gray-600">Track NaNi's customer feedback and ratings</p>
-            </div>
+    <div class="pt-32 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Reviews Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-orange-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-orange-600 mb-2">{{ number_format($averageRating, 1) }}</div>
-                    <div class="flex items-center justify-center text-yellow-400 mb-2">
+        <!-- Header -->
+        <div class="mb-8 fade-in">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Customer Reviews</h1>
+            <p class="text-stone-500">Track NaNi's customer feedback and ratings</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in" style="animation-delay: 0.1s;">
+            <!-- Average Rating Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 hover-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                        <i class="fas fa-star text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($averageRating, 1) }}</h3>
+                <div class="flex items-center mb-2">
+                    <div class="flex text-yellow-400 text-sm">
                         @for($i = 1; $i <= 5; $i++)
                             @if($i <= floor($averageRating))
                                 <i class="fas fa-star"></i>
@@ -90,166 +142,237 @@
                             @endif
                         @endfor
                     </div>
-                    <p class="text-gray-600">Average Rating</p>
                 </div>
-
-                <div class="bg-blue-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-blue-600 mb-2">{{ $totalReviews }}</div>
-                    <p class="text-gray-600">Total Reviews</p>
-                </div>
-
-                <div class="bg-green-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-green-600 mb-2">
-                        {{ $popularMenuItems->count() > 0 ? number_format($popularMenuItems->first()->reviews_avg_restaurant_rating ?? 0, 1) : '0.0' }}
-                    </div>
-                    <p class="text-gray-600">Top Rated Item</p>
-                </div>
-
-                <div class="bg-purple-50 rounded-lg p-4 text-center">
-                    <div class="text-4xl font-bold text-purple-600 mb-2">
-                        {{ $ratingDistribution->where('restaurant_rating', '>=', 4)->sum('count') }}
-                    </div>
-                    <p class="text-gray-600">Positive Reviews (4+ stars)</p>
-                </div>
+                <p class="text-sm text-stone-500">Average Rating</p>
             </div>
 
-            <!-- Rating Distribution -->
-            <div class="bg-gray-50 rounded-lg p-6 mb-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Rating Distribution</h3>
-                <div class="space-y-3">
-                    @foreach($ratingDistribution as $distribution)
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-600 w-20">{{ $distribution->restaurant_rating }}
-                                ★</span>
-                            <div class="flex-1 bg-gray-200 rounded-full h-3 ml-4">
-                                <div class="bg-yellow-400 h-3 rounded-full"
+            <!-- Total Reviews Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 hover-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                        <i class="fas fa-comment-alt text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ $totalReviews }}</h3>
+                <p class="text-sm text-stone-500">Total Reviews</p>
+            </div>
+
+            <!-- Top Rated Item Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 hover-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-green-50 text-green-600 rounded-xl">
+                        <i class="fas fa-crown text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">
+                    @if($popularMenuItems->count() > 0)
+                        {{ number_format($popularMenuItems->first()->reviews_avg_restaurant_rating ?? 0, 1) }}
+                    @else
+                        0.0
+                    @endif
+                </h3>
+                <p class="text-sm text-stone-500">Top Rated Item</p>
+            </div>
+
+            <!-- Positive Reviews Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 hover-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                        <i class="fas fa-thumbs-up text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-1">
+                    {{ $ratingDistribution->where('restaurant_rating', '>=', 4)->sum('count') }}
+                </h3>
+                <p class="text-sm text-stone-500">Positive Reviews (4+ stars)</p>
+            </div>
+        </div>
+
+        <!-- Rating Distribution -->
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 mb-8 fade-in"
+            style="animation-delay: 0.2s;">
+            <h3 class="text-xl font-bold text-gray-900 mb-6 font-serif">Rating Distribution</h3>
+            <div class="space-y-4">
+                @foreach($ratingDistribution->reverse() as $distribution)
+                    <div class="flex items-center">
+                        <div class="flex items-center w-20">
+                            <span class="text-sm font-bold text-gray-900">{{ $distribution->restaurant_rating }}</span>
+                            <div class="flex ml-2">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i
+                                        class="fas fa-star text-xs {{ $i <= $distribution->restaurant_rating ? 'text-yellow-400' : 'text-stone-200' }}"></i>
+                                @endfor
+                            </div>
+                        </div>
+                        <div class="flex-1 mx-4">
+                            <div class="w-full bg-stone-100 rounded-full h-3">
+                                <div class="rating-bar bg-gradient-to-r from-yellow-400 to-orange-400 h-3 rounded-full"
                                     style="width: {{ ($distribution->count / $totalReviews) * 100 }}%"></div>
                             </div>
-                            <span class="text-sm text-gray-600 ml-4 w-16">{{ $distribution->count }} reviews</span>
+                        </div>
+                        <div class="text-right w-32">
+                            <span class="text-sm font-bold text-gray-900">{{ $distribution->count }}</span>
                             <span
-                                class="text-sm text-gray-500 ml-2">({{ number_format(($distribution->count / $totalReviews) * 100, 1) }}%)</span>
+                                class="text-sm text-stone-500 ml-1">({{ number_format(($distribution->count / $totalReviews) * 100, 1) }}%)</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Popular Menu Items -->
+        @if($popularMenuItems && $popularMenuItems->count() > 0)
+            <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 mb-8 fade-in"
+                style="animation-delay: 0.3s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-6 font-serif">Top Rated Menu Items</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($popularMenuItems->take(6) as $index => $item)
+                        <div
+                            class="group bg-stone-50 rounded-2xl p-4 hover:bg-white transition-colors border border-stone-100 hover-card">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center">
+                                    <span
+                                        class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                                        {{ $index + 1 }}
+                                    </span>
+                                    <h4 class="font-bold text-gray-900">{{ $item->name }}</h4>
+                                </div>
+                                <span class="font-bold text-gray-900">₱{{ number_format($item->price, 2) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex text-yellow-400 mr-2">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i
+                                                class="fas fa-star{{ $i <= ($item->reviews_avg_restaurant_rating ?? 0) ? '' : '-o' }} text-xs"></i>
+                                        @endfor
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900">
+                                        {{ number_format($item->reviews_avg_restaurant_rating ?? 0, 1) }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-stone-500">
+                                    {{ $item->reviews_count ?? 0 }} {{ Str::plural('review', $item->reviews_count ?? 0) }}
+                                </span>
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
+        @endif
 
-            <!-- Popular Menu Items -->
-            @if($popularMenuItems && $popularMenuItems->count() > 0)
-                <div class="bg-gray-50 rounded-lg p-6 mb-8">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Top Rated Menu Items</h3>
-                    <div class="space-y-4">
-                        @foreach($popularMenuItems as $index => $item)
-                            <div class="flex items-center justify-between bg-white rounded-lg p-3">
-                                <div class="flex items-center">
-                                    <span
-                                        class="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium mr-4">
-                                        {{ $index + 1 }}
-                                    </span>
-                                    <div>
-                                        <h4 class="font-medium text-gray-900">{{ $item->name }}</h4>
-                                        <div class="flex items-center">
-                                            <div class="flex items-center text-yellow-400 mr-2">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    <i
-                                                        class="fas fa-star{{ $i <= ($item->reviews_avg_restaurant_rating ?? 0) ? '' : '-o' }} text-xs"></i>
-                                                @endfor
-                                            </div>
-                                            <span
-                                                class="text-sm text-gray-600">{{ number_format($item->reviews_avg_restaurant_rating ?? 0, 1) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="text-sm text-gray-500">₱{{ number_format($item->price, 2) }}</span>
-                            </div>
-                        @endforeach
-                    </div>
+        <!-- Reviews List -->
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+            style="animation-delay: 0.4s;">
+            <div class="p-6 border-b border-stone-100 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900 font-serif">All Reviews</h3>
+                <div class="text-sm text-stone-500">
+                    Showing {{ $reviews->firstItem() ?? 0 }}-{{ $reviews->lastItem() ?? 0 }} of {{ $reviews->total() }}
+                    reviews
                 </div>
-            @endif
+            </div>
 
-            <!-- Reviews List -->
-            <div class="space-y-6">
-                @foreach($reviews as $review)
-                    <div class="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition duration-150">
+            <div class="divide-y divide-stone-100">
+                @forelse($reviews as $review)
+                    <div class="p-6 hover:bg-stone-50/50 transition-colors">
                         <!-- Review Header -->
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center">
-                                @if($review->customer->profile_picture)
-                                    <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
-                                        alt="{{ $review->customer->name }}" class="h-12 w-12 rounded-full object-cover mr-4">
-                                @else
-                                    <div class="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                @endif
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $review->customer->name }}</p>
-                                    <div class="flex items-center">
-                                        <div class="flex items-center text-yellow-400 mr-2">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <i class="fas fa-star{{ $i <= $review->restaurant_rating ? '' : '-o' }}"></i>
-                                            @endfor
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-start gap-4">
+                                <div class="relative">
+                                    @if($review->customer->profile_picture)
+                                        <img src="{{ asset('storage/' . $review->customer->profile_picture) }}"
+                                            alt="{{ $review->customer->name }}"
+                                            class="h-14 w-14 rounded-full object-cover border-2 border-white shadow-sm">
+                                    @else
+                                        <div
+                                            class="h-14 w-14 bg-gradient-to-br from-stone-200 to-stone-300 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                                            <i class="fas fa-user text-stone-400 text-xl"></i>
                                         </div>
-                                        <span
-                                            class="text-sm text-gray-500">{{ $review->created_at->format('M d, Y - h:i A') }}</span>
+                                    @endif
+                                    <div class="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow">
+                                        <div class="flex items-center text-yellow-400 text-xs">
+                                            <i class="fas fa-star"></i>
+                                            <span
+                                                class="text-stone-900 font-bold ml-0.5">{{ $review->restaurant_rating }}</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">{{ $review->customer->name }}</h4>
+                                    <p class="text-sm text-stone-500">
+                                        {{ $review->created_at->format('M d, Y') }} • Order
+                                        #{{ $review->order->order_number }}
+                                    </p>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                    Order #{{ $review->order->order_number }}
-                                </span>
-                                @if($review->rider_rating)
-                                    <div class="mt-2 flex items-center justify-end">
-                                        <span class="text-xs text-gray-500 mr-2">Rider:</span>
-                                        <div class="flex items-center text-yellow-400">
+
+                            @if($review->rider_rating)
+                                <div class="text-right">
+                                    <div
+                                        class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm">
+                                        <i class="fas fa-motorcycle text-xs"></i>
+                                        <span class="font-bold">{{ $review->rider_rating }}</span>
+                                        <div class="flex text-yellow-400 ml-1">
                                             @for($i = 1; $i <= 5; $i++)
                                                 <i class="fas fa-star{{ $i <= $review->rider_rating ? '' : '-o' }} text-xs"></i>
                                             @endfor
                                         </div>
                                     </div>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Review Comment -->
                         @if($review->comment)
-                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                <p class="text-gray-700 italic">"{{ $review->comment }}"</p>
+                            <div class="mb-4">
+                                <p class="text-gray-700 leading-relaxed">
+                                    <span class="text-2xl text-stone-300 mr-1">"</span>
+                                    {{ $review->comment }}
+                                    <span class="text-2xl text-stone-300 ml-1">"</span>
+                                </p>
                             </div>
-                        @else
-                            <div class="text-gray-400 italic mb-4">No comment provided</div>
                         @endif
 
                         <!-- Ordered Items -->
                         @if($review->order && $review->order->items->count() > 0)
-                            <div class="mt-4 pt-4 border-t border-gray-200">
-                                <h4 class="text-sm font-medium text-gray-700 mb-2">Ordered Items:</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div class="mt-6 pt-6 border-t border-stone-100">
+                                <h5 class="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
+                                    <i class="fas fa-utensils text-orange-500"></i>
+                                    Ordered Items
+                                </h5>
+                                <div class="space-y-2">
                                     @foreach($review->order->items as $item)
-                                        <div class="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-2">
-                                            <span class="text-gray-700">{{ $item->quantity }}x {{ $item->menuItem->name }}</span>
-                                            <span class="text-gray-500">₱{{ number_format($item->total, 2) }}</span>
+                                        <div class="flex justify-between items-center text-sm bg-stone-50 rounded-xl px-4 py-2.5">
+                                            <span class="font-medium text-gray-900">{{ $item->quantity }}x
+                                                {{ $item->menuItem->name }}</span>
+                                            <span class="font-bold text-gray-900">₱{{ number_format($item->total, 2) }}</span>
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="flex justify-between items-center mt-3 text-sm">
-                                    <span class="text-gray-600">
+                                <div class="flex justify-between items-center mt-4 pt-4 border-t border-stone-200 text-sm">
+                                    <span class="text-stone-500">
                                         <i class="fas fa-calendar-alt mr-1"></i>
-                                        Ordered: {{ $review->order->created_at->format('M d, Y') }}
+                                        {{ $review->order->created_at->format('M d, Y') }}
                                     </span>
-                                    <span class="font-medium text-gray-900">
+                                    <span class="font-bold text-gray-900">
                                         Total: ₱{{ number_format($review->order->total_amount, 2) }}
                                     </span>
                                 </div>
                             </div>
                         @endif
                     </div>
-                @endforeach
+                @empty
+                    <div class="p-12 text-center text-stone-400">
+                        <i class="far fa-comment-alt text-4xl mb-3"></i>
+                        <p class="text-lg font-medium text-gray-900">No reviews yet</p>
+                        <p class="text-sm">Customer reviews will appear here</p>
+                    </div>
+                @endforelse
             </div>
 
             <!-- Pagination -->
             @if($reviews->hasPages())
-                <div class="mt-8">
+                <div class="px-6 py-4 border-t border-stone-100 bg-stone-50">
                     {{ $reviews->links() }}
                 </div>
             @endif
@@ -257,22 +380,66 @@
     </div>
 
     <script>
-        // Auto-expand long comments
         document.addEventListener('DOMContentLoaded', function () {
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Logout?',
+                        text: "You will be returned to the login screen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1c1917',
+                        cancelButtonColor: '#78716c',
+                        confirmButtonText: 'Yes, logout',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // Animate rating bars on scroll
+            const observerOptions = {
+                threshold: 0.2,
+                rootMargin: '0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+                        entry.target.style.width = entry.target.dataset.width;
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.rating-bar').forEach(bar => {
+                const width = bar.style.width;
+                bar.dataset.width = width;
+                bar.style.width = '0%';
+                observer.observe(bar);
+            });
+
+            // Auto-expand long comments
             const reviewComments = document.querySelectorAll('.review-comment');
             reviewComments.forEach(comment => {
                 if (comment.scrollHeight > 80) {
                     const expandBtn = document.createElement('button');
-                    expandBtn.className = 'text-blue-600 hover:text-blue-800 text-sm mt-2';
-                    expandBtn.innerHTML = 'Read more <i class="fas fa-chevron-down ml-1"></i>';
+                    expandBtn.className = 'text-blue-600 hover:text-blue-800 text-sm mt-2 inline-flex items-center gap-1';
+                    expandBtn.innerHTML = 'Read more <i class="fas fa-chevron-down text-xs"></i>';
                     expandBtn.addEventListener('click', function () {
                         comment.classList.toggle('expanded');
                         if (comment.classList.contains('expanded')) {
                             comment.style.maxHeight = 'none';
-                            this.innerHTML = 'Read less <i class="fas fa-chevron-up ml-1"></i>';
+                            this.innerHTML = 'Read less <i class="fas fa-chevron-up text-xs"></i>';
                         } else {
                             comment.style.maxHeight = '80px';
-                            this.innerHTML = 'Read more <i class="fas fa-chevron-down ml-1"></i>';
+                            this.innerHTML = 'Read more <i class="fas fa-chevron-down text-xs"></i>';
                         }
                     });
                     comment.parentNode.insertBefore(expandBtn, comment.nextSibling);

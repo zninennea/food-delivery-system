@@ -6,208 +6,548 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Rider - NaNi Owner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                    <div>
-                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('owner.riders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-arrow-left mr-1"></i>Back to Riders
+<body class="bg-stone-50 text-gray-800 antialiased">
+
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
                     </a>
+                    <a href="{{ route('owner.orders.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-shopping-cart mr-1"></i> Orders
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
+                    </a>
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-star mr-1"></i> Reviews
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-motorcycle mr-1"></i> Riders
+                    </a>
+
+                    <div class="ml-4 pl-4 border-l border-gray-200 flex items-center gap-3">
+                        <!-- Profile Button (Active) -->
+                        <a href="{{ route('owner.profile.show') }}"
+                            class="text-grey-600 hover:text-orange-700 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+
+                        <span class="text-sm font-bold text-gray-700">Admin</span>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
+    <div class="pt-32 pb-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="max-w-4xl mx-auto mt-6 px-4">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-6 fade-in">
+                <div
+                    class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-100 rounded-xl">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block">{{ session('success') }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <strong class="font-bold">Success! </strong>
-                        <span class="block sm:inline">{{ session('success') }}</span>
-                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Header -->
+        <div class="mb-8 fade-in">
+            <div class="flex justify-between items-start">
+                <div>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="inline-flex items-center gap-2 text-stone-600 hover:text-orange-600 font-medium transition-colors group mb-4">
+                        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                        Back to Riders
+                    </a>
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Edit Rider</h1>
+                    <p class="text-stone-500">Update {{ $rider->name }}'s information</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    @if($rider->profile_picture)
+                        <img src="{{ asset('storage/' . $rider->profile_picture) }}" alt="{{ $rider->name }}"
+                            class="h-16 w-16 rounded-full object-cover border-4 border-white shadow-lg">
+                    @else
+                        <div
+                            class="h-16 w-16 bg-gradient-to-br from-stone-200 to-stone-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                            <i class="fas fa-user text-stone-400 text-2xl"></i>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
-    @endif
 
-    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-orange-600">Edit Rider: {{ $rider->name }}</h2>
-            </div>
-
+        <!-- Main Form Card -->
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+            style="animation-delay: 0.1s;">
             <form action="{{ route('owner.riders.update', $rider) }}" method="POST" enctype="multipart/form-data"
-                class="p-6">
+                class="p-8">
                 @csrf
                 @method('PUT')
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Personal Information -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Personal Information Card -->
+                    <div class="space-y-6">
+                        <div class="bg-gradient-to-r from-stone-50 to-white p-6 rounded-2xl border border-stone-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                Personal Information
+                            </h3>
 
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $rider->name) }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('name')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            <div class="space-y-5">
+                                <div>
+                                    <label for="name" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Full Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="name" id="name" value="{{ old('name', $rider->name) }}"
+                                        required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                                    @error('name')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" id="email" value="{{ old('email', $rider->email) }}"
-                                required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('email')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Email Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="email" name="email" id="email"
+                                        value="{{ old('email', $rider->email) }}" required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                                    @error('email')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                            <input type="text" name="phone" id="phone" value="{{ old('phone', $rider->phone) }}"
-                                required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('phone')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <div>
+                                    <label for="phone" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Phone Number <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="phone" id="phone" value="{{ old('phone', $rider->phone) }}"
+                                        required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                                    @error('phone')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <!-- Password Fields -->
-                        <div class="border-t pt-4 mt-4">
-                            <h4 class="text-md font-medium text-gray-900 mb-3">Change Password</h4>
-                            <p class="text-sm text-gray-500 mb-3">Leave blank to keep current password</p>
+                                <!-- Current Profile Picture -->
+                                @if($rider->profile_picture)
+                                    <div class="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                                        <p class="text-sm font-medium text-stone-700 mb-2">Current Profile Picture:</p>
+                                        <div class="relative inline-block">
+                                            <img src="{{ asset('storage/' . $rider->profile_picture) }}"
+                                                alt="Current Profile"
+                                                class="h-24 w-24 rounded-full object-cover border-4 border-white shadow-md">
+                                            <div
+                                                class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                                                Current
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">New
-                                    Password</label>
-                                <input type="password" name="password" id="password"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Enter new password">
-                                @error('password')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="password_confirmation"
-                                    class="block text-sm font-medium text-gray-700">Confirm New Password</label>
-                                <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Confirm new password">
+                                <div>
+                                    <label for="profile_picture" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Update Profile Picture
+                                    </label>
+                                    <input type="file" name="profile_picture" id="profile_picture" accept="image/*"
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200">
+                                    <p class="text-xs text-stone-500 mt-2">
+                                        Leave empty to keep current picture
+                                    </p>
+                                    @error('profile_picture')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Vehicle Information & Status -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-medium text-gray-900">Vehicle & Status</h3>
+                    <!-- Vehicle & Account Information Card -->
+                    <div class="space-y-6">
+                        <div class="bg-gradient-to-r from-stone-50 to-white p-6 rounded-2xl border border-stone-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                <div class="p-2 bg-green-50 text-green-600 rounded-xl">
+                                    <i class="fas fa-motorcycle"></i>
+                                </div>
+                                Vehicle & Status
+                            </h3>
 
-                        <div>
-                            <label for="vehicle_type" class="block text-sm font-medium text-gray-700">Vehicle
-                                Type</label>
-                            <input type="text" name="vehicle_type" id="vehicle_type"
-                                value="{{ old('vehicle_type', $rider->vehicle_type) }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="e.g., Motorcycle, Bicycle">
-                            @error('vehicle_type')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            <div class="space-y-5">
+                                <div>
+                                    <label for="vehicle_type" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Vehicle Type <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="vehicle_type" id="vehicle_type"
+                                        value="{{ old('vehicle_type', $rider->vehicle_type) }}" required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                                        placeholder="e.g., Motorcycle, Bicycle">
+                                    @error('vehicle_type')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <div>
-                            <label for="vehicle_plate" class="block text-sm font-medium text-gray-700">Vehicle
-                                Plate</label>
-                            <input type="text" name="vehicle_plate" id="vehicle_plate"
-                                value="{{ old('vehicle_plate', $rider->vehicle_plate) }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('vehicle_plate')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <div>
+                                    <label for="vehicle_plate" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Vehicle Plate <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="vehicle_plate" id="vehicle_plate"
+                                        value="{{ old('vehicle_plate', $rider->vehicle_plate) }}" required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                                    @error('vehicle_plate')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select name="status" id="status" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="active" {{ $rider->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $rider->status == 'inactive' ? 'selected' : '' }}>Inactive
-                                </option>
-                            </select>
-                            @error('status')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <div>
+                                    <label for="status" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Status <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="status" id="status" required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none bg-white">
+                                        <option value="active" {{ $rider->status == 'active' ? 'selected' : '' }}>Active
+                                        </option>
+                                        <option value="inactive" {{ $rider->status == 'inactive' ? 'selected' : '' }}>
+                                            Inactive</option>
+                                    </select>
+                                    @error('status')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                        <!-- File Uploads -->
-                        <div>
-                            <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile
-                                Picture</label>
-                            <input type="file" name="profile_picture" id="profile_picture"
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('profile_picture')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <!-- Current Driver's License -->
+                                @if($rider->drivers_license)
+                                    <div class="mt-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                                        <p class="text-sm font-medium text-stone-700 mb-2">Current Driver's License:</p>
+                                        <div class="relative">
+                                            <img src="{{ asset('storage/' . $rider->drivers_license) }}"
+                                                alt="Current License"
+                                                class="h-32 w-full object-contain rounded-lg border border-stone-200">
+                                            <div
+                                                class="absolute top-3 right-3 bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-bold">
+                                                Current
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
-                        <div>
-                            <label for="drivers_license" class="block text-sm font-medium text-gray-700">Driver's
-                                License</label>
-                            <input type="file" name="drivers_license" id="drivers_license"
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            @error('drivers_license')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Current Images -->
-                        @if($rider->profile_picture)
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-600">Current Profile Picture:</p>
-                                <img src="{{ asset('storage/' . $rider->profile_picture) }}" alt="Profile"
-                                    class="h-20 w-20 object-cover rounded mt-1">
+                                <div>
+                                    <label for="drivers_license" class="block text-sm font-bold text-stone-700 mb-2">
+                                        Update Driver's License
+                                    </label>
+                                    <input type="file" name="drivers_license" id="drivers_license" accept="image/*"
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200">
+                                    <p class="text-xs text-stone-500 mt-2">
+                                        Leave empty to keep current license
+                                    </p>
+                                    @error('drivers_license')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
                             </div>
-                        @endif
+                        </div>
+
+                        <!-- Password Update Card -->
+                        <div class="bg-gradient-to-r from-stone-50 to-white p-6 rounded-2xl border border-stone-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                <div class="p-2 bg-purple-50 text-purple-600 rounded-xl">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                Change Password
+                            </h3>
+
+                            <div class="space-y-4">
+                                <p class="text-sm text-stone-500 mb-3">
+                                    Leave password fields blank to keep current password
+                                </p>
+
+                                <div>
+                                    <label for="password" class="block text-sm font-bold text-stone-700 mb-2">
+                                        New Password
+                                    </label>
+                                    <input type="password" name="password" id="password"
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                                        placeholder="Enter new password">
+                                    @error('password')
+                                        <p class="text-red-500 text-sm mt-2 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="password_confirmation"
+                                        class="block text-sm font-bold text-stone-700 mb-2">
+                                        Confirm New Password
+                                    </label>
+                                    <input type="password" name="password_confirmation" id="password_confirmation"
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                                        placeholder="Confirm new password">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end space-x-3">
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-8 border-t border-stone-200 flex justify-end gap-4">
                     <a href="{{ route('owner.riders.index') }}"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        class="px-6 py-3 bg-stone-200 text-stone-700 font-bold rounded-xl hover:bg-stone-300 transition-colors">
                         Cancel
                     </a>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    <button type="submit"
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-save mr-2"></i>
                         Update Rider
                     </button>
                 </div>
             </form>
         </div>
+
+        <!-- Current Information Summary -->
+        <div class="mt-8 fade-in" style="animation-delay: 0.2s;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-stone-50 to-white p-4 rounded-2xl border border-stone-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-500">Vehicle</p>
+                            <p class="font-bold text-gray-900">{{ $rider->vehicle_type }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-stone-50 to-white p-4 rounded-2xl border border-stone-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="p-2 bg-green-50 text-green-600 rounded-lg">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-500">Status</p>
+                            <span
+                                class="px-2 py-1 text-xs font-bold rounded-full 
+                                {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ ucfirst($rider->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-stone-50 to-white p-4 rounded-2xl border border-stone-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-500">Member Since</p>
+                            <p class="font-bold text-gray-900">{{ $rider->created_at->format('M d, Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Logout?',
+                        text: "You will be returned to the login screen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1c1917',
+                        cancelButtonColor: '#78716c',
+                        confirmButtonText: 'Yes, logout',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // Image preview for profile picture
+            const profilePictureInput = document.getElementById('profile_picture');
+            if (profilePictureInput) {
+                profilePictureInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            // Remove old preview if exists
+                            const oldPreview = document.getElementById('profile-update-preview');
+                            if (oldPreview) oldPreview.remove();
+
+                            // Create new preview
+                            const preview = document.createElement('div');
+                            preview.id = 'profile-update-preview';
+                            preview.className = 'mt-4';
+                            preview.innerHTML = `
+                                <p class="text-sm font-medium text-stone-700 mb-2">New Profile Picture Preview:</p>
+                                <div class="relative inline-block">
+                                    <img src="${e.target.result}" 
+                                         alt="New Profile Preview"
+                                         class="h-24 w-24 rounded-full object-cover border-4 border-white shadow-md">
+                                    <div class="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                        New
+                                    </div>
+                                </div>
+                            `;
+                            profilePictureInput.parentNode.insertBefore(preview, profilePictureInput.nextSibling);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Image preview for driver's license
+            const licenseInput = document.getElementById('drivers_license');
+            if (licenseInput) {
+                licenseInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            // Remove old preview if exists
+                            const oldPreview = document.getElementById('license-update-preview');
+                            if (oldPreview) oldPreview.remove();
+
+                            // Create new preview
+                            const preview = document.createElement('div');
+                            preview.id = 'license-update-preview';
+                            preview.className = 'mt-4';
+                            preview.innerHTML = `
+                                <p class="text-sm font-medium text-stone-700 mb-2">New License Preview:</p>
+                                <div class="relative">
+                                    <img src="${e.target.result}" 
+                                         alt="New License Preview"
+                                         class="h-32 w-full object-contain rounded-lg border border-stone-200">
+                                    <div class="absolute top-3 right-3 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">
+                                        New
+                                    </div>
+                                </div>
+                            `;
+                            licenseInput.parentNode.insertBefore(preview, licenseInput.nextSibling);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

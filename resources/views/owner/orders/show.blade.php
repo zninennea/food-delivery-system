@@ -4,291 +4,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order #{{ $order->order_number }} - NaNi</title>
+    <title>Order #{{ $order->order_number }} - NaNi Owner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/nani-logo.png') }}" alt="NaNi Logo" class="h-10 w-10 mr-3">
-                    <div>
-                        <a href="/" class="text-xl font-bold text-gray-800">NaNi</a>
-                        <p class="text-xs text-gray-500 -mt-1">Admin Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('owner.orders.index') }}"
-                        class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-arrow-left mr-1"></i>Back to Orders
+<body class="bg-stone-50 text-gray-800 antialiased">
+
+    <nav
+        class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
+                </a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{{ route('owner.dashboard') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
                     </a>
+                    <a href="{{ route('owner.orders.index') }}"
+                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-shopping-cart mr-1"></i> Orders
+                    </a>
+                    <a href="{{ route('owner.menu.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-utensils mr-1"></i> Menu
+                    </a>
+                    <a href="{{ route('owner.analytics.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Analytics
+                    </a>
+                    <a href="{{ route('owner.reviews.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-star mr-1"></i> Reviews
+                    </a>
+                    <a href="{{ route('owner.riders.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-motorcycle mr-1"></i> Riders
+                    </a>
+
+                    <div class="ml-4 pl-4 border-l border-gray-200 flex items-center gap-3">
+                        <!-- Profile Button (Active) -->
+                        <a href="{{ route('owner.profile.show') }}"
+                            class="text-grey-600 hover:text-orange-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+
+                        <span class="text-sm font-bold text-gray-700">Admin</span>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="max-w-4xl mx-auto mt-6 px-4">
-            <div class="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <strong class="font-bold">Success! </strong>
-                        <span class="block sm:inline">{{ session('success') }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    <div class="pt-32 pb-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    @if(session('error'))
-        <div class="max-w-4xl mx-auto mt-6 px-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <div class="flex items-center">
-                    <div class="py-1">
-                        <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <strong class="font-bold">Error! </strong>
-                        <span class="block sm:inline">{{ session('error') }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <!-- Order Header -->
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-orange-600">Order #{{ $order->order_number }}</h2>
-                        <p class="text-gray-600">Placed on {{ $order->created_at->format('F j, Y \a\t g:i A') }}</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                            @elseif($order->status == 'ready') bg-green-100 text-green-800
-                            @elseif($order->status == 'on_the_way') bg-purple-100 text-purple-800
-                            @elseif($order->status == 'delivered') bg-gray-100 text-gray-800
-                            @else bg-red-100 text-red-800 @endif">
-                            {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customer Information -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Customer Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-600">Name</p>
-                        <p class="font-medium">{{ $order->customer->name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Phone</p>
-                        <p class="font-medium">{{ $order->customer_phone }}</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="text-sm text-gray-600">Delivery Address</p>
-                        <p class="font-medium">{{ $order->delivery_address }}</p>
-                    </div>
-                    @if($order->special_instructions)
-                        <div class="md:col-span-2">
-                            <p class="text-sm text-gray-600">Special Instructions</p>
-                            <p class="font-medium text-orange-600">{{ $order->special_instructions }}</p>
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-6 fade-in">
+                <div
+                    class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-100 rounded-xl">
+                            <i class="fas fa-check text-green-600"></i>
                         </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Payment Information -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Payment Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-600">Payment Method</p>
-                        <p class="font-medium capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p>
-                    </div>
-
-                    @if($order->payment_method === 'cash_on_delivery')
-
-                        @if($order->cash_provided)
-                            <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <p class="text-sm text-gray-600">Cash Provided</p>
-                                        <p class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-600">Order Total</p>
-                                        <p class="font-medium">₱{{ number_format($order->grand_total, 2) }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-600">Change Due</p>
-                                        <p class="font-medium text-blue-600">
-                                            ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                    @elseif($order->payment_method === 'gcash')
                         <div>
-                            <p class="text-sm text-gray-600">GCash Status</p>
-                            <span class="px-2 py-1 text-xs font-medium rounded-full 
-                                                            @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
-                                                            @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
-                                                            @else bg-yellow-100 text-yellow-800 @endif">
-                                {{ ucfirst($order->gcash_payment_status) }}
-                            </span>
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block">{{ session('success') }}</span>
                         </div>
-                        @if($order->gcash_reference_number)
-                            <div>
-                                <p class="text-sm text-gray-600">Reference Number</p>
-                                <p class="font-medium">{{ $order->gcash_reference_number }}</p>
-                            </div>
-                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 fade-in">
+                <div
+                    class="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-red-100 rounded-xl">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div>
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block">{{ session('error') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Header -->
+        <div class="mb-6 fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <a href="{{ route('owner.orders.index') }}"
+                        class="inline-flex items-center gap-2 text-stone-600 hover:text-orange-600 font-medium transition-colors group mb-4">
+                        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                        Back to Orders
+                    </a>
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Order #{{ $order->order_number }}</h1>
+                    <p class="text-stone-500 mt-1">Placed on {{ $order->created_at->format('F j, Y \a\t g:i A') }}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-4 py-2 text-sm font-bold rounded-full 
+                                @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                @else bg-gray-100 text-gray-800 @endif">
+                        {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                    </span>
+                    @if(in_array($order->status, ['delivered', 'cancelled']))
+                        <i class="fas fa-lock text-stone-400" title="Finalized order"></i>
                     @endif
                 </div>
             </div>
+        </div>
 
-            <!-- Order Items -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
-                <div class="space-y-4">
-                    @foreach($order->items as $item)
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <div class="ml-4">
-                                    <p class="font-medium text-gray-900">{{ $item->menuItem->name }}</p>
-                                    <p class="text-sm text-gray-500">₱{{ number_format($item->unit_price, 2) }} ×
-                                        {{ $item->quantity }}
-                                    </p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Customer Information -->
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+                    style="animation-delay: 0.1s;">
+                    <div class="p-6 border-b border-stone-100 bg-gradient-to-r from-stone-50 to-white">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                            <div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            Customer Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <div>
+                                    <span class="text-sm text-stone-500 block mb-1">Name</span>
+                                    <p class="font-medium text-gray-900">{{ $order->customer->name }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-stone-500 block mb-1">Phone</span>
+                                    <p class="font-medium text-gray-900">{{ $order->customer_phone }}</p>
                                 </div>
                             </div>
-                            <p class="font-medium text-gray-900">₱{{ number_format($item->total, 2) }}</p>
+                            <div class="space-y-2">
+                                <div>
+                                    <span class="text-sm text-stone-500 block mb-1">Delivery Address</span>
+                                    <p class="font-medium text-gray-900">{{ $order->delivery_address }}</p>
+                                </div>
+                            </div>
                         </div>
-                    @endforeach
+                        @if($order->special_instructions)
+                            <div class="mt-6 p-4 bg-orange-50 border border-orange-100 rounded-xl">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-sticky-note text-orange-500 mt-0.5"></i>
+                                    <div>
+                                        <span class="text-sm font-bold text-orange-700 block mb-1">Special
+                                            Instructions</span>
+                                        <p class="text-orange-800">{{ $order->special_instructions }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+                    style="animation-delay: 0.2s;">
+                    <div class="p-6 border-b border-stone-100 bg-gradient-to-r from-stone-50 to-white">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                            <div class="p-2 bg-purple-50 text-purple-600 rounded-xl">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            Order Items ({{ $order->items->count() }})
+                        </h3>
+                    </div>
+                    <div class="divide-y divide-stone-100">
+                        @foreach($order->items as $item)
+                            <div class="p-6 hover:bg-stone-50/50 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-16 h-16 bg-stone-100 rounded-xl overflow-hidden">
+                                                @if($item->menuItem->image_url)
+                                                    <img src="{{ asset('storage/' . $item->menuItem->image_url) }}"
+                                                        alt="{{ $item->menuItem->name }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <div class="w-full h-full flex items-center justify-center text-stone-400">
+                                                        <i class="fas fa-utensils text-lg"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="flex-1">
+                                                <h4 class="font-bold text-gray-900">{{ $item->menuItem->name }}</h4>
+                                                <p class="text-sm text-stone-500 mt-1">{{ $item->menuItem->description }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm text-stone-500">₱{{ number_format($item->unit_price, 2) }} ×
+                                            {{ $item->quantity }}
+                                        </p>
+                                        <p class="font-bold text-lg text-gray-900 mt-1">
+                                            ₱{{ number_format($item->total, 2) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
-            <!-- Order Summary -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Subtotal</span>
-                        <span class="font-medium">₱{{ number_format($order->total_amount, 2) }}</span>
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Payment Information -->
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+                    style="animation-delay: 0.3s;">
+                    <div class="p-6 border-b border-stone-100 bg-gradient-to-r from-stone-50 to-white">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                            <div class="p-2 bg-green-50 text-green-600 rounded-xl">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            Payment Information
+                        </h3>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Delivery Fee</span>
-                        <span class="font-medium">₱{{ number_format($order->delivery_fee, 2) }}</span>
-                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">Payment Method</span>
+                                <span class="font-bold capitalize">
+                                    @if($order->payment_method == 'gcash')
+                                        <span class="flex items-center gap-2">
+                                            <i class="fas fa-mobile-alt text-green-600"></i>
+                                            GCash
+                                        </span>
+                                    @else
+                                        <span class="flex items-center gap-2">
+                                            <i class="fas fa-money-bill text-blue-600"></i>
+                                            Cash on Delivery
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
 
-                    @if($order->payment_method === 'cash_on_delivery' && $order->cash_provided)
-                        <div class="flex justify-between border-t border-gray-200 pt-2">
-                            <span class="text-gray-600">Cash Provided</span>
-                            <span class="font-medium text-green-600">₱{{ number_format($order->cash_provided, 2) }}</span>
+                            @if($order->payment_method === 'cash_on_delivery' && $order->cash_provided)
+                                <div class="bg-blue-50 p-4 rounded-xl space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-600">Cash Provided</span>
+                                        <span
+                                            class="font-bold text-green-600">₱{{ number_format($order->cash_provided, 2) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-600">Order Total</span>
+                                        <span class="font-bold">₱{{ number_format($order->grand_total, 2) }}</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 border-t border-blue-200">
+                                        <span class="text-stone-600">Change Due</span>
+                                        <span class="font-bold text-blue-600">
+                                            ₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @elseif($order->payment_method === 'gcash')
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-stone-600">Payment Status</span>
+                                        <span class="px-3 py-1 text-sm font-bold rounded-full 
+                                                                        @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                                                                        @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                                                                        @else bg-yellow-100 text-yellow-800 @endif">
+                                            {{ ucfirst($order->gcash_payment_status ?? 'pending') }}
+                                        </span>
+                                    </div>
+                                    @if($order->gcash_reference_number)
+                                        <div class="flex justify-between">
+                                            <span class="text-stone-600">Reference Number</span>
+                                            <span class="font-mono font-bold">{{ $order->gcash_reference_number }}</span>
+                                        </div>
+                                    @endif
+                                    @if($order->gcash_receipt_path)
+                                        <div class="pt-3 border-t border-stone-200">
+                                            <a href="{{ route('owner.orders.gcash-receipt', $order) }}" target="_blank"
+                                                class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
+                                                <i class="fas fa-receipt"></i>
+                                                View GCash Receipt
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-gradient-to-br from-stone-900 to-stone-800 text-white rounded-3xl shadow-lg overflow-hidden fade-in"
+                    style="animation-delay: 0.4s;">
+                    <div class="p-6 border-b border-stone-700">
+                        <h3 class="text-xl font-bold flex items-center gap-3">
+                            <div class="p-2 bg-white/10 rounded-xl">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            Order Summary
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-stone-300">Subtotal</span>
+                            <span class="font-medium">₱{{ number_format($order->total_amount, 2) }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Change Due</span>
-                            <span
-                                class="font-medium text-blue-600">₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</span>
+                            <span class="text-stone-300">Delivery Fee</span>
+                            <span class="font-medium">₱{{ number_format($order->delivery_fee, 2) }}</span>
                         </div>
-                    @endif
 
-                    <div class="flex justify-between border-t border-gray-200 pt-2">
-                        <span class="font-medium text-gray-900">Total</span>
-                        <span class="font-bold text-gray-900">₱{{ number_format($order->grand_total, 2) }}</span>
+                        <div class="pt-3 border-t border-stone-700">
+                            <div class="flex justify-between">
+                                <span class="font-bold text-lg">Total</span>
+                                <span class="font-bold text-xl">₱{{ number_format($order->grand_total, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden fade-in"
+                    style="animation-delay: 0.5s;">
+                    <div class="p-6 border-b border-stone-100 bg-gradient-to-r from-stone-50 to-white">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                            <div class="p-2 bg-orange-50 text-orange-600 rounded-xl">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            Order Actions
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <!-- Status Update -->
+                        @if(!in_array($order->status, ['delivered', 'cancelled']))
+                            <div>
+                                <label class="block text-sm font-bold text-stone-700 mb-2">Update Order Status</label>
+                                <form action="{{ route('owner.orders.update-status', $order) }}" method="POST"
+                                    class="space-y-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <select name="status" required
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending
+                                        </option>
+                                        <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>
+                                            Preparing</option>
+                                        <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready</option>
+                                        <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>On
+                                            the Way</option>
+                                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>
+                                            Delivered</option>
+                                        <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>
+                                            Cancelled</option>
+                                    </select>
+                                    <button type="submit"
+                                        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30">
+                                        Update Status
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="p-4 bg-stone-100 rounded-xl text-center">
+                                <i class="fas fa-lock text-stone-400 text-2xl mb-2"></i>
+                                <p class="text-stone-600 font-medium">Order is {{ $order->status }}</p>
+                                <p class="text-sm text-stone-500 mt-1">Status cannot be changed</p>
+                            </div>
+                        @endif
+
+                        <!-- Rider Information -->
+                        <div class="pt-4 border-t border-stone-200">
+                            @if($order->rider)
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold text-stone-700 mb-2">Assigned Rider</label>
+                                    <div class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl">
+                                        <div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                                            <i class="fas fa-motorcycle"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-900">{{ $order->rider->name }}</p>
+                                            <p class="text-sm text-stone-500">{{ $order->rider->phone }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Assign/Change Rider Button -->
+                            @if(!in_array($order->status, ['delivered', 'cancelled']))
+                                <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
+                                    class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold rounded-xl hover:from-orange-700 hover:to-red-700 transition-all shadow-lg shadow-orange-500/30">
+                                    <i class="fas fa-motorcycle"></i>
+                                    {{ $order->rider ? 'Change Rider' : 'Assign Rider' }}
+                                </a>
+                            @endif
+                        </div>
+
+                        <!-- Delete Order -->
+                        @if(in_array($order->status, ['pending', 'cancelled']))
+                            <div class="pt-4 border-t border-stone-200">
+                                <form action="{{ route('owner.orders.destroy', $order) }}" method="POST"
+                                    id="delete-order-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" onclick="confirmDelete()"
+                                        class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-xl hover:from-red-700 hover:to-rose-700 transition-all shadow-lg shadow-red-500/30">
+                                        <i class="fas fa-trash"></i>
+                                        Delete Order
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
-
-            <!-- Actions -->
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                <!-- Status Update Form - Only show for non-delivered, non-cancelled orders -->
-                @if(!in_array($order->status, ['delivered', 'cancelled']))
-                    <div class="flex items-center space-x-4">
-                        <form action="{{ route('owner.orders.update-status', $order) }}" method="POST"
-                            class="flex items-center space-x-4">
-                            @csrf
-                            @method('PUT')
-                            <select name="status"
-                                class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>Preparing
-                                </option>
-                                <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready</option>
-                                <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>On the Way
-                                </option>
-                                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered
-                                </option>
-                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                </option>
-                            </select>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                Update Status
-                            </button>
-                        </form>
-                    </div>
-                @else
-                    <div class="text-sm text-gray-500 italic">
-                        Order is {{ $order->status }} - status cannot be changed
-                    </div>
-                @endif
-
-                <div class="text-right">
-                    @if($order->rider)
-                        <p class="text-sm text-gray-600">Assigned Rider</p>
-                        <p class="font-medium">{{ $order->rider->name }}</p>
-                    @endif
-
-                    <!-- Only show Assign/Change Rider button for non-delivered, non-cancelled orders -->
-                    @if(!in_array($order->status, ['delivered', 'cancelled']))
-                        <a href="{{ route('owner.orders.assign-rider-form', $order) }}"
-                            class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 inline-flex items-center mt-2">
-                            <i class="fas fa-motorcycle mr-2"></i>
-                            {{ $order->rider ? 'Change Rider' : 'Assign Rider' }}
-                        </a>
-                    @endif
-
-                    <!-- Delete button (only for pending/cancelled orders) -->
-                    @if(in_array($order->status, ['pending', 'cancelled']))
-                        <form action="{{ route('owner.orders.destroy', $order) }}" method="POST" class="mt-2">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                                onclick="return confirm('Delete order #{{ $order->order_number }}?')">
-                                <i class="fas fa-trash mr-2"></i>Delete Order
-                            </button>
-                        </form>
-                    @endif
-                </div>
-            </div>
-
-
         </div>
     </div>
-    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Logout?',
+                        text: "You will be returned to the login screen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1c1917',
+                        cancelButtonColor: '#78716c',
+                        confirmButtonText: 'Yes, logout',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // Delete order confirmation
+            window.confirmDelete = function () {
+                Swal.fire({
+                    title: 'Delete Order?',
+                    html: `Are you sure you want to delete Order #<strong>${'{{ $order->order_number }}'}</strong>?<br>
+                           <span class="text-sm text-stone-500">This action cannot be undone.</span>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#78716c',
+                    confirmButtonText: 'Yes, delete',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true,
+                    backdrop: 'rgba(0, 0, 0, 0.3)',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-order-form').submit();
+                    }
+                });
+            };
+        });
+    </script>
 </body>
 
 </html>
