@@ -130,13 +130,21 @@ class OrderController extends Controller
     {
         $user = Auth::user();
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
+
         if ($order->customer_id !== $user->id) {
             abort(403, 'Unauthorized access to this order.');
         }
 
         $order->load('items.menuItem', 'rider', 'messages.sender');
 
-        return view('customer.track-order', compact('order'));
+        return view('customer.track-order', compact('order', 'profilePictureUrl'));
     }
 
     public function cancel(Request $request, Order $order)

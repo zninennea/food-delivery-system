@@ -65,7 +65,7 @@
         </div>
     </nav>
 
-    <div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="relative min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
 
         <div class="absolute inset-0 z-0">
             <div
@@ -74,15 +74,16 @@
             <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-stone-900/90"></div>
         </div>
 
-        <div class="max-w-md w-full relative z-10 fade-in">
+        <div class="max-w-md w-full relative z-10 fade-in mt-10">
             <div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/20">
 
                 <div class="text-center mb-8">
-                    <div class="flex justify-center mb-4">
-                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Logo" class="h-20 w-auto drop-shadow-md">
+                    <div class="flex justify-center mb-4 transition-all duration-300 transform hover:-translate-y-1">
+                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Text"
+                            class="h-70 w-auto drop-shadow-2xl animate-float">
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900">Welcome Back</h2>
-                    <p class="mt-2 text-sm text-gray-600">Please sign in to continue your culinary journey</p>
+                    <p class="mt-2 text-sm text-gray-600">Ready to put NaNi on your plate again?</p>
                 </div>
 
                 @if ($errors->has('email') || session('error'))

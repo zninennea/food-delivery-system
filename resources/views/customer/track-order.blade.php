@@ -79,6 +79,18 @@
                         class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-list mr-1"></i> My Orders
                     </a>
+                    <a href="{{ route('customer.profile.show') }}"
+                        class="flex justify-center mb-0 transition-all duration-300 transform hover:-translate-y-1">
+                        @if($profilePictureUrl)
+                            <img src="{{ $profilePictureUrl }}" alt="Profile"
+                                class="w-12 h-12 rounded-full object-cover border-2 border-orange-600 shadow-sm">
+                        @else
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center text-white text-sm font-bold">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
+                        @endif
+                    </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline ml-2">
                         @csrf
                         <button type="submit"

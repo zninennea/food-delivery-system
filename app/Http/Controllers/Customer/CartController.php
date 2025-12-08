@@ -170,6 +170,13 @@ class CartController extends Controller
     {
         $user = Auth::user();
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         // Check if user has required profile data
         if (empty($user->delivery_address) || empty($user->phone)) {
             return redirect()->route('customer.profile.edit')
@@ -191,6 +198,6 @@ class CartController extends Controller
 
         $deliveryFee = 50.00;
 
-        return view('customer.checkout', compact('cartItems', 'total', 'deliveryFee'));
+        return view('customer.checkout', compact('cartItems', 'total', 'deliveryFee', 'profilePictureUrl'));
     }
 }

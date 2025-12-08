@@ -99,8 +99,9 @@
             <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/20">
 
                 <div class="text-center mb-8">
-                    <div class="flex justify-center mb-4">
-                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Logo" class="h-20 w-auto drop-shadow-md">
+                    <div class="flex justify-center mb-4 transition-all duration-300 transform hover:-translate-y-1">
+                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Text"
+                            class="h-70 w-auto drop-shadow-2xl animate-float">
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900">Join NaNi</h2>
                     <p class="mt-2 text-sm text-gray-600">Create your account to order</p>
