@@ -434,6 +434,7 @@
                         div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
                         div.innerHTML = `
                         <div class="${isMe ? 'chat-message-right' : 'chat-message-left'} max-w-[80%] p-3 text-sm">
+                            <p class="font-medium text-xs opacity-80 mb-1">${msg.sender_name}</p>
                             <p>${msg.message}</p>
                             <span class="text-[10px] opacity-70 block text-right mt-1">${msg.created_at}</span>
                         </div>

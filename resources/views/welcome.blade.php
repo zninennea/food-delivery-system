@@ -263,15 +263,15 @@
                 <div class="text-center md:text-right">
                     <h4 class="text-xl font-bold mb-6 text-white">Opening Hours</h4>
                     <ul class="space-y-3 text-gray-400">
-                        <li class="flex justify-center md:justify-end justify-between">
+                        <li class="flex md:justify-end justify-between">
                             <span>Monday - Friday</span>
                             <span class="ml-4 text-white">10:00 AM - 10:00 PM</span>
                         </li>
-                        <li class="flex justify-center md:justify-end justify-between">
+                        <li class="flex md:justify-end justify-between">
                             <span>Saturday</span>
                             <span class="ml-4 text-white">09:00 AM - 11:00 PM</span>
                         </li>
-                        <li class="flex justify-center md:justify-end justify-between">
+                        <li class="flex md:justify-end justify-between">
                             <span>Sunday</span>
                             <span class="ml-4 text-white">09:00 AM - 10:00 PM</span>
                         </li>

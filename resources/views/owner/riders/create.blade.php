@@ -361,92 +361,47 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Logout Confirmation
-            const logoutForm = document.getElementById('logout-form');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Logout?',
-                        text: "You will be returned to the login screen.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1c1917',
-                        cancelButtonColor: '#78716c',
-                        confirmButtonText: 'Yes, logout',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            logoutForm.submit();
-                        }
-                    });
-                });
-            }
+        // Auto-refresh logic
+        setTimeout(function () {
+            window.location.reload();
+        }, 60000); // Refresh every minute
 
-            // Image preview for profile picture
-            const profilePictureInput = document.getElementById('profile_picture');
-            if (profilePictureInput) {
-                profilePictureInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            // Remove old preview if exists
-                            const oldPreview = document.getElementById('profile-preview');
-                            if (oldPreview) oldPreview.remove();
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-                            // Create new preview
-                            const preview = document.createElement('div');
-                            preview.id = 'profile-preview';
-                            preview.className = 'mt-4';
-                            preview.innerHTML = `
-                                <p class="text-sm font-medium text-stone-700 mb-2">Preview:</p>
-                                <div class="relative inline-block">
-                                    <img src="${e.target.result}" 
-                                         alt="Profile Preview"
-                                         class="h-24 w-24 rounded-full object-cover border-4 border-white shadow-md">
-                                </div>
-                            `;
-                            profilePictureInput.parentNode.insertBefore(preview, profilePictureInput.nextSibling);
-                        }
-                        reader.readAsDataURL(file);
+                Swal.fire({
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
                     }
                 });
-            }
-
-            // Image preview for driver's license
-            const licenseInput = document.getElementById('drivers_license');
-            if (licenseInput) {
-                licenseInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            // Remove old preview if exists
-                            const oldPreview = document.getElementById('license-preview');
-                            if (oldPreview) oldPreview.remove();
-
-                            // Create new preview
-                            const preview = document.createElement('div');
-                            preview.id = 'license-preview';
-                            preview.className = 'mt-4';
-                            preview.innerHTML = `
-                                <p class="text-sm font-medium text-stone-700 mb-2">License Preview:</p>
-                                <div class="relative">
-                                    <img src="${e.target.result}" 
-                                         alt="License Preview"
-                                         class="h-48 w-full object-contain rounded-lg border border-stone-200 shadow-sm">
-                                </div>
-                            `;
-                            licenseInput.parentNode.insertBefore(preview, licenseInput.nextSibling);
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-        });
+            });
+        }
     </script>
 </body>
 

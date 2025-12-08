@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->isLocal()) {
+        if ($this->app->environment('local')) {
             $this->app->register(IdeHelperServiceProvider::class);
         }
         
@@ -28,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+         // Force Google config if not set
+        if (empty(config('services.google.client_id'))) {
+            config([
+                'services.google.client_id' => env('GOOGLE_CLIENT_ID'),
+                'services.google.client_secret' => env('GOOGLE_CLIENT_SECRET'),
+                'services.google.redirect' => env('GOOGLE_REDIRECT_URI'),
+            ]);
+        }
     }
 }

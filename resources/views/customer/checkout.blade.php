@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <!-- Add SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
         rel="stylesheet">
@@ -46,6 +49,25 @@
 
         .payment-radio:checked+div .check-icon {
             display: block;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f5f5f4;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
         }
     </style>
 </head>
@@ -96,7 +118,7 @@
             <p class="text-stone-500">Complete your order details below.</p>
         </div>
 
-        <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="fade-in">
+        <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" id="checkoutForm">
             @csrf
 
             <input type="hidden" name="delivery_address" value="{{ Auth::user()->delivery_address }}">
@@ -117,6 +139,20 @@
                                 class="text-sm text-orange-600 hover:underline font-medium">Edit</a>
                         </div>
 
+                        @error('delivery_address')
+                            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                        @error('customer_phone')
+                            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
                             <div class="bg-stone-50 p-4 rounded-xl">
                                 <p class="text-stone-400 text-xs uppercase tracking-wider font-bold mb-1">Deliver To</p>
@@ -136,7 +172,7 @@
                                 (Optional)</label>
                             <textarea name="special_instructions" id="special_instructions" rows="2"
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-none"
-                                placeholder="Gate code, landmark, etc..."></textarea>
+                                placeholder="Gate code, landmark, etc...">{{ old('special_instructions') }}</textarea>
                         </div>
                     </div>
 
@@ -150,7 +186,7 @@
                         <div class="space-y-4">
                             <label class="relative block cursor-pointer group">
                                 <input type="radio" name="payment_method" value="cash_on_delivery"
-                                    class="peer sr-only payment-radio" checked onchange="togglePaymentFields()">
+                                    class="peer sr-only payment-radio" {{ old('payment_method', 'cash_on_delivery') == 'cash_on_delivery' ? 'checked' : '' }} onchange="togglePaymentFields()">
                                 <div
                                     class="p-5 rounded-xl border border-gray-200 hover:border-orange-200 transition-all flex items-center gap-4">
                                     <div
@@ -166,7 +202,7 @@
                                 </div>
                             </label>
 
-                            <div id="cash_provided_field" class="ml-14 transition-all duration-300">
+                            <div id="cash_provided_field" class="ml-14 transition-all duration-300 {{ old('payment_method', 'cash_on_delivery') == 'gcash' ? 'hidden' : '' }}">
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">I
                                     will pay with (Optional)</label>
                                 <div class="relative max-w-xs">
@@ -174,14 +210,17 @@
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">₱</span>
                                     <input type="number" name="cash_provided" step="0.01"
                                         class="pl-7 block w-full border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                                        placeholder="1000">
+                                        placeholder="1000" value="{{ old('cash_provided') }}">
                                 </div>
+                                @error('cash_provided')
+                                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
                                 <p class="text-xs text-stone-400 mt-1">Enter amount if you need change.</p>
                             </div>
 
                             <label class="relative block cursor-pointer group">
                                 <input type="radio" name="payment_method" value="gcash"
-                                    class="peer sr-only payment-radio" onchange="togglePaymentFields()">
+                                    class="peer sr-only payment-radio" {{ old('payment_method') == 'gcash' ? 'checked' : '' }} onchange="togglePaymentFields()">
                                 <div
                                     class="p-5 rounded-xl border border-gray-200 hover:border-orange-200 transition-all flex items-center gap-4">
                                     <div
@@ -198,7 +237,20 @@
                             </label>
 
                             <div id="gcash_fields"
-                                class="hidden ml-14 space-y-4 bg-stone-50 p-4 rounded-xl border border-stone-100">
+                                class="ml-14 space-y-4 bg-stone-50 p-4 rounded-xl border border-stone-100 {{ old('payment_method') == 'gcash' ? '' : 'hidden' }}">
+                                @error('gcash_reference_number')
+                                    <div class="p-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                                @error('gcash_receipt')
+                                    <div class="p-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                                
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="text-sm font-bold text-gray-700">Send to: 09123775192</span>
@@ -212,17 +264,18 @@
                                 <div>
                                     <label
                                         class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ref
-                                        Number</label>
+                                        Number <span class="text-red-500">*</span></label>
                                     <input type="text" name="gcash_reference_number" id="gcash_reference_number"
-                                        class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                        placeholder="e.g. 100234...">
+                                        class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm {{ $errors->has('gcash_reference_number') ? 'border-red-300' : '' }}"
+                                        placeholder="e.g. 100234..." value="{{ old('gcash_reference_number') }}">
                                 </div>
                                 <div>
                                     <label
                                         class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Upload
-                                        Receipt</label>
+                                        Receipt <span class="text-red-500">*</span></label>
                                     <input type="file" name="gcash_receipt" id="gcash_receipt" accept="image/*"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 {{ $errors->has('gcash_receipt') ? 'border-red-300' : '' }}">
+                                    <p class="text-xs text-stone-400 mt-1">Upload a screenshot of your payment confirmation</p>
                                 </div>
                             </div>
                         </div>
@@ -262,7 +315,7 @@
                             </div>
                         </div>
 
-                        <button type="submit"
+                        <button type="submit" id="submitOrderBtn"
                             class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl font-bold shadow-lg hover:shadow-orange-500/30 transform hover:-translate-y-1 transition-all duration-200">
                             Place Order
                         </button>
@@ -276,19 +329,21 @@
         </form>
     </div>
 
-    <div id="qrModal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl transform transition-all">
-            <div class="p-6 text-center">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Scan to Pay</h3>
-                <div class="bg-blue-600 p-4 rounded-xl inline-block mb-4">
-                    <img id="qrImage" src="" alt="GCash QR" class="max-w-full h-auto rounded-lg">
+    <!-- Fixed QR Modal - Properly Centered -->
+    <div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl transform transition-all">
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Scan to Pay</h3>
+                    <div class="bg-blue-50 p-4 rounded-xl inline-block mb-4 border border-blue-100">
+                        <img id="qrImage" src="" alt="GCash QR" class="w-64 h-64 object-contain rounded-lg mx-auto">
+                    </div>
+                    <p class="text-sm text-gray-600 mb-6">Scan with your GCash app</p>
+                    <button type="button" id="closeModal"
+                        class="w-full bg-stone-100 text-stone-700 font-bold py-3 rounded-xl hover:bg-stone-200 transition-colors">
+                        Close
+                    </button>
                 </div>
-                <p class="text-sm text-gray-600 mb-6">Scan with your GCash app</p>
-                <button type="button" id="closeModal"
-                    class="w-full bg-stone-100 text-stone-700 font-bold py-3 rounded-xl hover:bg-stone-200 transition-colors">
-                    Close
-                </button>
             </div>
         </div>
     </div>
@@ -322,10 +377,26 @@
 
         // QR Modal Logic
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Toast for notifications
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#1f2937',
+                color: '#f9fafb',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
             const modal = document.getElementById('qrModal');
             const qrImage = document.getElementById('qrImage');
             const closeBtn = document.getElementById('closeModal');
 
+            // Open QR Modal
             document.querySelectorAll('.view-qr-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     qrImage.src = this.dataset.qrUrl;
@@ -333,8 +404,93 @@
                 });
             });
 
+            // Close QR Modal
             closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
             modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+            // Form Validation
+            const checkoutForm = document.getElementById('checkoutForm');
+            const submitBtn = document.getElementById('submitOrderBtn');
+
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function (e) {
+                    const gcashRadio = document.querySelector('input[value="gcash"]:checked');
+                    
+                    if (gcashRadio) {
+                        const gcashRef = document.getElementById('gcash_reference_number');
+                        const gcashReceipt = document.getElementById('gcash_receipt');
+                        
+                        // Check if GCash reference is empty
+                        if (!gcashRef.value.trim()) {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'GCash Reference Number is required'
+                            });
+                            gcashRef.focus();
+                            return false;
+                        }
+                        
+                        // Check if GCash receipt is empty
+                        if (!gcashReceipt.value) {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'GCash receipt is required'
+                            });
+                            return false;
+                        }
+                    }
+
+                    // Optional: Show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+                });
+            }
+
+            // Show old validation errors
+            @if($errors->any())
+                // Scroll to first error
+                const firstError = document.querySelector('.text-red-600, [class*="border-red"]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            @endif
+
+            // Logout Confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Logout Confirmation',
+                        html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                        cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                            cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
         });
     </script>
 </body>

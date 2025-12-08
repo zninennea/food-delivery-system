@@ -107,15 +107,76 @@
                 <p class="text-stone-500">Track sales, orders, and customer satisfaction.</p>
             </div>
 
-            <div class="flex gap-3">
-                <a href="{{ route('owner.analytics.export', ['type' => 'monthly', 'year' => date('Y')]) }}"
-                    class="flex items-center gap-2 bg-white border border-stone-200 text-stone-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-stone-50 transition-colors shadow-sm">
-                    <i class="fas fa-download"></i> Monthly Summary
+        </div>
+        <!-- Simple CSV Downloads -->
+        <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 mb-8 fade-in"
+            style="animation-delay: 0.1s;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 font-serif">Order Data Downloads</h3>
+                <a href="{{ route('owner.analytics.data-dictionary') }}"
+                    class="text-blue-600 text-sm font-bold hover:underline flex items-center gap-1">
+                    <i class="fas fa-book"></i> Data Dictionary
                 </a>
-                <a href="{{ route('owner.analytics.export', ['type' => 'daily', 'month' => date('m'), 'year' => date('Y')]) }}"
-                    class="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-500/30">
-                    <i class="fas fa-file-csv"></i> Detailed Daily Report
-                </a>
+            </div>
+
+            <p class="text-sm text-stone-600 mb-6">Download anonymized order data in CSV format, similar to public
+                bike-sharing systems.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Quarterly Data -->
+                <div class="border border-stone-200 rounded-xl p-4 hover:bg-stone-50 transition-colors">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-gray-900">Quarterly Data</h4>
+                        <span
+                            class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Q{{ ceil(date('m') / 3) }}</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mb-3">All orders from the current quarter</p>
+                    <a href="{{ route('owner.analytics.trip-data', ['type' => 'quarterly', 'year' => date('Y'), 'quarter' => ceil(date('m') / 3)]) }}"
+                        class="inline-flex items-center gap-2 text-blue-600 text-sm font-bold hover:text-blue-800">
+                        <i class="fas fa-file-csv"></i> Download CSV
+                    </a>
+                </div>
+
+                <!-- Monthly Data -->
+                <div class="border border-stone-200 rounded-xl p-4 hover:bg-stone-50 transition-colors">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-gray-900">Monthly Data</h4>
+                        <span
+                            class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">{{ date('F') }}</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mb-3">All orders from {{ date('F Y') }}</p>
+                    <a href="{{ route('owner.analytics.trip-data', ['type' => 'monthly', 'year' => date('Y'), 'month' => date('m')]) }}"
+                        class="inline-flex items-center gap-2 text-orange-600 text-sm font-bold hover:text-orange-800">
+                        <i class="fas fa-file-csv"></i> Download CSV
+                    </a>
+                </div>
+
+                <!-- Recent Data -->
+                <div class="border border-stone-200 rounded-xl p-4 hover:bg-stone-50 transition-colors">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-gray-900">Recent Orders</h4>
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Today</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mb-3">Orders from the last 7 days</p>
+                    <a href="{{ route('owner.analytics.trip-data', ['type' => 'daily']) }}"
+                        class="inline-flex items-center gap-2 text-green-600 text-sm font-bold hover:text-green-800">
+                        <i class="fas fa-file-csv"></i> Download CSV
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-stone-100">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 text-sm mb-1">Privacy Protected</h4>
+                        <p class="text-xs text-blue-700">All personally identifiable information (names, addresses,
+                            phone
+                            numbers) has been removed. Only order metadata is included.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -206,11 +267,12 @@
                         @if($count > 0)
                             <div class="flex justify-between items-center text-sm">
                                 <span class="capitalize text-stone-600 flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full 
-                                                                                                                        @if($status == 'delivered') bg-green-500
-                                                                                                                        @elseif($status == 'cancelled') bg-red-500
-                                                                                                                        @else bg-blue-500 @endif
-                                                                                                                    "></span>
+                                    <span
+                                        class="w-2 h-2 rounded-full 
+                                                                                                                                                                                                                                                                        @if($status == 'delivered') bg-green-500
+                                                                                                                                                                                                                                                                        @elseif($status == 'cancelled') bg-red-500
+                                                                                                                                                                                                                                                                        @else bg-blue-500 @endif
+                                                                                                                                                                                                                                                                    "></span>
                                     {{ str_replace('_', ' ', $status) }}
                                 </span>
                                 <span class="font-bold text-gray-900">{{ $count }}</span>

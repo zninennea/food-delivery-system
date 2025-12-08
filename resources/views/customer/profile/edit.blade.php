@@ -67,10 +67,23 @@
                         class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
-                    <a href="{{ route('customer.profile.show') }}"
-                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                        <i class="fas fa-user mr-1"></i> Profile
+                    <a href="{{ route('customer.orders.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-list mr-1"></i> My Orders
                     </a>
+                    <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
+                        <a href="{{ route('customer.profile.show') }}"
+                            class="text-orange-600 hover:text-orange-700 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -161,6 +174,41 @@
                     </div>
                 </div>
 
+                <!-- Add this section after the Delivery Information section, before the buttons -->
+                <hr class="border-stone-100">
+
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 font-serif mb-4">Social Accounts</h3>
+
+                    <div class="flex items-center justify-between p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-12 h-12 rounded-full bg-white border border-stone-300 flex items-center justify-center">
+                                <img src="https://www.google.com/favicon.ico" alt="Google" class="w-6 h-6">
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Google</p>
+                                <p class="text-sm text-stone-500">
+                                    @if($user->oauth_provider === 'google')
+                                        <span class="text-green-600">
+                                            <i class="fas fa-check-circle mr-1"></i> Connected
+                                        </span>
+                                    @else
+                                        <span class="text-stone-500">Not connected</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        @if(!$user->hasGoogleAccount())
+                            <a href="{{ route('google.login') }}" onclick="setConnectionIntent()"
+                                class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all shadow-sm">
+                                <i class="fab fa-google mr-1"></i> Connect
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-between pt-4">
                     <a href="{{ route('customer.profile.password') }}"
                         class="text-stone-500 hover:text-orange-600 text-sm font-medium transition-colors">
@@ -183,7 +231,29 @@
         </div>
     </div>
 
-    // ... (previous HTML code remains the same until the JavaScript section)
+    <script>
+        function setConnectionIntent() {
+            // Store that user is connecting from profile page
+            localStorage.setItem('google_connect_intent', 'profile');
+        }
+
+        // Check on page load if we need to set session
+        document.addEventListener('DOMContentLoaded', function () {
+            const intent = localStorage.getItem('google_connect_intent');
+            if (intent === 'profile') {
+                // Send to server to set session
+                fetch('{{ route("set.google.connect.intent") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ intent: 'profile' })
+                });
+                localStorage.removeItem('google_connect_intent');
+            }
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -422,6 +492,84 @@
             validateForm();
         });
     </script>
+
+    <script>
+        function disconnectGoogle() {
+            Swal.fire({
+                title: 'Disconnect Google Account?',
+                html: `<div class="text-center">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+            </div>
+            <p class="text-gray-700">Are you sure you want to disconnect your Google account?</p>
+            <div class="mt-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                <p class="text-sm text-red-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    You'll need to set a password if you want to log in with email.
+                </p>
+            </div>
+        </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-unlink mr-2"></i>Disconnect',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                    cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('{{ route('google.disconnect') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Disconnected!',
+                                html: `<div class="text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <p class="text-gray-700">Google account has been disconnected.</p>
+                        </div>`,
+                                icon: 'success',
+                                confirmButtonColor: '#10b981',
+                                confirmButtonText: '<i class="fas fa-check mr-2"></i>OK',
+                                customClass: {
+                                    popup: 'rounded-2xl',
+                                    confirmButton: 'rounded-xl px-6 py-3 font-medium'
+                                }
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message || 'Failed to disconnect');
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Failed to disconnect Google account.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+
 </body>
 
 </html>

@@ -237,7 +237,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
                                         class="px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full 
-                                                                {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                                    {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ ucfirst($rider->status) }}
                                     </span>
                                 </td>
@@ -308,122 +308,47 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Logout Confirmation
-            const logoutForm = document.getElementById('logout-form');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Logout?',
-                        text: "You will be returned to the login screen.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1c1917',
-                        cancelButtonColor: '#78716c',
-                        confirmButtonText: 'Yes, logout',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            logoutForm.submit();
-                        }
-                    });
-                });
-            }
+        // Auto-refresh logic
+        setTimeout(function () {
+            window.location.reload();
+        }, 60000); // Refresh every minute
 
-            // Helper to open/close modals with animation
-            function toggleModal(modalId, show = true) {
-                const modal = document.getElementById(modalId);
-                const content = modal.querySelector('.modal-content');
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-                if (show) {
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                        modal.classList.remove('opacity-0');
-                        if (content) {
-                            content.classList.remove('scale-95');
-                            content.classList.add('scale-100');
-                        }
-                    }, 10);
-                } else {
-                    modal.classList.add('opacity-0');
-                    if (content) {
-                        content.classList.remove('scale-100');
-                        content.classList.add('scale-95');
-                    }
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                    }, 300);
-                }
-            }
-
-            // License Modal
-            const licenseModal = document.getElementById('licenseModal');
-            const licenseImage = document.getElementById('licenseImage');
-            const modalTitle = document.getElementById('modalTitle');
-            const closeModal = document.getElementById('closeModal');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-
-            // Add event listeners to all view license buttons
-            document.querySelectorAll('.view-license-btn').forEach(button => {
-                button.addEventListener('click', function () {
-                    const licenseUrl = this.getAttribute('data-license-url');
-                    const riderName = this.getAttribute('data-rider-name');
-
-                    licenseImage.src = licenseUrl;
-                    modalTitle.textContent = `${riderName}'s Driver's License`;
-                    toggleModal('licenseModal', true);
-                });
-            });
-
-            // Close modal buttons
-            closeModal.addEventListener('click', function () {
-                toggleModal('licenseModal', false);
-            });
-
-            closeModalBtn.addEventListener('click', function () {
-                toggleModal('licenseModal', false);
-            });
-
-            // Close modal when clicking outside
-            licenseModal.addEventListener('click', function (e) {
-                if (e.target === licenseModal) {
-                    toggleModal('licenseModal', false);
-                }
-            });
-
-            // Close modal with Escape key
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && !licenseModal.classList.contains('hidden')) {
-                    toggleModal('licenseModal', false);
-                }
-            });
-
-            // Delete confirmation
-            window.confirmDelete = function (riderName, button) {
                 Swal.fire({
-                    title: 'Delete Rider?',
-                    html: `Are you sure you want to delete <strong>${riderName}</strong>?<br>
-                           <span class="text-sm text-stone-500">This action cannot be undone.</span>`,
-                    icon: 'warning',
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#78716c',
-                    confirmButtonText: 'Yes, delete',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
                     reverseButtons: true,
-                    backdrop: 'rgba(0, 0, 0, 0.3)',
                     customClass: {
-                        popup: 'rounded-2xl shadow-2xl'
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        button.closest('form').submit();
+                        logoutForm.submit();
                     }
                 });
-            };
-        });
+            });
+        }
     </script>
 </body>
 

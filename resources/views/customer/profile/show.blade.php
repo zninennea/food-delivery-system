@@ -173,6 +173,32 @@
                 </div>
             </div>
 
+            <!-- Add this section in the Contact Information card, after the phone section -->
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+                    <i class="fab fa-google"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Google Account</p>
+                    <p class="text-gray-900 font-medium">
+                        @if($user->oauth_provider === 'google')
+                            <span class="text-green-600">
+                                <i class="fas fa-check-circle mr-1"></i> Connected
+                            </span>
+                            <span class="text-xs text-stone-500 ml-2">({{ $user->email }})</span>
+                        @else
+                            <span class="text-stone-500">
+                                <i class="fas fa-times-circle mr-1"></i> Not Connected
+                            </span>
+                            <a href="{{ route('google.login') }}"
+                                class="text-xs text-orange-600 hover:text-orange-500 ml-3">
+                                Connect Google
+                            </a>
+                        @endif
+                    </p>
+                </div>
+            </div>
+
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8">
                 <h3 class="text-lg font-bold text-gray-900 font-serif mb-6 flex items-center gap-2">
                     <i class="fas fa-map-marker-alt text-orange-500"></i> Delivery Details

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -19,6 +20,15 @@ class LoginController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        // Check if user exists and is using OAuth
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && $user->oauth_provider === 'google' && !$user->password) {
+            return back()->withErrors([
+                'email' => 'This account uses Google login. Please sign in with Google.',
+            ])->onlyInput('email');
+        }
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();

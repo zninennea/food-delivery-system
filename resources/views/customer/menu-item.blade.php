@@ -7,14 +7,39 @@
     <title>{{ $menuItem->name }} - NaNi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; transform: translateY(10px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        h1, h2, h3, h4, h5 { 
+            font-family: 'Playfair Display', serif; 
+        }
+        .fade-in { 
+            animation: fadeIn 0.6s ease-out forwards; 
+            opacity: 0; 
+            transform: translateY(10px); 
+        }
+        @keyframes fadeIn { 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        
+        /* SweetAlert2 Custom Theme */
+        .swal2-popup {
+            border-radius: 1.5rem !important;
+            font-family: 'Inter', sans-serif;
+        }
+        .swal2-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -36,9 +61,7 @@
                     </a>
                     <a href="{{ route('customer.cart.index') }}" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative">
                         <i class="fas fa-shopping-cart mr-1"></i> Cart
-                        @if($cartCount > 0)
-                            <span class="absolute top-0 right-0 -mt-1 -mr-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $cartCount }}</span>
-                        @endif
+                        <span id="nav-cart-count" class="{{ $cartCount > 0 ? '' : 'hidden' }} absolute top-0 right-0 -mt-1 -mr-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $cartCount }}</span>
                     </a>
                      <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
                         <a href="{{ route('customer.profile.show') }}" class="text-gray-600 hover:text-orange-600 transition-colors">
@@ -96,19 +119,16 @@
 
                     <p class="text-gray-600 text-lg leading-relaxed mb-8 font-light">{{ $menuItem->description }}</p>
 
-                    <form action="{{ route('customer.cart.add', $menuItem) }}" method="POST" class="space-y-6">
+                    <form id="addToCartForm" action="{{ route('customer.cart.add', $menuItem) }}" method="POST" class="space-y-6">
                         @csrf
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                                <div class="relative">
-                                    <select name="quantity" id="quantity"
-                                        class="block w-full pl-3 pr-10 py-3 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-xl bg-gray-50">
-                                        @for($i = 1; $i <= 10; $i++)
-                                            <option value="{{ $i }}">{{ $i }}</option>
-                                        @endfor
-                                    </select>
+                                <div class="flex items-center justify-between bg-gray-50 rounded-2xl p-2 border border-gray-100 max-w-xs">
+                                    <button type="button" id="decreaseQty" class="w-10 h-10 bg-white rounded-xl shadow-sm text-gray-600 hover:text-orange-600 transition-colors flex items-center justify-center font-bold text-lg">-</button>
+                                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" class="w-16 text-center bg-transparent border-none focus:ring-0 text-xl font-bold text-gray-900">
+                                    <button type="button" id="increaseQty" class="w-10 h-10 bg-white rounded-xl shadow-sm text-gray-600 hover:text-orange-600 transition-colors flex items-center justify-center font-bold text-lg">+</button>
                                 </div>
                             </div>
                         </div>
@@ -123,9 +143,12 @@
                         </div>
 
                         <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                            <button type="submit"
+                            <button type="submit" id="addToCartButton"
                                 class="flex-1 bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 px-8 rounded-xl hover:shadow-lg hover:shadow-orange-500/30 transform hover:-translate-y-1 transition-all duration-200 font-bold text-lg flex justify-center items-center gap-2">
                                 <i class="fas fa-shopping-bag"></i> Add to Order
+                                <span id="priceDisplay" class="bg-white/20 px-3 py-1 rounded text-sm font-normal ml-2">
+                                    ₱{{ number_format($menuItem->price, 2) }}
+                                </span>
                             </button>
                             <a href="{{ route('customer.menu') }}" 
                                 class="px-6 py-4 border border-gray-200 rounded-xl text-gray-600 font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors text-center">
@@ -166,5 +189,196 @@
         @endif
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get menu item price
+            const menuItemPrice = {{ $menuItem->price }};
+            const quantityInput = document.getElementById('quantity');
+            const priceDisplay = document.getElementById('priceDisplay');
+            
+            // Function to update price display
+            function updatePriceDisplay() {
+                const quantity = parseInt(quantityInput.value);
+                const totalPrice = menuItemPrice * quantity;
+                priceDisplay.textContent = '₱' + totalPrice.toFixed(2);
+            }
+            
+            // Initialize price display
+            updatePriceDisplay();
+            
+            // Quantity increase/decrease buttons
+            document.getElementById('increaseQty').addEventListener('click', () => {
+                if (parseInt(quantityInput.value) < 10) {
+                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                    updatePriceDisplay();
+                }
+            });
+            
+            document.getElementById('decreaseQty').addEventListener('click', () => {
+                if (parseInt(quantityInput.value) > 1) {
+                    quantityInput.value = parseInt(quantityInput.value) - 1;
+                    updatePriceDisplay();
+                }
+            });
+            
+            // Handle quantity input changes
+            quantityInput.addEventListener('change', () => {
+                let value = parseInt(quantityInput.value);
+                if (value < 1) value = 1;
+                if (value > 10) value = 10;
+                quantityInput.value = value;
+                updatePriceDisplay();
+            });
+
+            // Handle form submission with AJAX
+            const addToCartForm = document.getElementById('addToCartForm');
+            const addToCartButton = document.getElementById('addToCartButton');
+
+            if (addToCartForm) {
+                addToCartForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const submitBtn = addToCartButton;
+                    const originalBtnText = submitBtn.innerHTML;
+
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
+
+                    const formData = new FormData(this);
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Network response was not ok');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // SweetAlert Success - Same style as menu.blade.php
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Added!',
+                                text: data.message,
+                                timer: 1500,
+                                showConfirmButton: false,
+                                toast: true,
+                                position: 'top-end'
+                            });
+
+                            // Update cart count in navigation
+                            const navCartCount = document.querySelector('#nav-cart-count');
+                            if (navCartCount) {
+                                navCartCount.textContent = data.cart_count;
+                                if (data.cart_count > 0) {
+                                    navCartCount.classList.remove('hidden');
+                                } else {
+                                    navCartCount.classList.add('hidden');
+                                }
+                            }
+
+                            // Reset form (keep quantity but clear instructions)
+                            document.getElementById('special_instructions').value = '';
+                            quantityInput.value = 1;
+                            updatePriceDisplay();
+                        } else {
+                            throw new Error(data.message || 'Failed to add item to cart');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Failed to add item to cart. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'rounded-2xl',
+                                confirmButton: 'rounded-xl px-6 py-3'
+                            }
+                        });
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    });
+                });
+            }
+
+            // Logout confirmation
+            const logoutForm = document.getElementById('logout-form');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Logout Confirmation',
+                        html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                        cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                            cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+
+            // Show any flash messages from server
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ session('success') }}',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+            @endif
+        });
+    </script>
 </body>
 </html>

@@ -190,6 +190,26 @@
                         Create Account
                     </button>
 
+                    <!-- Add this after the existing register form, before the "Already have an account?" section -->
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white text-gray-500 rounded-full">Or sign up with</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <a href="{{ route('google.login') }}"
+                                class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                                <span>Sign up with Google</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
                         <p class="text-sm text-gray-600">
                             Already have an account?

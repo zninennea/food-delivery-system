@@ -76,7 +76,7 @@
                         class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative">
                         <i class="fas fa-shopping-cart mr-1"></i> Cart
                         @if($cartItems->sum('quantity') > 0)
-                            <span
+                            <span id="nav-cart-count"
                                 class="absolute top-0 right-0 -mt-1 -mr-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $cartItems->sum('quantity') }}</span>
                         @endif
                     </a>
@@ -237,7 +237,8 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: body ? JSON.stringify(body) : null
                     });
@@ -264,7 +265,11 @@
                         text: error.message || 'Something went wrong. Please try again.',
                         icon: 'error',
                         confirmButtonColor: '#ef4444',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-xl px-6 py-3'
+                        }
                     });
                 }
             };
@@ -338,7 +343,7 @@
                 });
             });
 
-            // Clear Cart with SweetAlert2
+            // Clear Cart with SweetAlert2 - FIXED VERSION
             document.getElementById('clear-cart-btn')?.addEventListener('click', function () {
                 Swal.fire({
                     title: 'Clear Cart?',
@@ -369,32 +374,59 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Clearing Cart...',
+                            text: 'Please wait while we clear your cart.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
                         fetch('{{ route('customer.cart.clear') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(data => {
+                                        throw new Error(data.message || 'Network response was not ok');
+                                    });
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.success) {
+                                    Swal.close();
                                     Toast.fire({
                                         icon: 'success',
-                                        title: 'Cart cleared successfully'
+                                        title: data.message || 'Cart cleared successfully'
                                     });
                                     setTimeout(() => {
                                         window.location.reload();
                                     }, 1000);
+                                } else {
+                                    throw new Error(data.message || 'Failed to clear cart');
                                 }
                             })
                             .catch(error => {
+                                console.error('Error:', error);
                                 Swal.fire({
                                     title: 'Error',
-                                    text: 'Failed to clear cart. Please try again.',
+                                    text: error.message || 'Failed to clear cart. Please try again.',
                                     icon: 'error',
                                     confirmButtonColor: '#ef4444',
-                                    confirmButtonText: 'OK'
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        popup: 'rounded-2xl',
+                                        confirmButton: 'rounded-xl px-6 py-3'
+                                    }
                                 });
                             });
                     }
@@ -435,6 +467,28 @@
                     });
                 });
             }
+
+            // Show any flash messages from server
+            @if(session('success'))
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ session('success') }}'
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+            @endif
         });
     </script>
 </body>

@@ -304,30 +304,47 @@
         @endif
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Logout Confirmation
-            const logoutForm = document.getElementById('logout-form');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Logout?',
-                        text: "You will be returned to the login screen.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1c1917',
-                        cancelButtonColor: '#78716c',
-                        confirmButtonText: 'Yes, logout',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            logoutForm.submit();
-                        }
-                    });
+        // Auto-refresh logic
+        setTimeout(function () {
+            window.location.reload();
+        }, 60000); // Refresh every minute
+
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
                 });
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>

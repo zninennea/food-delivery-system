@@ -71,7 +71,14 @@ class User extends Authenticatable
         'status',           // For riders
         'delivery_address', // Add this for customers
         'drivers_license',
-        'status'
+        'status',
+        // Google OAuth fields
+        'google_id',
+        'google_token',
+        'google_refresh_token',
+        'avatar',
+        'oauth_provider',
+        'oauth_id'
     ];
 
     protected $hidden = [
@@ -151,5 +158,21 @@ class User extends Authenticatable
     public function getDefaultDeliveryAddress()
     {
         return $this->delivery_address ?? 'No delivery address set';
+    }
+    // Add this helper method to check if user has Google connected
+    public function hasGoogleAccount()
+    {
+        return !empty($this->google_id) && $this->oauth_provider === 'google';
+    }
+
+    // Add this method to get profile picture URL
+    public function getProfilePictureUrlAttribute()
+    {
+        if ($this->profile_picture) {
+            return asset('storage/' . $this->profile_picture);
+        } elseif ($this->avatar && $this->oauth_provider === 'google') {
+            return $this->avatar;
+        }
+        return null;
     }
 }

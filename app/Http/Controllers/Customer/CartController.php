@@ -126,11 +126,21 @@ class CartController extends Controller
         ]);
     }
 
-    public function clear()
+    public function clear(Request $request)
     {
         $user = Auth::user();
         Cart::where('customer_id', $user->id)->delete();
 
+        // Return JSON response for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart cleared successfully!',
+                'cart_count' => 0
+            ]);
+        }
+
+        // For regular requests, redirect back
         return redirect()->back()->with('success', 'Cart cleared!');
     }
 

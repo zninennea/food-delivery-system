@@ -71,10 +71,23 @@
                         class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
-                    <a href="{{ route('customer.profile.show') }}"
-                        class="text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                        <i class="fas fa-user mr-1"></i> Profile
+                    <a href="{{ route('customer.orders.index') }}"
+                        class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-list mr-1"></i> My Orders
                     </a>
+                    <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
+                        <a href="{{ route('customer.profile.show') }}"
+                            class="text-orange-600 hover:text-orange-700 transition-colors">
+                            <i class="fas fa-user-circle text-xl"></i>
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Logout">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

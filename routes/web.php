@@ -18,6 +18,9 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\Auth\GoogleController;
+use Illuminate\Http\Request;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -193,6 +196,19 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/analytics/sales-data', [OwnerAnalyticsController::class, 'getSalesData'])->name('analytics.sales-data');
     Route::get('/analytics/export', [App\Http\Controllers\Owner\AnalyticsController::class, 'export'])->name('analytics.export');
 
+    // Owner analytics export routes (FIXED VERSION)
+    Route::get('/analytics/order-data', [OwnerAnalyticsController::class, 'exportOrderData'])
+        ->name('analytics.order-data');
+
+    Route::get('/analytics/item-analytics', [OwnerAnalyticsController::class, 'exportItemAnalytics'])
+        ->name('analytics.item-analytics');
+    // Add to the owner analytics routes section:
+    Route::get('/analytics/trip-data', [OwnerAnalyticsController::class, 'exportTripData'])
+        ->name('analytics.trip-data');
+
+    Route::get('/analytics/data-dictionary', [OwnerAnalyticsController::class, 'exportDataDictionary'])
+        ->name('analytics.data-dictionary');
+        
     // Owner Review routes
     Route::get('/reviews', [\App\Http\Controllers\Owner\ReviewController::class, 'index'])->name('reviews.index');
     Route::get('/reviews/stats', [\App\Http\Controllers\Owner\ReviewController::class, 'getReviewStats'])->name('reviews.stats');
@@ -461,3 +477,122 @@ Route::get('/api/orders/{order}/can-cancel', function (Order $order) {
             : 'Order cannot be cancelled (status: ' . $order->status . ')'
     ]);
 })->middleware('auth');
+
+// Google OAuth routes
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+// Protected Google disconnect route
+
+Route::middleware('auth')->group(function () {
+    Route::post('/auth/google/disconnect', [GoogleController::class, 'disconnectGoogle'])->name('google.disconnect');
+});
+Route::post('/auth/google/set-intent', function (Request $request) {
+    if ($request->input('intent') === 'profile') {
+        session(['google_connect_intent' => 'profile']);
+    }
+    return response()->json(['success' => true]);
+})->name('set.google.connect.intent');
+
+// Add to routes/web.php
+Route::get('/test-google-oauth', function () {
+    echo '<h1>Google OAuth Debug</h1>';
+
+    echo '<h2>Current Config:</h2>';
+    echo '<pre>';
+    echo "Client ID: " . config('services.google.client_id') . "\n";
+    echo "Redirect URI: " . config('services.google.redirect') . "\n";
+    echo "APP URL: " . config('app.url') . "\n";
+    echo '</pre>';
+
+    echo '<h2>Testing Socialite:</h2>';
+    try {
+        $socialite = app('Laravel\Socialite\Contracts\Factory');
+        echo '✓ Socialite factory loaded<br>';
+
+        $driver = $socialite->driver('google');
+        echo '✓ Google driver created<br>';
+
+        $redirect = $driver->redirect();
+        echo '✓ Redirect object created<br>';
+
+        $url = $redirect->getTargetUrl();
+        echo '✓ OAuth URL generated<br>';
+        echo 'URL: <a href="' . $url . '" target="_blank">' . $url . '</a><br>';
+
+        echo '<h3>URL Analysis:</h3>';
+        $parsed = parse_url($url);
+        echo '<pre>';
+        print_r($parsed);
+        echo '</pre>';
+
+        // Extract client_id from URL
+        if (isset($parsed['query'])) {
+            parse_str($parsed['query'], $params);
+            echo 'Client ID in URL: ' . ($params['client_id'] ?? 'NOT FOUND') . '<br>';
+            echo 'Redirect URI in URL: ' . ($params['redirect_uri'] ?? 'NOT FOUND') . '<br>';
+        }
+    } catch (\Exception $e) {
+        echo '<div style="color: red; padding: 20px; background: #fee;">';
+        echo '<h3>Error:</h3>';
+        echo '<pre>' . $e->getMessage() . '</pre>';
+        echo '<pre>' . $e->getTraceAsString() . '</pre>';
+        echo '</div>';
+    }
+});
+// Add to routes/web.php
+Route::get('/test-basic', function () {
+    return response()->json([
+        'app_name' => config('app.name'),
+        'app_url' => config('app.url'),
+        'app_key_set' => !empty(config('app.key')),
+        'google_client_id' => config('services.google.client_id') ? 'SET' : 'NOT SET',
+        'env_loaded' => app()->environment(),
+    ]);
+});
+// Add to routes/web.php
+Route::get('/google-test-flow', function () {
+    return view('google-test');
+});
+
+// Add to routes/web.php
+Route::get('/test-google-oauth-json', function () {
+    try {
+        $socialite = app('Laravel\Socialite\Contracts\Factory');
+        $driver = $socialite->driver('google');
+        $redirect = $driver->redirect();
+        $url = $redirect->getTargetUrl();
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'client_id' => config('services.google.client_id'),
+            'redirect_uri' => config('services.google.redirect')
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/check-google-status', function () {
+    $logPath = storage_path('logs/laravel.log');
+    $recentLogs = 'No log file';
+
+    if (file_exists($logPath)) {
+        $content = file_get_contents($logPath);
+        $lines = explode("\n", $content);
+        $googleLines = array_slice(array_filter($lines, function ($line) {
+            return stripos($line, 'google') !== false;
+        }), -5);
+        $recentLogs = implode('<br>', $googleLines);
+    }
+
+    return response()->json([
+        'config_loaded' => !empty(config('services.google.client_id')),
+        'client_id' => config('services.google.client_id'),
+        'redirect_uri' => config('services.google.redirect'),
+        'recent_logs' => $recentLogs
+    ]);
+});

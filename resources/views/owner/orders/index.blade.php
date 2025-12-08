@@ -160,7 +160,7 @@
 
                 @foreach($statuses as $status)
                             <a href="{{ route('owner.orders.index', ['status' => $status]) }}" class="px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200 
-                                                                                                                                                      {{ $currentStatus === $status
+                                                                                                                                                                  {{ $currentStatus === $status
                     ? 'bg-stone-900 text-white shadow-md'
                     : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50 hover:border-stone-300' }}">
                                 {{ ucfirst(str_replace('_', ' ', $status)) }}
@@ -252,13 +252,13 @@
                                     <div class="flex items-center gap-2">
                                         <span
                                             class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full uppercase tracking-wide
-                                                                                        @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                                                        @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                                                        @elseif($order->status == 'ready') bg-purple-100 text-purple-800
-                                                                                        @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
-                                                                                        @elseif($order->status == 'delivered') bg-green-100 text-green-800
-                                                                                        @elseif($order->status == 'cancelled') bg-red-100 text-red-800
-                                                                                        @else bg-gray-100 text-gray-800 @endif">
+                                                                                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                                            @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                                                                            @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                                                                            @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                                                                            @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                                                                            @else bg-gray-100 text-gray-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                         @if(in_array($order->status, ['delivered', 'cancelled']))
@@ -285,9 +285,9 @@
                                                 <div class="flex items-center gap-1">
                                                     <span
                                                         class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
-                                                                                                                                            @if($order->gcash_payment_status == 'verified') bg-green-100 text-green-700
-                                                                                                                                            @elseif($order->gcash_payment_status == 'rejected') bg-red-100 text-red-700
-                                                                                                                                            @else bg-yellow-100 text-yellow-700 @endif">
+                                                                                                                                                    @if($order->gcash_payment_status == 'verified') bg-green-100 text-green-700
+                                                                                                                                                    @elseif($order->gcash_payment_status == 'rejected') bg-red-100 text-red-700
+                                                                                                                                                    @else bg-yellow-100 text-yellow-700 @endif">
                                                         {{ $order->gcash_payment_status ?? 'pending' }}
                                                     </span>
                                                     @if(in_array($order->status, ['delivered', 'cancelled']))
@@ -722,6 +722,48 @@
                 }
             }
         });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Auto-refresh logic
+        setTimeout(function () {
+            window.location.reload();
+        }, 60000); // Refresh every minute
+
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
     </script>
 </body>
 

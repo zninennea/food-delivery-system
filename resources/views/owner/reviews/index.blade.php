@@ -379,76 +379,47 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Logout Confirmation
-            const logoutForm = document.getElementById('logout-form');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Logout?',
-                        text: "You will be returned to the login screen.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#1c1917',
-                        cancelButtonColor: '#78716c',
-                        confirmButtonText: 'Yes, logout',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            logoutForm.submit();
-                        }
-                    });
-                });
-            }
+        // Auto-refresh logic
+        setTimeout(function () {
+            window.location.reload();
+        }, 60000); // Refresh every minute
 
-            // Animate rating bars on scroll
-            const observerOptions = {
-                threshold: 0.2,
-                rootMargin: '0px'
-            };
+        // Logout Confirmation
+        const logoutForm = document.getElementById('logout-form');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
-                        entry.target.style.width = entry.target.dataset.width;
+                Swal.fire({
+                    title: 'Logout Confirmation',
+                    html: `<div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-700">Are you sure you want to logout from your rider account?</p>
+                            <p class="text-sm text-gray-500 mt-1">You will be redirected to the login page.</p>
+                        </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i>Yes, Logout',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                        cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
                     }
                 });
-            }, observerOptions);
-
-            document.querySelectorAll('.rating-bar').forEach(bar => {
-                const width = bar.style.width;
-                bar.dataset.width = width;
-                bar.style.width = '0%';
-                observer.observe(bar);
             });
-
-            // Auto-expand long comments
-            const reviewComments = document.querySelectorAll('.review-comment');
-            reviewComments.forEach(comment => {
-                if (comment.scrollHeight > 80) {
-                    const expandBtn = document.createElement('button');
-                    expandBtn.className = 'text-blue-600 hover:text-blue-800 text-sm mt-2 inline-flex items-center gap-1';
-                    expandBtn.innerHTML = 'Read more <i class="fas fa-chevron-down text-xs"></i>';
-                    expandBtn.addEventListener('click', function () {
-                        comment.classList.toggle('expanded');
-                        if (comment.classList.contains('expanded')) {
-                            comment.style.maxHeight = 'none';
-                            this.innerHTML = 'Read less <i class="fas fa-chevron-up text-xs"></i>';
-                        } else {
-                            comment.style.maxHeight = '80px';
-                            this.innerHTML = 'Read more <i class="fas fa-chevron-down text-xs"></i>';
-                        }
-                    });
-                    comment.parentNode.insertBefore(expandBtn, comment.nextSibling);
-                    comment.style.maxHeight = '80px';
-                    comment.style.overflow = 'hidden';
-                    comment.classList.add('transition-all', 'duration-300');
-                }
-            });
-        });
+        }
     </script>
 </body>
 
