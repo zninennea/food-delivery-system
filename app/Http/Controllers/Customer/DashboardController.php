@@ -18,6 +18,12 @@ class DashboardController extends Controller
         $user = Auth::user();
         $restaurant = Restaurant::first();
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
         // Featured items
         $featuredItems = MenuItem::limit(6)->get();
 
@@ -58,7 +64,8 @@ class DashboardController extends Controller
             'cartCount',
             'restaurant',
             'averageRating',
-            'totalReviews'
+            'totalReviews',
+            'profilePictureUrl'
 
         ));
     }
@@ -67,6 +74,13 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $restaurant = Restaurant::first();
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
 
         // Check if we're in modification mode
         $modifyOrderId = $request->get('modify_order');
@@ -90,7 +104,8 @@ class DashboardController extends Controller
             'menuItemsByCategory',
             'cartCount',
             'restaurant',
-            'modifyOrder'
+            'modifyOrder',
+            'profilePictureUrl'
         ));
     }
 
@@ -99,12 +114,24 @@ class DashboardController extends Controller
         $user = Auth::user();
         $cartCount = Cart::where('customer_id', $user->id)->sum('quantity');
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+        
         // Get similar items
         $similarItems = MenuItem::where('category', $menuItem->category)
             ->where('id', '!=', $menuItem->id)
             ->limit(4)
             ->get();
 
-        return view('customer.menu-item', compact('menuItem', 'similarItems', 'cartCount'));
+        return view('customer.menu-item', compact(
+            'menuItem',
+             'similarItems',
+              'cartCount',
+            'profilePictureUrl'
+            ));
     }
 }

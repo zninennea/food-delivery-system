@@ -107,7 +107,7 @@
 
                 <div class="relative z-10">
                     <div class="flex justify-center mb-4 transition-all duration-300 transform hover:-translate-y-1">
-                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Icon"
+                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Text"
                             class="h-30 w-auto drop-shadow-2xl animate-float">
                     </div>
 

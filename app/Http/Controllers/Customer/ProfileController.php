@@ -15,6 +15,13 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         // Use Google avatar if available and no custom profile picture
         if (!$user->profile_picture && $user->oauth_provider === 'google' && $user->avatar) {
             $user->profile_picture_url = $user->avatar;
@@ -24,13 +31,27 @@ class ProfileController extends Controller
                 : null;
         }
 
-        return view('customer.profile.show', compact('user'));
+        return view('customer.profile.show', compact(
+            'user',
+            'profilePictureUrl'
+        ));
     }
 
     public function edit()
     {
         $user = Auth::user();
-        return view('customer.profile.edit', compact('user'));
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
+        return view('customer.profile.edit', compact(
+            'user',
+            'profilePictureUrl'
+        ));
     }
 
     public function update(Request $request)
@@ -83,7 +104,18 @@ class ProfileController extends Controller
 
     public function editPassword()
     {
-        return view('customer.profile.password');
+        $user = Auth::user();
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
+        return view('customer.profile.password', compact(
+            'profilePictureUrl'
+        ));
     }
 
     public function updatePassword(Request $request)

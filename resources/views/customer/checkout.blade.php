@@ -94,8 +94,16 @@
                     </a>
                     <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
                         <a href="{{ route('customer.profile.show') }}"
-                            class="text-gray-600 hover:text-orange-600 transition-colors">
-                            <i class="fas fa-user-circle text-xl"></i>
+                            class="flex justify-center mb-0 transition-all duration-300 transform hover:-translate-y-1">
+                            @if($profilePictureUrl)
+                                <img src="{{ $profilePictureUrl }}" alt="Profile"
+                                    class="w-12 h-12 rounded-full object-cover border-2 border-orange-600 shadow-sm">
+                            @else
+                                <div
+                                    class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center text-white text-sm font-bold">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                            @endif
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
@@ -118,7 +126,8 @@
             <p class="text-stone-500">Complete your order details below.</p>
         </div>
 
-        <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" id="checkoutForm">
+        <form action="{{ route('customer.orders.store') }}" method="POST" enctype="multipart/form-data" class="fade-in"
+            id="checkoutForm">
             @csrf
 
             <input type="hidden" name="delivery_address" value="{{ Auth::user()->delivery_address }}">
@@ -186,7 +195,8 @@
                         <div class="space-y-4">
                             <label class="relative block cursor-pointer group">
                                 <input type="radio" name="payment_method" value="cash_on_delivery"
-                                    class="peer sr-only payment-radio" {{ old('payment_method', 'cash_on_delivery') == 'cash_on_delivery' ? 'checked' : '' }} onchange="togglePaymentFields()">
+                                    class="peer sr-only payment-radio" {{ old('payment_method', 'cash_on_delivery') == 'cash_on_delivery' ? 'checked' : '' }}
+                                    onchange="togglePaymentFields()">
                                 <div
                                     class="p-5 rounded-xl border border-gray-200 hover:border-orange-200 transition-all flex items-center gap-4">
                                     <div
@@ -202,7 +212,8 @@
                                 </div>
                             </label>
 
-                            <div id="cash_provided_field" class="ml-14 transition-all duration-300 {{ old('payment_method', 'cash_on_delivery') == 'gcash' ? 'hidden' : '' }}">
+                            <div id="cash_provided_field"
+                                class="ml-14 transition-all duration-300 {{ old('payment_method', 'cash_on_delivery') == 'gcash' ? 'hidden' : '' }}">
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">I
                                     will pay with (Optional)</label>
                                 <div class="relative max-w-xs">
@@ -250,7 +261,7 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                
+
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="text-sm font-bold text-gray-700">Send to: 09123775192</span>
@@ -275,7 +286,8 @@
                                         Receipt <span class="text-red-500">*</span></label>
                                     <input type="file" name="gcash_receipt" id="gcash_receipt" accept="image/*"
                                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 {{ $errors->has('gcash_receipt') ? 'border-red-300' : '' }}">
-                                    <p class="text-xs text-stone-400 mt-1">Upload a screenshot of your payment confirmation</p>
+                                    <p class="text-xs text-stone-400 mt-1">Upload a screenshot of your payment
+                                        confirmation</p>
                                 </div>
                             </div>
                         </div>
@@ -415,11 +427,11 @@
             if (checkoutForm) {
                 checkoutForm.addEventListener('submit', function (e) {
                     const gcashRadio = document.querySelector('input[value="gcash"]:checked');
-                    
+
                     if (gcashRadio) {
                         const gcashRef = document.getElementById('gcash_reference_number');
                         const gcashReceipt = document.getElementById('gcash_receipt');
-                        
+
                         // Check if GCash reference is empty
                         if (!gcashRef.value.trim()) {
                             e.preventDefault();
@@ -430,7 +442,7 @@
                             gcashRef.focus();
                             return false;
                         }
-                        
+
                         // Check if GCash receipt is empty
                         if (!gcashReceipt.value) {
                             e.preventDefault();

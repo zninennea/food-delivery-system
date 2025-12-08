@@ -13,6 +13,15 @@ class ReviewController extends Controller
     // Add this method to your ReviewController.php
     public function index()
     {
+        $user = Auth::user();
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         // Get ALL reviews with pagination
         $reviews = Review::with(['customer', 'order.items.menuItem'])
             ->whereHas('order')
@@ -31,11 +40,21 @@ class ReviewController extends Controller
             'reviews',
             'averageRating',
             'totalReviews',
-            'ratingDistribution'
+            'ratingDistribution',
+            'profilePictureUrl'
         ));
     }
     public function create(Order $order)
     {
+        $user = Auth::user();
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         // Check if order belongs to user and is delivered
         if ($order->customer_id !== Auth::id()) {
             abort(403, 'Unauthorized access to this order.');
@@ -53,7 +72,7 @@ class ReviewController extends Controller
                 ->with('info', 'You have already reviewed this order.');
         }
 
-        return view('customer.reviews.create', compact('order'));
+        return view('customer.reviews.create', compact('order', 'profilePictureUrl'));
     }
 
     public function store(Request $request, Order $order)

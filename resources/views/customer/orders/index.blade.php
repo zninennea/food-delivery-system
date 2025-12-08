@@ -66,8 +66,16 @@
                     </a>
                     <div class="ml-4 flex items-center space-x-3 border-l pl-4 border-gray-200">
                         <a href="{{ route('customer.profile.show') }}"
-                            class="text-gray-600 hover:text-orange-600 transition-colors">
-                            <i class="fas fa-user-circle text-xl"></i>
+                            class="flex justify-center mb-0 transition-all duration-300 transform hover:-translate-y-1">
+                            @if($profilePictureUrl)
+                                <img src="{{ $profilePictureUrl }}" alt="Profile"
+                                    class="w-12 h-12 rounded-full object-cover border-2 border-orange-600 shadow-sm">
+                            @else
+                                <div
+                                    class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center text-white text-sm font-bold">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </div>
+                            @endif
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
@@ -143,13 +151,13 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full uppercase tracking-wide
-                                                    @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                    @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                    @elseif($order->status == 'ready') bg-purple-100 text-purple-800
-                                                    @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
-                                                    @elseif($order->status == 'delivered') bg-green-100 text-green-800
-                                                    @elseif($order->status == 'cancelled') bg-red-100 text-red-800
-                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                                    @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                    @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                    @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                                                    @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                                                    @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                                                    @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                                                    @else bg-gray-100 text-gray-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </td>

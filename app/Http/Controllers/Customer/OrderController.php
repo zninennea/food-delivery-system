@@ -23,12 +23,22 @@ class OrderController extends Controller
     {
         $user = Auth::user();
 
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         $orders = Order::with(['items.menuItem', 'rider'])
             ->where('customer_id', $user->id)
             ->latest()
             ->paginate(10);
 
-        return view('customer.orders.index', compact('orders'));
+        return view('customer.orders.index', compact(
+            'orders',
+            'profilePictureUrl'
+        ));
     }
     public function store(Request $request)
     {

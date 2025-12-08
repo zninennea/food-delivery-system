@@ -13,6 +13,14 @@ class CartController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        $profilePictureUrl = null;
+        if ($user->profile_picture) {
+            $profilePictureUrl = asset('storage/' . $user->profile_picture);
+        } elseif ($user->oauth_provider === 'google' && $user->avatar) {
+            $profilePictureUrl = $user->avatar;
+        }
+
         $cartItems = Cart::with('menuItem')
             ->where('customer_id', $user->id)
             ->get();
@@ -24,7 +32,12 @@ class CartController extends Controller
         $deliveryFee = 50.00;
 
         // 2. Pass 'deliveryFee' to the view using compact()
-        return view('customer.cart', compact('cartItems', 'total', 'deliveryFee'));
+        return view('customer.cart', compact(
+            'cartItems',
+            'total',
+            'deliveryFee',
+            'profilePictureUrl'
+        ));
     }
 
     public function add(Request $request, MenuItem $menuItem)
