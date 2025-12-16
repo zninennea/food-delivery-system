@@ -1,0 +1,21 @@
+{
+    "build": {
+        "builder": "NIXPACKS",
+        "buildCommand": "npm install && npm run build",
+        "nixpacksPlan": {
+            "phases": {
+                "setup": {
+                    "aptPackages": [
+                        "nodejs",
+                        "npm"
+                    ]
+                },
+                "install": [
+                    "composer install --optimize-autoloader --no-scripts --no-interaction",
+                    "npm install"
+                ],
+                "build": "npm run build"
+            }
+        }
+    }
+}
