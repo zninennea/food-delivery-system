@@ -34,6 +34,8 @@ class OrderController extends Controller
     /**
      * Update order status
      */
+    // app/Http\Controllers\Rider\OrderController.php
+
     public function updateStatus(Request $request, Order $order)
     {
         if (Auth::user()->role !== 'rider') {
@@ -51,6 +53,15 @@ class OrderController extends Controller
             'status' => 'required|in:on_the_way,delivered'
         ]);
 
+        // NEW: Prevent marking as delivered if GCash payment is not verified
+        if (
+            $request->status === 'delivered' &&
+            $order->payment_method === 'gcash' &&
+            $order->gcash_payment_status !== 'verified'
+        ) {
+            return redirect()->back()->with('error', 'Cannot mark order as delivered: GCash payment is not yet verified by the owner.');
+        }
+
         $oldStatus = $order->status;
         $newStatus = $request->status;
 
@@ -63,6 +74,7 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', "Order status updated to " . ucfirst(str_replace('_', ' ', $newStatus)) . "!");
     }
+
     public function getMessages(Order $order)
     {
         try {

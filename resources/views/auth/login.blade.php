@@ -47,7 +47,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
@@ -79,7 +79,7 @@
 
                 <div class="text-center mb-8">
                     <div class="flex justify-center mb-4 transition-all duration-300 transform hover:-translate-y-1">
-                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Text"
+                        <img src="{{ asset('images/NaNi_Slogan.png') }}" alt="NaNi Slogan"
                             class="h-70 w-auto drop-shadow-2xl animate-float">
                     </div>
                     <h2 class="text-3xl font-bold text-gray-900">Welcome Back</h2>

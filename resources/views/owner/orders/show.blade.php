@@ -57,7 +57,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
@@ -325,10 +325,11 @@
                                 <div class="space-y-3">
                                     <div class="flex justify-between items-center">
                                         <span class="text-stone-600">Payment Status</span>
-                                        <span class="px-3 py-1 text-sm font-bold rounded-full 
-                                                                        @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
-                                                                        @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
-                                                                        @else bg-yellow-100 text-yellow-800 @endif">
+                                        <span
+                                            class="px-3 py-1 text-sm font-bold rounded-full 
+                                                                                            @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                                                                                            @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                                                                                            @else bg-yellow-100 text-yellow-800 @endif">
                                             {{ ucfirst($order->gcash_payment_status ?? 'pending') }}
                                         </span>
                                     </div>
@@ -395,6 +396,32 @@
                         </h3>
                     </div>
                     <div class="p-6 space-y-4">
+                        <!-- Payment Verification Warning -->
+                        @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                            <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-yellow-800 mb-1">
+                                            GCash Payment Verification Required
+                                        </p>
+                                        <p class="text-xs text-yellow-700">
+                                            Verify the GCash payment before marking this order as delivered.
+                                        </p>
+                                        @if($order->gcash_receipt_path)
+                                            <div class="mt-2">
+                                                <a href="{{ route('owner.orders.gcash-receipt', $order) }}" target="_blank"
+                                                    class="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                                    <i class="fas fa-receipt"></i>
+                                                    View GCash Receipt
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Status Update -->
                         @if(!in_array($order->status, ['delivered', 'cancelled']))
                             <div>
@@ -404,7 +431,9 @@
                                     @csrf
                                     @method('PUT')
                                     <select name="status" required
-                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        class="w-full px-4 py-3 border border-stone-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                        @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                                        onchange="checkGcashPayment(this)" @endif>
                                         <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending
                                         </option>
                                         <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>
@@ -412,8 +441,13 @@
                                         <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready</option>
                                         <option value="on_the_way" {{ $order->status == 'on_the_way' ? 'selected' : '' }}>On
                                             the Way</option>
-                                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>
-                                            Delivered</option>
+                                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}
+                                            @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified') disabled @endif>
+                                            Delivered
+                                            @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                                                (GCash not verified)
+                                            @endif
+                                        </option>
                                         <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>
                                             Cancelled</option>
                                     </select>
@@ -458,6 +492,15 @@
                             @endif
                         </div>
 
+                        <!-- View Receipt Button -->
+                        <div class="pt-4 border-t border-stone-200">
+                            <a href="{{ route('owner.orders.receipt', $order) }}"
+                                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30">
+                                <i class="fas fa-receipt"></i>
+                                View Official Receipt
+                            </a>
+                        </div>
+
                         <!-- Delete Order -->
                         @if(in_array($order->status, ['pending', 'cancelled']))
                             <div class="pt-4 border-t border-stone-200">
@@ -485,6 +528,33 @@
         setTimeout(function () {
             window.location.reload();
         }, 60000); // Refresh every minute
+
+        // Check GCash payment before marking as delivered
+        function checkGcashPayment(select) {
+            if (select.value === 'delivered') {
+                Swal.fire({
+                    title: 'Payment Verification Required',
+                    html: `<div class="text-left">
+                        <p class="text-gray-700 mb-3">This order has a GCash payment that requires verification before delivery.</p>
+                        <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Please verify the GCash payment first by clicking the 
+                                <i class="fas fa-money-check-alt text-green-600 mx-1"></i> icon in the order list.
+                            </p>
+                        </div>
+                    </div>`,
+                    icon: 'warning',
+                    iconColor: '#f59e0b',
+                    confirmButtonColor: '#1c1917',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl'
+                    }
+                });
+                select.value = '{{ $order->status }}'; // Reset to current status
+            }
+        }
 
         // Logout Confirmation
         const logoutForm = document.getElementById('logout-form');
@@ -518,6 +588,39 @@
                         logoutForm.submit();
                     }
                 });
+            });
+        }
+
+        // Delete Order Confirmation
+        function confirmDelete() {
+            const orderNumber = '{{ $order->order_number }}';
+
+            Swal.fire({
+                title: 'Delete Order Confirmation',
+                html: `<div class="text-center">
+                        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-trash text-red-600 text-2xl"></i>
+                        </div>
+                        <p class="text-gray-700">Are you sure you want to delete Order #${orderNumber}?</p>
+                        <p class="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
+                    </div>`,
+                icon: 'warning',
+                iconColor: '#ef4444',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash mr-2"></i>Yes, Delete',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                    cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-order-form').submit();
+                }
             });
         }
     </script>

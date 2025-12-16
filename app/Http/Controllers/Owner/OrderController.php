@@ -1,10 +1,9 @@
 <?php
 
-
-
 namespace App\Http\Controllers\Owner;
 
-
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 use App\Http\Controllers\Controller;
 
@@ -14,15 +13,12 @@ use App\Models\Restaurant;
 
 use App\Models\User;
 
+
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Log;
-
-use Illuminate\Support\Facades\Storage;
-
-
 
 class OrderController extends Controller
 
@@ -84,6 +80,8 @@ class OrderController extends Controller
 
 
 
+    // app/Http\Controllers\Owner\OrderController.php
+
     public function updateStatus(Request $request, Order $order)
     {
         $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
@@ -97,8 +95,17 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Cannot update status for ' . ucfirst($order->status) . ' orders.');
         }
 
+        // NEW: Prevent marking as delivered if GCash payment is not verified
+        if (
+            $request->status === 'delivered' &&
+            $order->payment_method === 'gcash' &&
+            $order->gcash_payment_status !== 'verified'
+        ) {
+            return redirect()->back()->with('error', 'Cannot mark order as delivered: GCash payment is not yet verified.');
+        }
+
         $request->validate([
-            'status' => 'required|in:pending,preparing,ready,on_the_way,delivered,cancelled,gcash_pending_verification'
+            'status' => 'required|in:pending,preparing,ready,on_the_way,delivered,cancelled'
         ]);
 
         $oldStatus = $order->status;
@@ -487,5 +494,65 @@ class OrderController extends Controller
             Log::error("Failed to update GCash status for Order #{$order->order_number}: " . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to update GCash payment status. Please try again.');
         }
+    }
+    /**
+     * Generate and view official receipt
+     */
+    public function generateReceipt(Order $order)
+    {
+        $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
+
+        if ($order->restaurant_id !== $restaurant->id) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        // Load all necessary relationships
+        $order->load(['customer', 'rider', 'items.menuItem', 'restaurant']);
+
+        // Get restaurant info (owner info)
+        $owner = Auth::user();
+
+        return view('owner.orders.receipt', compact('order', 'restaurant', 'owner'));
+    }
+
+    /**
+     * Download receipt as PDF (Direct DomPDF approach)
+     */
+    public function downloadReceipt(Order $order)
+    {
+        $restaurant = Restaurant::where('owner_id', Auth::id())->firstOrFail();
+
+        if ($order->restaurant_id !== $restaurant->id) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        // Load all necessary relationships
+        $order->load(['customer', 'rider', 'items.menuItem', 'restaurant']);
+        $owner = Auth::user();
+
+        // Create DomPDF instance
+        $options = new Options();
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('defaultPaperSize', 'A4');
+        $options->set('defaultPaperOrientation', 'portrait');
+
+        $dompdf = new Dompdf($options);
+
+        // Load HTML content - use a simpler view for PDF
+        $html = view('owner.orders.receipt-pdf', compact('order', 'restaurant', 'owner'))->render();
+        $dompdf->loadHtml($html);
+
+        // Render PDF
+        $dompdf->render();
+
+        // Generate filename
+        $filename = "Receipt-{$order->order_number}-" . now()->format('Y-m-d') . ".pdf";
+
+        // Stream the PDF
+        return $dompdf->stream($filename, [
+            "Attachment" => true // Force download
+        ]);
     }
 }

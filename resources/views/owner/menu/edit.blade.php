@@ -47,7 +47,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 

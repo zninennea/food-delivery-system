@@ -86,7 +86,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                     <div class="ml-2">
                         <a href="/" class="text-xl font-bold text-gray-800 font-serif">NaNi</a>
@@ -327,7 +327,8 @@
                                     </td>
                                     <td class="px-7 py-5 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
-                                            {{ $order->updated_at->format('M j, Y') }}</div>
+                                            {{ $order->updated_at->format('M j, Y') }}
+                                        </div>
                                         <div class="text-xs text-gray-500">{{ $order->updated_at->format('g:i A') }}</div>
                                     </td>
                                 </tr>

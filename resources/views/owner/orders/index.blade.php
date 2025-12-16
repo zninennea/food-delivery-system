@@ -77,7 +77,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{{ route('owner.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
 
                 </a>
@@ -160,7 +160,7 @@
 
                 @foreach($statuses as $status)
                             <a href="{{ route('owner.orders.index', ['status' => $status]) }}" class="px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200 
-                                                                                                                                                                  {{ $currentStatus === $status
+                                                                                                                                                                                                                              {{ $currentStatus === $status
                     ? 'bg-stone-900 text-white shadow-md'
                     : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50 hover:border-stone-300' }}">
                                 {{ ucfirst(str_replace('_', ' ', $status)) }}
@@ -252,13 +252,13 @@
                                     <div class="flex items-center gap-2">
                                         <span
                                             class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full uppercase tracking-wide
-                                                                                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                                                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                                                            @elseif($order->status == 'ready') bg-purple-100 text-purple-800
-                                                                                            @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
-                                                                                            @elseif($order->status == 'delivered') bg-green-100 text-green-800
-                                                                                            @elseif($order->status == 'cancelled') bg-red-100 text-red-800
-                                                                                            @else bg-gray-100 text-gray-800 @endif">
+                                                                                                                @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                                                                @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                                                                @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                                                                                                @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                                                                                                @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                                                                                                @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                                                                                                @else bg-gray-100 text-gray-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                         @if(in_array($order->status, ['delivered', 'cancelled']))
@@ -285,9 +285,9 @@
                                                 <div class="flex items-center gap-1">
                                                     <span
                                                         class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
-                                                                                                                                                    @if($order->gcash_payment_status == 'verified') bg-green-100 text-green-700
-                                                                                                                                                    @elseif($order->gcash_payment_status == 'rejected') bg-red-100 text-red-700
-                                                                                                                                                    @else bg-yellow-100 text-yellow-700 @endif">
+                                                                                                                                                                                            @if($order->gcash_payment_status == 'verified') bg-green-100 text-green-700
+                                                                                                                                                                                            @elseif($order->gcash_payment_status == 'rejected') bg-red-100 text-red-700
+                                                                                                                                                                                            @else bg-yellow-100 text-yellow-700 @endif">
                                                         {{ $order->gcash_payment_status ?? 'pending' }}
                                                     </span>
                                                     @if(in_array($order->status, ['delivered', 'cancelled']))
@@ -331,6 +331,8 @@
                                             <button
                                                 class="p-2 bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200 hover:text-stone-900 transition-colors update-status-btn"
                                                 data-order-id="{{ $order->id }}" data-current-status="{{ $order->status }}"
+                                                data-payment-method="{{ $order->payment_method }}"
+                                                data-gcash-status="{{ $order->gcash_payment_status ?? 'pending' }}"
                                                 title="Update Status">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
@@ -483,7 +485,7 @@
                         Swal.fire({
                             title: 'Cannot Update Status',
                             html: `This order is already <strong class="capitalize">${currentStatus}</strong>.<br>
-                                   <span class="text-stone-500 text-sm">Delivered or cancelled orders cannot be modified.</span>`,
+                       <span class="text-stone-500 text-sm">Delivered or cancelled orders cannot be modified.</span>`,
                             icon: 'warning',
                             iconColor: '#f59e0b',
                             confirmButtonColor: '#1c1917',
@@ -505,37 +507,79 @@
                         cancelled: { name: 'Cancelled', icon: '❌', color: '#ef4444' }
                     };
 
+                    // Check if GCash payment is pending and trying to mark as delivered
+                    const isGcashPending = this.dataset.paymentMethod === 'gcash' &&
+                        this.dataset.gcashStatus !== 'verified' &&
+                        this.dataset.gcashStatus !== 'rejected';
+
+                    if (isGcashPending) {
+                        Swal.fire({
+                            title: 'Payment Verification Required',
+                            html: `<div class="text-left">
+                    <p class="text-gray-700 mb-3">This order has a GCash payment that requires verification before delivery.</p>
+                    <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800 mb-1">
+                                    GCash payment status: <span class="font-bold capitalize">${this.dataset.gcashStatus || 'pending'}</span>
+                                </p>
+                                <p class="text-xs text-yellow-700">
+                                    Please verify the GCash payment first before marking this order as delivered.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`,
+                            icon: 'warning',
+                            iconColor: '#f59e0b',
+                            confirmButtonColor: '#1c1917',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'rounded-2xl shadow-2xl'
+                            }
+                        });
+                        return;
+                    }
+
                     // Create HTML for status options
                     let optionsHtml = '';
                     Object.entries(statusOptions).forEach(([key, value]) => {
                         const isCurrent = key === currentStatus;
+                        const isDeliveredWithGcashPending = key === 'delivered' && isGcashPending;
+
                         optionsHtml += `
-                            <button type="button" 
-                                class="status-option w-full flex items-center justify-between p-4 rounded-xl border border-stone-200 hover:border-${key === 'cancelled' ? 'red' : 'orange'}-200 hover:bg-${key === 'cancelled' ? 'red' : 'orange'}-50 transition-all mb-2 ${isCurrent ? 'ring-2 ring-orange-300' : ''}"
-                                data-status="${key}">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-2xl">${value.icon}</span>
-                                    <div class="text-left">
-                                        <div class="font-bold text-gray-900">${value.name}</div>
-                                        ${isCurrent ? '<div class="text-xs text-orange-600 font-medium">Current Status</div>' : ''}
-                                    </div>
-                                </div>
-                                ${!isCurrent ? '<i class="fas fa-chevron-right text-stone-400"></i>' : ''}
-                            </button>
-                        `;
+                <button type="button" 
+                    class="status-option w-full flex items-center justify-between p-4 rounded-xl border transition-all mb-2 ${isCurrent ? 'ring-2 ring-orange-300' : ''}
+                    ${isDeliveredWithGcashPending ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' :
+                                isCurrent ? 'bg-orange-50 border-orange-200' :
+                                    'bg-white border-stone-200 hover:border-orange-300 hover:bg-orange-50'}"
+                    data-status="${key}"
+                    ${isDeliveredWithGcashPending ? 'disabled' : ''}>
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${value.icon}</span>
+                        <div class="text-left">
+                            <div class="font-bold ${isDeliveredWithGcashPending ? 'text-gray-400' : 'text-gray-900'}">${value.name}</div>
+                            ${isCurrent ? '<div class="text-xs text-orange-600 font-medium">Current Status</div>' : ''}
+                            ${isDeliveredWithGcashPending ? '<div class="text-xs text-gray-500 font-medium">Payment verification required</div>' : ''}
+                        </div>
+                    </div>
+                    ${!isCurrent ? '<i class="fas fa-chevron-right text-stone-400"></i>' : ''}
+                </button>
+            `;
                     });
 
                     const { value: selectedStatus } = await Swal.fire({
                         title: 'Update Order Status',
                         html: `
-                            <div class="text-left mb-4">
-                                <p class="text-stone-600 mb-1">Select new status for Order #${orderId}</p>
-                                <p class="text-xs text-stone-400">Current: <span class="font-bold capitalize">${currentStatus.replace('_', ' ')}</span></p>
-                            </div>
-                            <div id="status-options" class="max-h-64 overflow-y-auto">
-                                ${optionsHtml}
-                            </div>
-                        `,
+                <div class="text-left mb-4">
+                    <p class="text-stone-600 mb-1">Select new status for Order #${orderId}</p>
+                    <p class="text-xs text-stone-400">Current: <span class="font-bold capitalize">${currentStatus.replace('_', ' ')}</span></p>
+                </div>
+                <div id="status-options" class="max-h-64 overflow-y-auto">
+                    ${optionsHtml}
+                </div>
+            `,
                         showCancelButton: true,
                         confirmButtonColor: '#1c1917',
                         cancelButtonColor: '#78716c',
@@ -544,7 +588,7 @@
                         reverseButtons: true,
                         backdrop: 'rgba(0, 0, 0, 0.3)',
                         allowOutsideClick: true,
-                        showLoaderOnConfirm: true,
+                        showLoaderOnConfirm: false,
                         preConfirm: () => {
                             const selected = document.querySelector('.status-option[data-status].selected');
                             if (!selected) {
@@ -560,14 +604,17 @@
                         },
                         didOpen: () => {
                             // Add click handlers to status options
-                            document.querySelectorAll('.status-option').forEach(option => {
+                            document.querySelectorAll('.status-option:not([disabled])').forEach(option => {
                                 option.addEventListener('click', function () {
                                     document.querySelectorAll('.status-option').forEach(opt => {
-                                        opt.classList.remove('selected', 'bg-orange-50', 'border-orange-300');
+                                        opt.classList.remove('selected', 'bg-orange-100', 'border-orange-400');
                                     });
-                                    this.classList.add('selected', 'bg-orange-50', 'border-orange-300');
+                                    this.classList.add('selected', 'bg-orange-100', 'border-orange-400');
                                 });
                             });
+
+                            // Auto-select current status
+                            document.querySelector(`.status-option[data-status="${currentStatus}"]`)?.classList.add('selected', 'bg-orange-100', 'border-orange-400');
                         }
                     });
 

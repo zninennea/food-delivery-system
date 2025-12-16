@@ -48,7 +48,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
@@ -154,7 +154,8 @@
         @foreach($menuItemsByCategory as $category => $items)
             <div class="mb-16 category-anchor" id="category-{{ Str::slug($category) }}">
                 <h2 class="text-3xl font-bold text-gray-900 mb-8 border-l-4 border-orange-500 pl-4 font-serif">
-                    {{ ucfirst($category) }}</h2>
+                    {{ ucfirst($category) }}
+                </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($items as $item)
                         <div
@@ -223,7 +224,7 @@
         <div class="max-w-7xl mx-auto px-4 text-center">
             <div class="flex justify-center items-center gap-2 mb-6 opacity-80">
                 <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
             </div>

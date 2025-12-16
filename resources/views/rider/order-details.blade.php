@@ -65,7 +65,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                     <div class="ml-2">
                         <a href="/" class="text-xl font-bold text-gray-800 font-serif">NaNi</a>
@@ -94,6 +94,21 @@
                 <div>
                     <strong class="font-bold">Success!</strong>
                     <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="max-w-4xl mx-auto mt-28 px-4 fade-in">
+            <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl shadow-sm flex items-center gap-4"
+                role="alert">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-red-600"></i>
+                </div>
+                <div>
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">{{ session('error') }}</span>
                 </div>
             </div>
         </div>
@@ -296,6 +311,33 @@
                                         class="font-bold text-blue-600">₱{{ number_format($order->cash_provided - $order->grand_total, 2) }}</span>
                                 </div>
                             </div>
+                        @elseif($order->payment_method === 'gcash')
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                                    <span class="text-gray-600">Payment Status:</span>
+                                    <span class="px-2 py-1 text-xs font-bold rounded-full 
+                                                @if($order->gcash_payment_status === 'verified') bg-green-100 text-green-800
+                                                @elseif($order->gcash_payment_status === 'rejected') bg-red-100 text-red-800
+                                                @else bg-yellow-100 text-yellow-800 @endif">
+                                        {{ ucfirst($order->gcash_payment_status ?? 'pending') }}
+                                    </span>
+                                </div>
+                                @if($order->gcash_payment_status !== 'verified')
+                                    <div class="p-3 bg-yellow-50 rounded-xl border border-yellow-100">
+                                        <div class="flex items-start gap-2">
+                                            <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-medium text-yellow-800">
+                                                    GCash payment verification pending
+                                                </p>
+                                                <p class="text-xs text-yellow-700 mt-1">
+                                                    Owner needs to verify payment before delivery
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -324,12 +366,37 @@
                                 id="mark-delivered-form">
                                 @csrf
                                 <input type="hidden" name="status" value="delivered">
-                                <button type="button"
-                                    class="mark-delivered-btn w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-green-500/30 hover:-translate-y-1 transition-all flex justify-center items-center gap-3">
+                                <button type="button" class="mark-delivered-btn w-full py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 transition-all flex justify-center items-center gap-3
+                                        @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                                            bg-gray-400 text-gray-700 cursor-not-allowed shadow-gray-400/30
+                                        @else
+                                            bg-gradient-to-r from-green-600 to-green-700 text-white shadow-green-500/30
+                                        @endif" @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified') disabled @endif>
                                     <i class="fas fa-check text-lg"></i>
-                                    Mark as Delivered
+                                    @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                                        Awaiting Payment Verification
+                                    @else
+                                        Mark as Delivered
+                                    @endif
                                 </button>
                             </form>
+
+                            @if($order->payment_method === 'gcash' && $order->gcash_payment_status !== 'verified')
+                                <div class="mt-3 p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-yellow-800">
+                                                GCash payment verification pending
+                                            </p>
+                                            <p class="text-xs text-yellow-700 mt-1">
+                                                The restaurant owner needs to verify the payment before you can mark this as
+                                                delivered.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         @endif
 
                         @if($order->status == 'delivered')
@@ -473,8 +540,42 @@
 
         function confirmMarkDelivered() {
             const orderNumber = '{{ $order->order_number }}';
+            const paymentMethod = '{{ $order->payment_method }}';
+            const gcashStatus = '{{ $order->gcash_payment_status }}';
             const form = document.getElementById('mark-delivered-form');
 
+            // Check if GCash payment is not verified
+            if (paymentMethod === 'gcash' && gcashStatus !== 'verified') {
+                Swal.fire({
+                    title: 'Payment Verification Required',
+                    html: `<div class="text-left">
+                        <p class="text-gray-700 mb-3">This order has a GCash payment that requires verification.</p>
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-yellow-800 mb-1">
+                                        GCash payment status: <span class="font-bold capitalize">${gcashStatus || 'pending'}</span>
+                                    </p>
+                                    <p class="text-xs text-yellow-700">
+                                        The restaurant owner needs to verify the GCash payment before delivery can be completed.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`,
+                    icon: 'warning',
+                    iconColor: '#f59e0b',
+                    confirmButtonColor: '#1c1917',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl'
+                    }
+                });
+                return; // Exit function
+            }
+
+            // Original confirmation logic
             Swal.fire({
                 title: 'Confirm Delivery',
                 html: `<div class="text-center">

@@ -66,7 +66,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
@@ -107,7 +107,7 @@
 
                 <div class="relative z-10">
                     <div class="flex justify-center mb-4 transition-all duration-300 transform hover:-translate-y-1">
-                        <img src="https://i.imgur.com/rjPEil9.png" alt="NaNi Text"
+                        <img src="{{ asset('images/NaNi_Slogan.png') }}" alt="NaNi Slogan"
                             class="h-30 w-auto drop-shadow-2xl animate-float">
                     </div>
 
@@ -221,7 +221,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 border-b border-gray-800 pb-12">
                 <div class="text-center md:text-left">
                     <a href="/" class="flex-shrink-0 flex items-center gap-2 group">
-                        <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                        <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                             class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                     </a>
                     <p class="text-gray-400 leading-relaxed mb-6">Bringing the authentic flavors of Japan to the heart

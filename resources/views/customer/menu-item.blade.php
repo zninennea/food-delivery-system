@@ -60,8 +60,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{{ route('customer.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
-                        class="h-10 w-auto group-hover:rotate-12 transition-transform duration-300">
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
+                        class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
                 <div class="hidden md:flex items-center space-x-1">
@@ -218,7 +218,8 @@
                             </div>
                             <div class="p-4">
                                 <h3 class="text-lg font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                                    {{ $item->name }}</h3>
+                                    {{ $item->name }}
+                                </h3>
                                 <p class="text-gray-500 text-sm mt-1 line-clamp-2">{{ $item->description }}</p>
                             </div>
                         </a>

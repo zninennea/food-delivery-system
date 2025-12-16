@@ -42,9 +42,6 @@ class DashboardController extends Controller
 
         // Get recent reviews from the database
         $recentReviews = Review::with(['customer', 'order.items.menuItem'])
-            ->whereHas('order', function ($query) use ($user) {
-                $query->where('customer_id', $user->id);
-            })
             ->latest()
             ->limit(5)
             ->get();

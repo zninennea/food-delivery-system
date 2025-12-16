@@ -178,6 +178,9 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::post('/orders/{order}/assign-rider', [OwnerOrderController::class, 'assignRider'])->name('orders.assign-rider');
     Route::delete('/orders/{order}', [OwnerOrderController::class, 'destroy'])->name('orders.destroy');
 
+    Route::get('/orders/{order}/receipt', [OwnerOrderController::class, 'generateReceipt'])->name('orders.receipt');
+    Route::get('/orders/{order}/receipt/download', [OwnerOrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
+
     // Owner GCash routes
     Route::get('/orders/{order}/gcash-receipt', [App\Http\Controllers\Owner\OrderController::class, 'viewGcashReceipt'])
         ->name('orders.gcash-receipt');
@@ -208,7 +211,7 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
 
     Route::get('/analytics/data-dictionary', [OwnerAnalyticsController::class, 'exportDataDictionary'])
         ->name('analytics.data-dictionary');
-        
+
     // Owner Review routes
     Route::get('/reviews', [\App\Http\Controllers\Owner\ReviewController::class, 'index'])->name('reviews.index');
     Route::get('/reviews/stats', [\App\Http\Controllers\Owner\ReviewController::class, 'getReviewStats'])->name('reviews.stats');

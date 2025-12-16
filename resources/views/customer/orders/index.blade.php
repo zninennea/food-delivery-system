@@ -47,7 +47,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{{ route('customer.dashboard') }}" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="https://i.imgur.com/vPOu1H2.png" alt="NaNi Icon"
+                    <img src="{{ asset('images/NaNi_Logo.png') }}" alt="NaNi Logo"
                         class="h-20 w-auto group-hover:rotate-12 transition-transform duration-300">
                 </a>
 
@@ -151,13 +151,13 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full uppercase tracking-wide
-                                                                    @if($order->status == 'pending') bg-yellow-100 text-yellow-800
-                                                                    @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
-                                                                    @elseif($order->status == 'ready') bg-purple-100 text-purple-800
-                                                                    @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
-                                                                    @elseif($order->status == 'delivered') bg-green-100 text-green-800
-                                                                    @elseif($order->status == 'cancelled') bg-red-100 text-red-800
-                                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                                            @if($order->status == 'pending') bg-yellow-100 text-yellow-800
+                                                                            @elseif($order->status == 'preparing') bg-blue-100 text-blue-800
+                                                                            @elseif($order->status == 'ready') bg-purple-100 text-purple-800
+                                                                            @elseif($order->status == 'on_the_way') bg-indigo-100 text-indigo-800
+                                                                            @elseif($order->status == 'delivered') bg-green-100 text-green-800
+                                                                            @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                                                            @else bg-gray-100 text-gray-800 @endif">
                                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                                         </span>
                                     </td>
