@@ -10,11 +10,17 @@
                         "npm"
                     ]
                 },
-                "install": [
-                    "composer install --optimize-autoloader --no-scripts --no-interaction",
-                    "npm install"
-                ],
-                "build": "npm run build"
+                "install": {
+                    "cmds": [
+                        "composer install --optimize-autoloader --no-scripts --no-interaction",
+                        "npm install"
+                    ]
+                },
+                "build": {
+                    "cmds": [
+                        "npm run build"
+                    ]
+                }
             }
         }
     }
