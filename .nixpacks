@@ -1,10 +1,10 @@
 [phases.setup]
-apt_packages = ["nodejs", "npm", "php8.2", "php8.2-common", "php8.2-cli", "php8.2-curl", "php8.2-mbstring", "php8.2-xml", "php8.2-zip", "php8.2-mysql", "php8.2-bcmath"]
+apt_packages = ["nodejs", "npm"]
 
 [phases.install]
 cmds = [
-  "composer install --optimize-autoloader --no-dev --no-scripts --no-interaction",
-  "npm ci --only=production"
+  "npm ci --no-audit",
+  "composer install --optimize-autoloader --no-dev --no-scripts --no-interaction"
 ]
 
 [phases.build]
