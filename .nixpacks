@@ -1,10 +1,12 @@
 [phases.setup]
-apt_packages = ["nodejs", "npm"]
+apt_packages = ["nodejs", "npm", "php8.4", "php8.4-common", "php8.4-cli", "php8.4-curl", "php8.4-mbstring", "php8.4-xml", "php8.4-zip", "php8.4-mysql", "php8.4-bcmath", "nginx", "libmysqlclient"]
 
 [phases.install]
 cmds = [
-  "npm ci --no-audit",
-  "composer install --optimize-autoloader --no-dev --no-scripts --no-interaction"
+  "mkdir -p /var/log/nginx",
+  "mkdir -p /var/cache/nginx",
+  "composer install --no-dev --no-interaction --optimize-autoloader",
+  "npm ci --only=production"
 ]
 
 [phases.build]
