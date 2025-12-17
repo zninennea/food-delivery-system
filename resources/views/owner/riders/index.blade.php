@@ -237,7 +237,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
                                         class="px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full 
-                                                                        {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                                            {{ $rider->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ ucfirst($rider->status) }}
                                     </span>
                                 </td>
@@ -284,7 +284,7 @@
 
     <!-- License Modal -->
     <div id="licenseModal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
         <div
             class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl transform scale-95 transition-transform duration-300 modal-content overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 bg-stone-900 text-white flex justify-between items-center">
@@ -347,6 +347,104 @@
                         logoutForm.submit();
                     }
                 });
+            });
+        }
+    </script>
+    <script>
+        // View License Modal
+        const viewLicenseBtns = document.querySelectorAll('.view-license-btn');
+        const licenseModal = document.getElementById('licenseModal');
+        const licenseImage = document.getElementById('licenseImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModal = document.getElementById('closeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Function to open modal
+        function openLicenseModal(imageUrl, riderName) {
+            licenseImage.src = imageUrl;
+            licenseImage.alt = `Driver's License - ${riderName}`;
+            modalTitle.textContent = `${riderName}'s Driver's License`;
+
+            // Show modal with animation
+            licenseModal.classList.remove('hidden');
+            setTimeout(() => {
+                licenseModal.style.opacity = '1';
+                document.querySelector('.modal-content').style.transform = 'scale(1)';
+            }, 10);
+
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to close modal
+        function closeLicenseModal() {
+            licenseModal.style.opacity = '0';
+            document.querySelector('.modal-content').style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                licenseModal.classList.add('hidden');
+                // Clear image source when closing
+                licenseImage.src = '';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        // Add click event to all View License buttons
+        viewLicenseBtns.forEach(button => {
+            button.addEventListener('click', function () {
+                const licenseUrl = this.getAttribute('data-license-url');
+                const riderName = this.getAttribute('data-rider-name');
+                openLicenseModal(licenseUrl, riderName);
+            });
+        });
+
+        // Close modal events
+        closeModal.addEventListener('click', closeLicenseModal);
+        closeModalBtn.addEventListener('click', closeLicenseModal);
+
+        // Close modal when clicking outside the content
+        licenseModal.addEventListener('click', function (e) {
+            if (e.target === licenseModal) {
+                closeLicenseModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !licenseModal.classList.contains('hidden')) {
+                closeLicenseModal();
+            }
+        });
+
+        // Delete Confirmation Function
+        function confirmDelete(riderName, button) {
+            Swal.fire({
+                title: 'Delete Rider',
+                html: `<div class="text-center">
+                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trash text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-700 font-medium">Delete <span class="text-red-600">${riderName}</span>?</p>
+                    <p class="text-sm text-gray-500 mt-1">This action cannot be undone. All rider data will be permanently removed.</p>
+                </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash mr-2"></i>Yes, Delete',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3 font-medium',
+                    cancelButton: 'rounded-xl px-6 py-3 font-medium'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Find the closest form and submit it
+                    const form = button.closest('form');
+                    form.submit();
+                }
             });
         }
     </script>
