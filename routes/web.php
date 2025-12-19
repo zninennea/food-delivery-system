@@ -31,9 +31,19 @@ use Illuminate\Http\Request;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/', function () {
-    return response()->json(['app' => 'Food Delivery System', 'status' => 'running']);
+// ADD THESE ROUTES AT THE TOP:
+Route::get('/health', function () {
+    return response()->json(['status' => 'healthy', 'time' => now()]);
 });
+
+Route::get('/up', function () {
+    return 'OK';
+});
+
+Route::get('/', function () {
+    return 'Food Delivery System is running!';
+});
+
 
 Route::get('/test', function() {
     try {
