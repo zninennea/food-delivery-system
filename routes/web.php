@@ -31,6 +31,24 @@ use Illuminate\Http\Request;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/', function () {
+    return response()->json(['app' => 'Food Delivery System', 'status' => 'running']);
+});
+
+Route::get('/test', function() {
+    try {
+        \DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'connected',
+            'database' => \DB::connection()->getDatabaseName()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'failed',
+            'error' => $e->getMessage()
+        ]);
+    }
+});
 
 // Public Routes
 Route::get('/', function () {
