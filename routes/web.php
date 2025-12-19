@@ -44,6 +44,21 @@ Route::get('/', function () {
     return 'Food Delivery System is running!';
 });
 
+Route::get('/', function() {
+    return response()->json(['app' => 'Food Delivery', 'status' => 'running']);
+});
+
+// Health check for Railway
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+});
+
+// Root route (REQUIRED for Railway health check)
+Route::get('/', function () {
+    return 'Food Delivery System v1.0';
+});
+
+// Your existing routes below...
 
 Route::get('/test', function() {
     try {
